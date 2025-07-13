@@ -1,18 +1,19 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /login.php');
+    exit;
+}
 
-use Clinique\Config\Database;
-
-$auth = new Auth();
-$auth->requireAuth();
+require_once __DIR__ . '/config/database.php';
 
 // Vérifier que l'utilisateur est admin
-if ($auth->getCurrentUserRole() !== 'admin') {
+if ($_SESSION['user_role'] !== 'admin') {
     header('Location: /dashboard.php');
     exit;
 }
 
-$db = Database::getInstance();
+$db = new Database();
 $message = '';
 
 // Traitement des actions
@@ -20,7 +21,7 @@ if ($_POST) {
     try {
         $permanence_id = $_POST['permanence_id'];
         $action = $_POST['action']; // 'valider' ou 'rejeter'
-        $admin_id = $auth->getCurrentUserId();
+        $admin_id = $_SESSION['user_id'];
         
         $statut = ($action === 'valider') ? 'valide' : 'rejete';
         $statut_final = ($action === 'valider') ? 'ok' : 'annule';
@@ -98,8 +99,8 @@ $stats = $db->fetch("
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="text-right">
-                        <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($auth->getCurrentUserName()); ?></p>
-                        <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $auth->getCurrentUserRole()); ?></p>
+                        <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($_SESSION['username']); ?></p>
+                        <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $_SESSION['user_role']); ?></p>
                     </div>
                     <a href="/logout.php" class="text-gray-600 hover:text-red-600 transition-colors">
                         <i class="fas fa-sign-out-alt"></i>
@@ -109,7 +110,7 @@ $stats = $db->fetch("
         </div>
     </nav>
     <div class="flex">
-        <?php include __DIR__ . '/../includes/sidebar.php'; ?>
+        <?php include 'includes/sidebar.php'; ?>
         <main class="flex-1 py-8 px-4 sm:px-6 lg:px-8">
             <h2 class="text-3xl font-bold text-gray-900 mb-6">Validation permanence</h2>
             <!-- Message -->
