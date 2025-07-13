@@ -1,6 +1,8 @@
 <?php
-// Utiliser la session pour l'utilisateur
-session_start();
+// Ne pas redémarrer la session si elle est déjà active
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ?>
 <nav class="bg-white shadow-lg border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -20,8 +22,8 @@ session_start();
             </div>
             <div class="flex items-center space-x-4">
                 <div class="text-right">
-                    <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($user['nom'] . ' ' . $user['prenom']); ?></p>
-                    <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $user['role']); ?></p>
+                    <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($_SESSION['username'] ?? 'Utilisateur'); ?></p>
+                    <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $_SESSION['user_role'] ?? 'utilisateur'); ?></p>
                 </div>
                 <a href="/logout.php" class="text-gray-600 hover:text-red-600 transition-colors">
                     <i class="fas fa-sign-out-alt"></i>

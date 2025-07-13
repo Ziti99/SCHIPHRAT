@@ -18,7 +18,7 @@ if (!in_array($user['role'], ['admin'])) {
     exit();
 }
 
-$db = Database::getInstance();
+$db = new Database();
 $message = '';
 $error = '';
 
