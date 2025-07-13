@@ -1,0 +1,137 @@
+================================================================================
+                    INSTRUCTIONS DE DÉMARRAGE - CLINIQUE OBSTÉTRIQUE
+================================================================================
+
+PRÉREQUIS :
+- PHP 8.0+ installé
+- MySQL installé
+- Dossier du projet décompressé
+
+================================================================================
+ÉTAPE 1 : CONFIGURATION MYSQL
+================================================================================
+
+1. Ouvrir MySQL Shell ou Command Prompt
+   - Windows : Ouvrir "MySQL Command Line Client" ou "MySQL Shell"
+   - Linux/Mac : Ouvrir terminal et taper "mysql -u root -p"
+
+2. Se connecter à MySQL
+   - Taper : mysql -u root -p
+   - Entrer votre mot de passe MySQL quand demandé
+
+3. Créer la base de données
+   - Dans MySQL, taper :
+   CREATE DATABASE clinique_obstetrique CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+4. Vérifier que la base est créée
+   - Taper : SHOW DATABASES;
+   - Vérifier que "clinique_obstetrique" apparaît dans la liste
+
+5. Importer le schéma
+   - Sortir de MySQL (taper "exit")
+   - Dans le terminal, aller dans le dossier du projet
+   - Taper : mysql -u root -p clinique_obstetrique < database/schema.sql
+
+6. Vérifier les tables
+   - Se reconnecter à MySQL : mysql -u root -p
+   - Taper : USE clinique_obstetrique;
+   - Taper : SHOW TABLES;
+   - Vérifier que les tables suivantes existent :
+     * users
+     * patientes
+     * grossesses
+     * consultations_prenatales
+     * accouchements
+     * suivi_postnatal
+     * registres
+
+================================================================================
+ÉTAPE 2 : CONFIGURATION DU FICHIER DATABASE.PHP
+================================================================================
+
+1. Ouvrir le fichier config/database.php
+2. Trouver la ligne : $password = 'admin';
+3. Remplacer 'admin' par votre mot de passe MySQL
+   Exemple : $password = 'votre_mot_de_passe_mysql';
+
+4. Sauvegarder le fichier
+
+================================================================================
+ÉTAPE 3 : DÉMARRER LE SERVEUR
+================================================================================
+
+1. Ouvrir un terminal/command prompt
+2. Naviguer vers le dossier du projet
+3. Taper : php -S localhost:8000 -t public
+4. Le serveur doit afficher : "PHP Development Server started"
+
+================================================================================
+ÉTAPE 4 : ACCÉDER À L'APPLICATION
+================================================================================
+
+1. Ouvrir un navigateur web
+2. Aller à l'adresse : http://localhost:8000
+3. Cliquer sur "Connexion" ou "Accès Personnel"
+
+COMPTES DE CONNEXION :
+- Administrateur : admin / password
+- Médecin : medecin1 / password
+- Sage-femme : sagefemme1 / password
+- Secrétaire : secretaire1 / password
+
+================================================================================
+ÉTAPE 5 : VÉRIFICATION ET DÉPANNAGE
+================================================================================
+
+Si erreur de connexion MySQL :
+1. Vérifier que MySQL est démarré
+2. Vérifier le mot de passe dans config/database.php
+3. Tester la connexion : php test_connexion.php
+
+Si erreur 404 :
+1. Vérifier que vous êtes dans le bon dossier
+2. Vérifier que le serveur est démarré
+3. Vérifier que le dossier "public" existe
+
+Si erreur de base de données :
+1. Vérifier que la base "clinique_obstetrique" existe
+2. Vérifier que les tables sont créées
+3. Réimporter le schéma si nécessaire
+
+================================================================================
+STRUCTURE DES DOSSIERS
+================================================================================
+
+clinique/
+├── config/
+│   └── database.php (à modifier)
+├── database/
+│   └── schema.sql
+├── public/ (point d'entrée)
+├── vendor/ (dépendances)
+├── modules/ (modules de l'application)
+├── src/ (code source)
+└── README.md
+
+================================================================================
+FONCTIONNALITÉS DISPONIBLES
+================================================================================
+
+- Gestion des patientes
+- Consultations prénatales
+- Accouchements
+- Suivi post-natal
+- Registres numériques
+- Statistiques et rapports
+- Gestion des utilisateurs
+
+================================================================================
+CONTACT ET SUPPORT
+================================================================================
+
+En cas de problème :
+1. Vérifier les logs du serveur
+2. Tester la connexion MySQL
+3. Vérifier la configuration PHP
+
+Le projet est maintenant prêt à utiliser ! 🚀 
