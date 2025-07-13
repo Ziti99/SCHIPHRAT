@@ -4,7 +4,7 @@ echo "<h1>Test Web - Connexion MySQL</h1>";
 // Test 1: Connexion directe PDO
 echo "<h2>Test 1: Connexion PDO directe</h2>";
 try {
-    $pdo = new PDO("mysql:host=localhost;dbname=clinique_obstetrique", "root", "admin");
+    $pdo = new PDO("mysql:host=metro.proxy.rlwy.net;port=29698;dbname=railway", "root", "UJxUfmCzEGIdbYPVwFXKUbAQoFzmByrI");
     echo "<p style='color: green;'>✅ Connexion PDO réussie avec mot de passe 'admin'</p>";
 } catch (Exception $e) {
     echo "<p style='color: red;'>❌ Erreur PDO avec 'admin': " . $e->getMessage() . "</p>";
@@ -13,7 +13,7 @@ try {
 // Test 2: Connexion sans mot de passe
 echo "<h2>Test 2: Connexion sans mot de passe</h2>";
 try {
-    $pdo = new PDO("mysql:host=localhost;dbname=clinique_obstetrique", "root", "");
+    $pdo = new PDO("mysql:host=metro.proxy.rlwy.net;port=29698;dbname=railway", "root", "UJxUfmCzEGIdbYPVwFXKUbAQoFzmByrI");
     echo "<p style='color: green;'>✅ Connexion PDO réussie sans mot de passe</p>";
 } catch (Exception $e) {
     echo "<p style='color: red;'>❌ Erreur PDO sans mot de passe: " . $e->getMessage() . "</p>";

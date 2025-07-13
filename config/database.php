@@ -5,13 +5,14 @@ class Database {
     private $pdo;
     
     public function __construct() {
-        $host = 'localhost';
-        $dbname = 'clinique_obstetrique';
+        $host = 'metro.proxy.rlwy.net';
+        $port = '29698';
+        $dbname = 'railway';
         $username = 'root';
-        $password = 'admin';
+        $password = 'UJxUfmCzEGIdbYPVwFXKUbAQoFzmByrI';
         
         try {
-            $this->pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
+            $this->pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $username, $password);
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
