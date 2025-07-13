@@ -167,7 +167,7 @@ $cesariennes = $db->fetch("
                             </a>
                             <div class="flex-shrink-0 flex items-center">
                                 <i class="fas fa-baby text-2xl text-green-600 mr-3"></i>
-                                <span class="text-xl font-bold text-gray-900">Registre des Accouchements</span>
+                                <span class="text-xl font-bold text-gray-900">Accouchements</span>
                             </div>
                         </div>
                         <div class="flex items-center space-x-4">
@@ -184,6 +184,30 @@ $cesariennes = $db->fetch("
             </nav>
 
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <!-- En-tête -->
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">Accouchements</h2>
+                        <p class="text-gray-600"><?php echo $total_accouchements; ?> accouchement(s) enregistré(s)</p>
+                    </div>
+                    <a href="/accouchements/ajouter.php" class="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center">
+                        <i class="fas fa-plus mr-2"></i>
+                        Nouvel accouchement
+                    </a>
+                </div>
+
+                <!-- Message de succès -->
+                <?php if (isset($_GET['success'])): ?>
+                    <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
+                        <div class="flex">
+                            <i class="fas fa-check-circle mr-2 mt-1"></i>
+                            <div>
+                                <strong>Succès !</strong> L'accouchement a été enregistré avec succès.
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <!-- Statistiques -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div class="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-6 text-white">
@@ -304,17 +328,9 @@ $cesariennes = $db->fetch("
                     </form>
                 </div>
 
-                <!-- Actions d'export -->
-                <div class="flex justify-between items-center mb-6">
+                <!-- Liste des accouchements -->
+                <div class="mb-6">
                     <h2 class="text-2xl font-bold text-gray-900">Liste des Accouchements</h2>
-                    <div class="flex space-x-3">
-                        <button onclick="exportToPDF()" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors">
-                            <i class="fas fa-file-pdf mr-2"></i>Export PDF
-                        </button>
-                        <button onclick="exportToExcel()" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-                            <i class="fas fa-file-excel mr-2"></i>Export Excel
-                        </button>
-                    </div>
                 </div>
 
                 <!-- Tableau des accouchements -->
@@ -444,20 +460,6 @@ $cesariennes = $db->fetch("
     </div>
 
     <script>
-        function exportToPDF() {
-            // Construire l'URL avec les paramètres de filtrage
-            const urlParams = new URLSearchParams(window.location.search);
-            const exportUrl = 'export_pdf_accouchements.php?' + urlParams.toString();
-            window.open(exportUrl, '_blank');
-        }
-
-        function exportToExcel() {
-            // Construire l'URL avec les paramètres de filtrage
-            const urlParams = new URLSearchParams(window.location.search);
-            const exportUrl = 'export_excel_accouchements.php?' + urlParams.toString();
-            window.open(exportUrl, '_blank');
-        }
-
         function viewDetails(accouchementId) {
             // Rediriger vers la page de détails
             window.location.href = '../accouchements/voir.php?id=' + accouchementId;
