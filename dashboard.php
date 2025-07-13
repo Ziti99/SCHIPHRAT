@@ -1,39 +1,49 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
+session_start();
 
-use Clinique\Auth\Auth;
-use Clinique\Config\Database;
+// Vérifier si l'utilisateur est connecté
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /login.php');
+    exit;
+}
 
-$auth = new Auth();
-$auth->requireAuth();
+// Configuration de la base de données
+$host = $_ENV['DB_HOST'] ?? 'localhost';
+$dbname = $_ENV['DB_NAME'] ?? 'clinique';
+$username = $_ENV['DB_USER'] ?? 'root';
+$password = $_ENV['DB_PASSWORD'] ?? '';
 
-$db = Database::getInstance();
-$user = $auth->getUser();
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Erreur de connexion : " . $e->getMessage());
+}
 
 // Récupération des statistiques
 $stats = [
-    'total_patientes' => $db->fetch("SELECT COUNT(*) as count FROM patientes")['count'],
-    'consultations_ce_mois' => $db->fetch("SELECT COUNT(*) as count FROM consultations_prenatales WHERE MONTH(date_consultation) = MONTH(CURDATE()) AND YEAR(date_consultation) = YEAR(CURDATE())")['count'],
-    'accouchements_ce_mois' => $db->fetch("SELECT COUNT(*) as count FROM accouchements WHERE MONTH(date_accouchement) = MONTH(CURDATE()) AND YEAR(date_accouchement) = YEAR(CURDATE())")['count']
+    'total_patientes' => $pdo->query("SELECT COUNT(*) FROM patientes")->fetchColumn(),
+    'consultations_ce_mois' => $pdo->query("SELECT COUNT(*) FROM consultations_prenatales WHERE MONTH(date_consultation) = MONTH(CURDATE()) AND YEAR(date_consultation) = YEAR(CURDATE())")->fetchColumn(),
+    'accouchements_ce_mois' => $pdo->query("SELECT COUNT(*) FROM accouchements WHERE MONTH(date_accouchement) = MONTH(CURDATE()) AND YEAR(date_accouchement) = YEAR(CURDATE())")->fetchColumn()
 ];
 
 // Récupération des dernières activités
-$recent_consultations = $db->fetchAll("
+$recent_consultations = $pdo->query("
     SELECT cp.*, p.nom, p.prenom, u.nom as medecin_nom, u.prenom as medecin_prenom
     FROM consultations_prenatales cp
     JOIN patientes p ON cp.patiente_id = p.id
     JOIN users u ON cp.medecin_id = u.id
     ORDER BY cp.date_consultation DESC
     LIMIT 5
-");
+")->fetchAll();
 
-$recent_accouchements = $db->fetchAll("
+$recent_accouchements = $pdo->query("
     SELECT a.*, p.nom, p.prenom
     FROM accouchements a
     JOIN patientes p ON a.patiente_id = p.id
     ORDER BY a.date_accouchement DESC
     LIMIT 5
-");
+")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -76,8 +86,8 @@ $recent_accouchements = $db->fetchAll("
                 
                 <div class="flex items-center space-x-4">
                     <div class="text-right">
-                        <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($auth->getCurrentUserName()); ?></p>
-                        <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $auth->getCurrentUserRole()); ?></p>
+                        <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($_SESSION['username']); ?></p>
+                        <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $_SESSION['role']); ?></p>
                     </div>
                     <div class="relative">
                         <button onclick="toggleUserMenu()" class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white hover:shadow-lg transition-all duration-200">
@@ -105,7 +115,7 @@ $recent_accouchements = $db->fetchAll("
             <!-- En-tête -->
             <div class="mb-8">
                 <h2 class="text-3xl font-bold text-gray-900 mb-2">Tableau de bord</h2>
-                <p class="text-gray-600">Bienvenue, <?php echo htmlspecialchars($auth->getCurrentUserName()); ?></p>
+                <p class="text-gray-600">Bienvenue, <?php echo htmlspecialchars($_SESSION['username']); ?></p>
             </div>
 
             <!-- Statistiques -->

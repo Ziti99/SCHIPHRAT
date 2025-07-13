@@ -1,9 +1,19 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
+session_start();
 
-use Clinique\Auth\Auth;
+// Configuration de la base de données
+$host = $_ENV['DB_HOST'] ?? 'localhost';
+$dbname = $_ENV['DB_NAME'] ?? 'clinique';
+$username = $_ENV['DB_USER'] ?? 'root';
+$password = $_ENV['DB_PASSWORD'] ?? '';
 
-$auth = new Auth();
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Erreur de connexion : " . $e->getMessage());
+}
+
 $error = '';
 
 // Traitement de la connexion
@@ -14,7 +24,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($username) || empty($password)) {
         $error = 'Veuillez remplir tous les champs.';
     } else {
-        if ($auth->login($username, $password)) {
+        // Vérifier les identifiants
+        $stmt = $pdo->prepare("SELECT id, username, password, role FROM users WHERE username = ?");
+        $stmt->execute([$username]);
+        $user = $stmt->fetch();
+        
+        if ($user && password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['role'] = $user['role'];
             header('Location: /dashboard.php');
             exit;
         } else {
@@ -24,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Rediriger si déjà connecté
-if ($auth->isLoggedIn()) {
+if (isset($_SESSION['user_id'])) {
     header('Location: /dashboard.php');
     exit;
 }
