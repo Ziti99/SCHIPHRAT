@@ -7,12 +7,6 @@ if (isset($_SESSION['user_id'])) {
     header('Location: /dashboard.php');
     exit;
 }
-
-// Rediriger vers le dashboard si déjà connecté
-if ($auth->isLoggedIn()) {
-    header('Location: /dashboard.php');
-    exit;
-}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
