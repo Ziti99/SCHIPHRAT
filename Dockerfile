@@ -46,7 +46,7 @@ EXPOSE $PORT
 RUN echo '#!/bin/bash' > /start.sh && \
     echo 'echo "🚀 Démarrage du conteneur..."' >> /start.sh && \
     echo 'echo "🌐 Démarrage dApache sur le port $PORT..."' >> /start.sh && \
-    echo 'sed -i "s/Listen 80/Listen $PORT/g" /etc/apache2/ports.conf"' >> /start.sh && \
+    echo 'sed -i "s/Listen 80/Listen $PORT/g" /etc/apache2/ports.conf' >> /start.sh && \
     echo 'apache2-foreground' >> /start.sh && \
     chmod +x /start.sh
 
