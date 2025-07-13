@@ -26,16 +26,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $frequence_cardiaque_foetale = $_POST['frequence_cardiaque_foetale'] ?? '';
     $observations = $_POST['observations'] ?? '';
     $recommandations = $_POST['recommandations'] ?? '';
-    $prochaine_consultation = $_POST['prochaine_consultation'] ?? '';
     
     try {
         $db->query("
             UPDATE consultations_prenatales 
             SET tension_arterielle = ?, poids = ?, hauteur_uterine = ?, position_foetus = ?, 
-                frequence_cardiaque_foetale = ?, observations = ?, recommandations = ?, prochaine_consultation = ?
+                frequence_cardiaque_foetale = ?, observations = ?, recommandations = ?
             WHERE id = ?
         ", [$tension_arterielle, $poids, $hauteur_uterine, $position_foetus, 
-             $frequence_cardiaque_foetale, $observations, $recommandations, $prochaine_consultation, $consultation_id]);
+             $frequence_cardiaque_foetale, $observations, $recommandations, $consultation_id]);
         
         header('Location: voir.php?id=' . $consultation_id . '&success=1');
         exit;
@@ -180,11 +179,6 @@ if (!$consultation) {
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Fréquence cardiaque fœtale</label>
                                 <input type="text" name="frequence_cardiaque_foetale" value="<?php echo htmlspecialchars($consultation['frequence_cardiaque_foetale'] ?? ''); ?>" 
                                        placeholder="Ex: 140 bpm" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Prochaine consultation</label>
-                                <input type="date" name="prochaine_consultation" value="<?php echo $consultation['prochaine_consultation'] ? date('Y-m-d', strtotime($consultation['prochaine_consultation'])) : ''; ?>" 
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                         </div>
                         

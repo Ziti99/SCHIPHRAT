@@ -181,10 +181,6 @@ if (!$consultation) {
                             <label class="block text-sm font-medium text-gray-700">Recommandations</label>
                             <p class="text-gray-900 mt-1"><?php echo nl2br(htmlspecialchars($consultation['recommandations'] ?: 'Aucune recommandation')); ?></p>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Prochaine consultation</label>
-                            <p class="text-gray-900"><?php echo $consultation['prochaine_consultation'] ? date('d/m/Y', strtotime($consultation['prochaine_consultation'])) : 'Non programmée'; ?></p>
-                        </div>
                     </div>
                 </div>
 
