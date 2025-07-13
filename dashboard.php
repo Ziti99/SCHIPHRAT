@@ -88,7 +88,7 @@ $recent_accouchements = $pdo->query("
                 <div class="flex items-center space-x-4">
                     <div class="text-right">
                         <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($_SESSION['username']); ?></p>
-                        <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $_SESSION['role']); ?></p>
+                        <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $_SESSION['user_role']); ?></p>
                     </div>
                     <div class="relative">
                         <button onclick="toggleUserMenu()" class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white hover:shadow-lg transition-all duration-200">

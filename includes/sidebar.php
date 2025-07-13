@@ -41,13 +41,13 @@ if (!isset($_SESSION['user_id'])) {
                 <i class="fas fa-chart-line mr-3"></i>
                 Statistiques
             </a>
-            <?php if ($_SESSION['role'] === 'secretaire'): ?>
+            <?php if ($_SESSION['user_role'] === 'secretaire'): ?>
             <a href="/permanence.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
                 <i class="fas fa-calendar-day mr-3"></i>
                 Permanence du Jour
             </a>
             <?php endif; ?>
-            <?php if ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'caissiere'): ?>
+            <?php if ($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'caissiere'): ?>
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Permanences</p>
                 <?php if ($_SESSION['role'] === 'admin'): ?>

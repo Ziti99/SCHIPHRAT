@@ -41,17 +41,12 @@ try {
 // Traitement de la suppression
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        // Vérifier si la patiente a des données liées
-        $hasGrossesses = $db->fetchOne("SELECT COUNT(*) as count FROM grossesses WHERE patiente_id = ?", [$id]);
-        $hasConsultations = $db->fetchOne("SELECT COUNT(*) as count FROM consultations_prenatales cp 
-                                         INNER JOIN grossesses g ON cp.grossesse_id = g.id 
-                                         WHERE g.patiente_id = ?", [$id]);
-        $hasAccouchements = $db->fetchOne("SELECT COUNT(*) as count FROM accouchements a 
-                                         INNER JOIN grossesses g ON a.grossesse_id = g.id 
-                                         WHERE g.patiente_id = ?", [$id]);
+        // Vérifier si la patiente a des données liées (sans grossesses car table inexistante)
+        $hasConsultations = $db->fetchOne("SELECT COUNT(*) as count FROM consultations_prenatales WHERE patiente_id = ?", [$id]);
+        $hasAccouchements = $db->fetchOne("SELECT COUNT(*) as count FROM accouchements WHERE patiente_id = ?", [$id]);
         
-        if ($hasGrossesses['count'] > 0 || $hasConsultations['count'] > 0 || $hasAccouchements['count'] > 0) {
-            $error = "Impossible de supprimer cette patiente car elle a des données liées (grossesses, consultations, accouchements).";
+        if ($hasConsultations['count'] > 0 || $hasAccouchements['count'] > 0) {
+            $error = "Impossible de supprimer cette patiente car elle a des données liées (consultations, accouchements).";
         } else {
             // Supprimer la patiente
             $sql = "DELETE FROM patientes WHERE id = ?";

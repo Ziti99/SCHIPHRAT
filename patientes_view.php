@@ -31,26 +31,24 @@ try {
         exit();
     }
     
-    // Récupérer les grossesses de la patiente
-    $grossesses = $db->fetchAll("SELECT * FROM grossesses WHERE patiente_id = ? ORDER BY date_debut_grossesse DESC", [$id]);
-    
-    // Récupérer les consultations prénatales
+    // Récupérer les consultations prénatales (sans grossesses car table inexistante)
     $consultations = $db->fetchAll("
-        SELECT cp.*, g.date_debut_grossesse 
+        SELECT cp.* 
         FROM consultations_prenatales cp 
-        INNER JOIN grossesses g ON cp.grossesse_id = g.id 
-        WHERE g.patiente_id = ? 
+        WHERE cp.patiente_id = ? 
         ORDER BY cp.date_consultation DESC
     ", [$id]);
     
-    // Récupérer les accouchements
+    // Récupérer les accouchements (sans grossesses car table inexistante)
     $accouchements = $db->fetchAll("
-        SELECT a.*, g.date_debut_grossesse 
+        SELECT a.* 
         FROM accouchements a 
-        INNER JOIN grossesses g ON a.grossesse_id = g.id 
-        WHERE g.patiente_id = ? 
+        WHERE a.patiente_id = ? 
         ORDER BY a.date_accouchement DESC
     ", [$id]);
+    
+    // Initialiser grossesses comme tableau vide car table inexistante
+    $grossesses = [];
     
 } catch (Exception $e) {
     header('Location: patientes.php');
