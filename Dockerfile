@@ -33,9 +33,7 @@ WORKDIR /var/www/html
 COPY . /var/www/html/
 
 # Configurer Apache pour utiliser le dossier public avec une configuration plus robuste
-RUN echo 'ServerName localhost' >> /etc/apache2/apache2.conf && \
-    echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf && \
-    echo '    ServerName localhost' >> /etc/apache2/sites-available/000-default.conf && \
+RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf && \
     echo '    ServerAdmin webmaster@localhost' >> /etc/apache2/sites-available/000-default.conf && \
     echo '    DocumentRoot /var/www/html/public' >> /etc/apache2/sites-available/000-default.conf && \
     echo '    <Directory /var/www/html/public>' >> /etc/apache2/sites-available/000-default.conf && \
