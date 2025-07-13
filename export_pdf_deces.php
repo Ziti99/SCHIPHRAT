@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 use Clinique\Auth\Auth;
 use Clinique\Config\Database;
@@ -53,7 +53,7 @@ $deces = $db->fetchAll("
     ORDER BY d.date_deces DESC
 ", $params);
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+    require_once __DIR__ . '/vendor/autoload.php';
 use Dompdf\Dompdf;
 
 $html = '<html><head><style>

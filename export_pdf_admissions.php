@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 use Clinique\Auth\Auth;
 use Clinique\Config\Database;
@@ -65,7 +65,7 @@ $admissions = $db->fetchAll("
 ", $params);
 
 // Création du PDF avec DOMPDF
-require_once __DIR__ . '/../../vendor/autoload.php';
+    require_once __DIR__ . '/vendor/autoload.php';
 use Dompdf\Dompdf;
 use Dompdf\Options;
 

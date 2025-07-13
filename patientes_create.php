@@ -1,6 +1,6 @@
 <?php
 // Point d'entrée public pour la création de patientes
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/../config/database.php';
 
 // Utiliser la classe Auth correcte

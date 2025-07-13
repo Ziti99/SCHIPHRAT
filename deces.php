@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 use Clinique\Auth\Auth;
 use Clinique\Config\Database;
@@ -105,7 +105,7 @@ $stats = [
 
 // Export PDF
 if (isset($_GET['export']) && $_GET['export'] === 'pdf') {
-    require_once __DIR__ . '/../../vendor/autoload.php';
+    require_once __DIR__ . '/vendor/autoload.php';
     
     $html = '
     <html>
