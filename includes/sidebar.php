@@ -51,14 +51,14 @@ if (!isset($_SESSION['user_id'])) {
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Permanences</p>
                 <?php if ($_SESSION['role'] === 'admin'): ?>
-                <a href="/admin/permanences.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
-                    <i class="fas fa-check-circle mr-3"></i>
-                    Validation permanences
+                                        <a href="/permanences.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+                            <i class="fas fa-check-circle mr-3"></i>
+                            Validation permanences
                 </a>
                 <?php endif; ?>
-                <a href="/admin/permanences_vue.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
-                    <i class="fas fa-eye mr-3"></i>
-                    Vue des permanences
+                                        <a href="/permanences_vue.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+                            <i class="fas fa-eye mr-3"></i>
+                            Vue des permanences
                 </a>
             </div>
             <?php endif; ?>
@@ -69,7 +69,7 @@ if (!isset($_SESSION['user_id'])) {
                     <i class="fas fa-users-cog mr-3"></i>
                     Utilisateurs
                 </a>
-                <a href="/admin/actes.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+                <a href="/actes.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
                     <i class="fas fa-cogs mr-3"></i>
                     Gestion des actes
                 </a>

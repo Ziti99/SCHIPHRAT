@@ -1,5 +1,22 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
+// Démarrer la session en premier, avant tout autre code
+session_start();
+
+require_once __DIR__ . '/config/database.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit();
+}
+$user = [
+    'id' => $_SESSION['user_id'],
+    'username' => $_SESSION['username'] ?? '',
+    'role' => $_SESSION['role'] ?? '',
+];
+if (!in_array($user['role'], ['admin', 'medecin', 'sage_femme'])) {
+    header('Location: dashboard.php');
+    exit();
+}
 
 use Clinique\Config\Database;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -7,9 +24,6 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
-
-$auth = new Auth();
-$auth->requireAnyRole(['admin', 'medecin', 'sage_femme']);
 
 $db = Database::getInstance();
 

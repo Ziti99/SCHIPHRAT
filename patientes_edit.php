@@ -1,10 +1,9 @@
 <?php
-// Point d'entrée public pour la modification de patientes
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/../config/database.php';
-
 // Démarrer la session en premier, avant tout autre code
 session_start();
+
+// Point d'entrée public pour la modification de patientes
+require_once __DIR__ . '/config/database.php';
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
@@ -25,7 +24,7 @@ $error = '';
 $id = $_GET['id'] ?? null;
 if (!$id) {
     header('Location: patientes.php');
-    exit;
+    exit();
 }
 
 // Récupérer les informations de la patiente
@@ -33,11 +32,11 @@ try {
     $patiente = $db->fetchOne("SELECT * FROM patientes WHERE id = ?", [$id]);
     if (!$patiente) {
         header('Location: patientes.php');
-        exit;
+        exit();
     }
 } catch (Exception $e) {
     header('Location: patientes.php');
-    exit;
+    exit();
 }
 
 // Traitement du formulaire
@@ -78,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Rediriger vers la liste des patientes
             header('Location: patientes.php?message=' . urlencode($message));
-            exit;
+            exit();
         }
     } catch (Exception $e) {
         $error = "Erreur lors de la modification : " . $e->getMessage();

@@ -1,10 +1,22 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
+// Démarrer la session en premier, avant tout autre code
+session_start();
 
-use Clinique\Config\Database;
+require_once __DIR__ . '/config/database.php';
 
-$auth = new Auth();
-$auth->requireAnyRole(['admin', 'medecin', 'sage_femme']);
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit();
+}
+$user = [
+    'id' => $_SESSION['user_id'],
+    'username' => $_SESSION['username'] ?? '',
+    'role' => $_SESSION['role'] ?? '',
+];
+if (!in_array($user['role'], ['admin', 'medecin', 'sage_femme'])) {
+    header('Location: dashboard.php');
+    exit();
+}
 
 $db = Database::getInstance();
 
@@ -471,7 +483,7 @@ $html = '
                     <div class="stat-label">Date d\'export</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">' . $auth->getCurrentUserName() . '</div>
+                    <div class="stat-number">' . $user['username'] . '</div>
                     <div class="stat-label">Exporté par</div>
                 </div>
             </div>
@@ -568,7 +580,7 @@ $html .= '
         <div class="footer">
             <div class="footer-text">
                 <strong>Clinique Obstétrique</strong> - Registre des Accouchements<br>
-                Exporté le ' . date('d/m/Y à H:i') . ' par ' . htmlspecialchars($auth->getCurrentUserName()) . '<br>
+                Exporté le ' . date('d/m/Y à H:i') . ' par ' . htmlspecialchars($user['username']) . '<br>
                 Document généré automatiquement - ' . count($accouchements) . ' accouchement(s) trouvé(s)
             </div>
         </div>

@@ -56,9 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             $message = "Patiente créée avec succès !";
             
-            // Rediriger vers la liste des patientes
+            // Rediriger vers la liste des patientes (avant tout include)
             header('Location: patientes.php?message=' . urlencode($message));
-            exit;
+            exit();
         }
     } catch (Exception $e) {
         $error = "Erreur lors de la création : " . $e->getMessage();

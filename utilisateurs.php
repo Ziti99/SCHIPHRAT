@@ -1,10 +1,22 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
+// Démarrer la session en premier, avant tout autre code
+session_start();
 
-use Clinique\Config\Database;
+require_once __DIR__ . '/config/database.php';
 
-$auth = new Auth();
-$auth->requireAnyRole(['admin']);
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit();
+}
+$user = [
+    'id' => $_SESSION['user_id'],
+    'username' => $_SESSION['username'] ?? '',
+    'role' => $_SESSION['role'] ?? '',
+];
+if (!in_array($user['role'], ['admin'])) {
+    header('Location: dashboard.php');
+    exit();
+}
 
 $db = Database::getInstance();
 $message = '';
@@ -145,10 +157,10 @@ $utilisateurs = $db->fetchAll("
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="text-right">
-                        <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($auth->getCurrentUserName()); ?></p>
-                        <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $auth->getCurrentUserRole()); ?></p>
+                        <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($user['username']); ?></p>
+                        <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $user['role']); ?></p>
                     </div>
-                    <a href="/logout.php" class="text-gray-600 hover:text-red-600 transition-colors">
+                    <a href="logout.php" class="text-gray-600 hover:text-red-600 transition-colors">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
                 </div>

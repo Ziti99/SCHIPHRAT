@@ -1,6 +1,4 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
-
 class Database {
     private $pdo;
     
@@ -41,5 +39,4 @@ class Database {
     public function lastInsertId() {
         return $this->pdo->lastInsertId();
     }
-}
-?> 
+} 

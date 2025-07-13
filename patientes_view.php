@@ -20,7 +20,7 @@ $db = new Database();
 $id = $_GET['id'] ?? null;
 if (!$id) {
     header('Location: patientes.php');
-    exit;
+    exit();
 }
 
 // Récupérer les informations de la patiente
@@ -28,7 +28,7 @@ try {
     $patiente = $db->fetchOne("SELECT * FROM patientes WHERE id = ?", [$id]);
     if (!$patiente) {
         header('Location: patientes.php');
-        exit;
+        exit();
     }
     
     // Récupérer les grossesses de la patiente
@@ -54,7 +54,7 @@ try {
     
 } catch (Exception $e) {
     header('Location: patientes.php');
-    exit;
+    exit();
 }
 ?>
 <!DOCTYPE html>

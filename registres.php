@@ -170,7 +170,7 @@ try {
                         Registres Numériques
                     </h3>
                     <div class="space-y-3">
-                        <a href="registres/admissions.php" class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
+                        <a href="admissions.php" class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
                             <div>
                                 <p class="font-medium text-blue-800">Registre des Admissions</p>
                                 <p class="text-sm text-blue-600">Consultations prénatales avec filtres</p>
@@ -178,7 +178,7 @@ try {
                             <i class="fas fa-arrow-right text-blue-500"></i>
                         </a>
                         
-                        <a href="registres/accouchements.php" class="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
+                        <a href="accouchements.php" class="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
                             <div>
                                 <p class="font-medium text-green-800">Registre des Accouchements</p>
                                 <p class="text-sm text-green-600">Accouchements avec filtres avancés</p>
@@ -186,7 +186,7 @@ try {
                             <i class="fas fa-arrow-right text-green-500"></i>
                         </a>
                         
-                        <a href="registres/deces.php" class="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
+                        <a href="deces.php" class="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
                             <div>
                                 <p class="font-medium text-red-800">Registre des Décès</p>
                                 <p class="text-sm text-red-600">Décès avec filtres avancés</p>
@@ -202,7 +202,7 @@ try {
                         Export Excel
                     </h3>
                     <div class="space-y-3">
-                        <a href="/registres/export-excel.php?type=accouchements" class="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
+                        <a href="export_excel_accouchements.php" class="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
                             <div>
                                 <p class="font-medium text-green-800">Registre des accouchements</p>
                                 <p class="text-sm text-green-600">Export Excel complet</p>
@@ -210,7 +210,7 @@ try {
                             <i class="fas fa-download text-green-500"></i>
                         </a>
                         
-                        <a href="/registres/export-excel.php?type=admissions" class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
+                        <a href="export_excel_admissions.php" class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
                             <div>
                                 <p class="font-medium text-blue-800">Registre des admissions</p>
                                 <p class="text-sm text-blue-600">Export Excel complet</p>
@@ -218,7 +218,7 @@ try {
                             <i class="fas fa-download text-blue-500"></i>
                         </a>
                         
-                        <a href="/registres/export-excel.php?type=deces" class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
+                        <a href="export_excel_deces.php" class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
                             <div>
                                 <p class="font-medium text-gray-800">Registre des décès</p>
                                 <p class="text-sm text-gray-600">Export Excel complet</p>
@@ -236,7 +236,7 @@ try {
                         <i class="fas fa-baby text-green-500 mr-2"></i>
                         Registre des accouchements
                     </h3>
-                    <a href="/registres/accouchements.php" class="text-purple-600 hover:text-purple-700 font-medium">
+                    <a href="accouchements.php" class="text-purple-600 hover:text-purple-700 font-medium">
                         Voir tout <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>
@@ -293,7 +293,7 @@ try {
                         <i class="fas fa-cross text-red-500 mr-2"></i>
                         Registre des décès néonataux
                     </h3>
-                    <a href="/registres/deces.php" class="text-purple-600 hover:text-purple-700 font-medium">
+                    <a href="deces.php" class="text-purple-600 hover:text-purple-700 font-medium">
                         Voir tout <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>

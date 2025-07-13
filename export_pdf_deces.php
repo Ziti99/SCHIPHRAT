@@ -1,10 +1,22 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
+// Démarrer la session en premier, avant tout autre code
+session_start();
 
-use Clinique\Config\Database;
+require_once __DIR__ . '/config/database.php';
 
-$auth = new Auth();
-$auth->requireAnyRole(['admin', 'medecin', 'sage_femme']);
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit();
+}
+$user = [
+    'id' => $_SESSION['user_id'],
+    'username' => $_SESSION['username'] ?? '',
+    'role' => $_SESSION['role'] ?? '',
+];
+if (!in_array($user['role'], ['admin', 'medecin', 'sage_femme'])) {
+    header('Location: dashboard.php');
+    exit();
+}
 
 $db = Database::getInstance();
 

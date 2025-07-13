@@ -1,7 +1,25 @@
 <?php
+// Démarrer la session en premier, avant tout autre code
+session_start();
+
+require_once __DIR__ . '/config/database.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit();
+}
+$user = [
+    'id' => $_SESSION['user_id'],
+    'username' => $_SESSION['username'] ?? '',
+    'role' => $_SESSION['role'] ?? '',
+];
+if (!in_array($user['role'], ['admin', 'medecin', 'sage_femme'])) {
+    header('Location: dashboard.php');
+    exit();
+}
+
 require_once __DIR__ . '/vendor/autoload.php';
 
-//use Clinique\Auth\Auth;
 use Clinique\Config\Database;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -9,9 +27,6 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Font;
-
-$auth = new Auth();
-$auth->requireAnyRole(['admin', 'medecin', 'sage_femme']);
 
 $db = Database::getInstance();
 
@@ -138,7 +153,7 @@ $sheet->getStyle('A2')->getFont()->setSize(12);
 $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
 $sheet->mergeCells('A3:L3');
-$sheet->setCellValue('A3', 'Exporté le ' . date('d/m/Y à H:i') . ' par ' . $auth->getCurrentUserName());
+$sheet->setCellValue('A3', 'Exporté le ' . date('d/m/Y à H:i') . ' par ' . $user['username']);
 $sheet->getStyle('A3')->getFont()->setSize(10);
 $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
@@ -176,7 +191,7 @@ $sheet->setCellValue('B8', count($accouchements));
 $sheet->setCellValue('A9', 'Date d\'export:');
 $sheet->setCellValue('B9', date('d/m/Y'));
 $sheet->setCellValue('A10', 'Exporté par:');
-$sheet->setCellValue('B10', $auth->getCurrentUserName());
+$sheet->setCellValue('B10', $user['username']);
 
 // En-têtes du tableau
 $headers = [
