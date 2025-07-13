@@ -170,9 +170,9 @@ try {
                         Registres Numériques
                     </h3>
                     <div class="space-y-3">
-                        <a href="admissions.php" class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
+                        <a href="consultations.php" class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
                             <div>
-                                <p class="font-medium text-blue-800">Registre des Admissions</p>
+                                <p class="font-medium text-blue-800">Registre des Consultations</p>
                                 <p class="text-sm text-blue-600">Consultations prénatales avec filtres</p>
                             </div>
                             <i class="fas fa-arrow-right text-blue-500"></i>

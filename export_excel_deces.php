@@ -11,11 +11,16 @@ if (!isset($_SESSION['user_id'])) {
 $user = [
     'id' => $_SESSION['user_id'],
     'username' => $_SESSION['username'] ?? '',
-    'role' => $_SESSION['role'] ?? '',
+    'role' => $_SESSION['user_role'] ?? '',
 ];
 if (!in_array($user['role'], ['admin', 'medecin', 'sage_femme'])) {
     header('Location: dashboard.php');
     exit();
+}
+
+// Vérifier si PhpSpreadsheet est disponible
+if (!class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+    die('Erreur: PhpSpreadsheet n\'est pas installé. Veuillez installer les dépendances.');
 }
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
