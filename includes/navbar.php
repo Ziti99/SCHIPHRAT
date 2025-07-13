@@ -1,10 +1,6 @@
 <?php
-// S'assurer que $auth est disponible
-if (!isset($auth)) {
-    require_once __DIR__ . '/vendor/autoload.php';
-    $auth = new \Clinique\Auth\Auth();
-}
-$user = $auth->getUser();
+// Utiliser la session pour l'utilisateur
+session_start();
 ?>
 <nav class="bg-white shadow-lg border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

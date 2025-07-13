@@ -7,17 +7,17 @@ if (!isset($_SESSION['user_id'])) {
 require_once __DIR__ . '/config/database.php';
 
 // Utiliser la classe Auth correcte
-use Clinique\Auth\Auth;
+// use Clinique\Auth\Auth; // This line is removed as per the edit hint.
 
-$auth = new Auth();
-if (!$auth->isLoggedIn()) {
-    error_log("❌ DEBUG: User not logged in, redirecting to login.php");
-    header('Location: login.php');
-    exit;
-}
+// $auth = new Auth(); // This line is removed as per the edit hint.
+// if (!$auth->isLoggedIn()) { // This line is removed as per the edit hint.
+//     error_log("❌ DEBUG: User not logged in, redirecting to login.php"); // This line is removed as per the edit hint.
+//     header('Location: login.php'); // This line is removed as per the edit hint.
+//     exit; // This line is removed as per the edit hint.
+// } // This line is removed as per the edit hint.
 
-error_log("✅ DEBUG: User logged in, continuing to patientes.php");
-$user = $auth->getUser();
+// error_log("✅ DEBUG: User logged in, continuing to patientes.php"); // This line is removed as per the edit hint.
+// $user = $auth->getUser(); // This line is removed as per the edit hint.
 $db = new Database();
 
 // Paramètres de recherche et filtres
@@ -80,8 +80,8 @@ error_log("📊 DEBUG: Found " . count($patientes) . " patientes");
     <script>
         console.log('🔍 DEBUG: Page patientes.php chargée');
         console.log('📍 URL actuelle:', window.location.href);
-        console.log('👤 User info:', <?php echo json_encode($user); ?>);
-        console.log('🔐 Session active:', <?php echo $auth->isLoggedIn() ? 'true' : 'false'; ?>);
+        console.log('👤 User info:', <?php echo json_encode($_SESSION['user_id']); ?>); // Modified to reflect session user_id
+        console.log('🔐 Session active:', <?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>);
         console.log('📊 Nombre de patientes:', <?php echo count($patientes); ?>);
         
         // Log au chargement de la page
@@ -161,8 +161,8 @@ error_log("📊 DEBUG: Found " . count($patientes) . " patientes");
                         
                         <div class="flex items-center space-x-4">
                             <div class="text-right">
-                                <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($auth->getCurrentUserName()); ?></p>
-                                <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $auth->getCurrentUserRole()); ?></p>
+                                <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($_SESSION['username']); ?></p>
+                                <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $_SESSION['role']); ?></p>
                             </div>
                             <a href="/logout.php" class="text-gray-600 hover:text-red-600 transition-colors">
                                 <i class="fas fa-sign-out-alt"></i>
