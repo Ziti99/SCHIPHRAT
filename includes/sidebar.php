@@ -1,6 +1,6 @@
 <?php
 // Pas besoin d'autoloader, on utilise les sessions
-session_start();
+// session_start(); // SUPPRIMÉ car déjà démarré dans dashboard.php
 if (!isset($_SESSION['user_id'])) {
     header('Location: /login.php');
     exit;
