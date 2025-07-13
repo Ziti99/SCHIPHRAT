@@ -1,14 +1,13 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
-
-use Clinique\Auth\Auth;
-use Clinique\Config\Database;
-
-$auth = new Auth();
-$auth->requireAuth();
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /login.php');
+    exit;
+}
+require_once __DIR__ . '/config/database.php';
 
 $db = Database::getInstance();
-$user = $auth->getUser();
+$user = $db->fetch("SELECT * FROM users WHERE id = ?", [$_SESSION['user_id']]);
 
 $message = '';
 $messageType = '';
@@ -169,8 +168,8 @@ $recentActivities = array_slice($recentActivities, 0, 10);
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="text-right">
-                        <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($auth->getCurrentUserName()); ?></p>
-                        <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $auth->getCurrentUserRole()); ?></p>
+                        <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($user['nom'] . ' ' . $user['prenom']); ?></p>
+                        <p class="text-xs text-gray-500 capitalize"><?= str_replace('_', ' ', $user['role']) ?></p>
                     </div>
                     <a href="/logout.php" class="text-gray-600 hover:text-red-600 transition-colors">
                         <i class="fas fa-sign-out-alt"></i>

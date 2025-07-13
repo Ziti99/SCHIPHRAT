@@ -1,11 +1,10 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
-
-use Clinique\Auth\Auth;
-use Clinique\Config\Database;
-
-$auth = new Auth();
-$auth->requireAnyRole(['admin', 'medecin', 'sage_femme', 'secretaire']);
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /login.php');
+    exit;
+}
+require_once __DIR__ . '/config/database.php';
 
 $db = Database::getInstance();
 
@@ -136,8 +135,8 @@ $top_medecins = $db->fetchAll("
                 
                 <div class="flex items-center space-x-4">
                     <div class="text-right">
-                        <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($auth->getCurrentUserName()); ?></p>
-                        <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $auth->getCurrentUserRole()); ?></p>
+                        <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($_SESSION['user_name']); ?></p>
+                        <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $_SESSION['user_role']); ?></p>
                     </div>
                     <a href="/logout.php" class="text-gray-600 hover:text-red-600 transition-colors">
                         <i class="fas fa-sign-out-alt"></i>

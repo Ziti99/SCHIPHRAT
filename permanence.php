@@ -1,17 +1,10 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
-
-use Clinique\Auth\Auth;
-use Clinique\Config\Database;
-
-$auth = new Auth();
-$auth->requireAuth();
-
-// Vérifier que l'utilisateur est secrétaire
-if ($auth->getCurrentUserRole() !== 'secretaire') {
-    header('Location: /dashboard.php');
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /login.php');
     exit;
 }
+require_once __DIR__ . '/config/database.php';
 
 $db = Database::getInstance();
 $message = '';
@@ -28,7 +21,7 @@ if ($_POST) {
         $montant = $_POST['montant'];
         $observations = $_POST['observations'] ?? '';
         
-        $secretaire_id = $auth->getCurrentUserId();
+        $secretaire_id = $_SESSION['user_id'];
         
         $sql = "INSERT INTO permanences (nom_patient, prenom_patient, age, nationalite, contact, acte_id, montant_paye, observations, secretaire_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $db->query($sql, [$nom, $prenom, $age, $nationalite, $contact, $acte_id, $montant, $observations, $secretaire_id]);

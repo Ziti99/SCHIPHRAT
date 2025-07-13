@@ -1,15 +1,10 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
-
-use Clinique\Auth\Auth;
-use Clinique\Config\Database;
-
-$auth = new Auth();
-$auth->requireAuth();
-if ($auth->getCurrentUserRole() !== 'secretaire') {
-    header('Location: /dashboard.php');
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /login.php');
     exit;
 }
+require_once __DIR__ . '/config/database.php';
 
 $db = Database::getInstance();
 $message = '';
@@ -67,8 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $permanence) {
                 <div class="flex items-center space-x-4">
                     <span class="text-gray-700">
                         <i class="fas fa-user mr-2"></i>
-                        <?php echo htmlspecialchars($auth->getUser()['nom'] . ' ' . $auth->getUser()['prenom']); ?>
-                        <span class="text-sm text-gray-500">(<?php echo htmlspecialchars($auth->getUser()['role']); ?>)</span>
+                        <?php echo htmlspecialchars($_SESSION['nom'] . ' ' . $_SESSION['prenom']); ?>
+                        <span class="text-sm text-gray-500">(<?php echo htmlspecialchars($_SESSION['role']); ?>)</span>
                     </span>
                     <a href="logout.php" class="text-red-600 hover:text-red-800 transition-colors duration-200">
                         <i class="fas fa-sign-out-alt mr-2"></i>Déconnexion
