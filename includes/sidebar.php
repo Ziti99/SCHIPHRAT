@@ -1,7 +1,9 @@
 <?php
-if (!isset($auth)) {
-    require_once __DIR__ . '/vendor/autoload.php';
-    $auth = new \Clinique\Auth\Auth();
+// Pas besoin d'autoloader, on utilise les sessions
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /login.php');
+    exit;
 }
 ?>
 <aside class="w-64 bg-white shadow-lg min-h-screen">
@@ -39,16 +41,16 @@ if (!isset($auth)) {
                 <i class="fas fa-chart-line mr-3"></i>
                 Statistiques
             </a>
-            <?php if ($auth->hasRole('secretaire')): ?>
+            <?php if ($_SESSION['role'] === 'secretaire'): ?>
             <a href="/permanence.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
                 <i class="fas fa-calendar-day mr-3"></i>
                 Permanence du Jour
             </a>
             <?php endif; ?>
-            <?php if ($auth->hasRole('admin') || $auth->hasRole('caissiere')): ?>
+            <?php if ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'caissiere'): ?>
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Permanences</p>
-                <?php if ($auth->hasRole('admin')): ?>
+                <?php if ($_SESSION['role'] === 'admin'): ?>
                 <a href="/admin/permanences.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
                     <i class="fas fa-check-circle mr-3"></i>
                     Validation permanences
@@ -60,7 +62,7 @@ if (!isset($auth)) {
                 </a>
             </div>
             <?php endif; ?>
-            <?php if ($auth->hasRole('admin')): ?>
+            <?php if ($_SESSION['role'] === 'admin'): ?>
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Administration</p>
                 <a href="/utilisateurs.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
@@ -80,8 +82,8 @@ if (!isset($auth)) {
 <!-- Script de debug pour la sidebar -->
 <script>
     console.log('🔍 DEBUG: Sidebar chargée');
-    console.log('👤 User role:', '<?php echo $auth->getCurrentUserRole(); ?>');
-    console.log('🔐 User logged in:', <?php echo $auth->isLoggedIn() ? 'true' : 'false'; ?>);
+    console.log('👤 User role:', '<?php echo $_SESSION['role']; ?>');
+    console.log('🔐 User logged in:', <?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>);
     
     // Log spécifique pour le lien Patientes
     const patientesLink = document.getElementById('sidebar-patientes-link');
