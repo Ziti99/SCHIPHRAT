@@ -218,7 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     Durée du travail
                                 </label>
                                 <input type="text" name="duree_travail" 
-                                       value="<?php echo htmlspecialchars($accouchement['duree_travail']); ?>"
+                                       value="<?php echo htmlspecialchars($accouchement['duree_travail'] ?? ''); ?>"
                                        placeholder="ex: 8h30"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                             </div>
@@ -233,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         Nom du bébé
                                     </label>
                                     <input type="text" name="nom_bebe" 
-                                           value="<?php echo htmlspecialchars($accouchement['nom_bebe']); ?>"
+                                           value="<?php echo htmlspecialchars($accouchement['nom_bebe'] ?? ''); ?>"
                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                                 </div>
                                 
@@ -253,7 +253,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         Poids (kg)
                                     </label>
                                     <input type="number" step="0.1" name="poids_bebe" 
-                                           value="<?php echo htmlspecialchars($accouchement['poids_bebe']); ?>"
+                                           value="<?php echo htmlspecialchars($accouchement['poids_bebe'] ?? ''); ?>"
                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                                 </div>
                                 
@@ -262,7 +262,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         Taille (cm)
                                     </label>
                                     <input type="number" step="0.1" name="taille_bebe" 
-                                           value="<?php echo htmlspecialchars($accouchement['taille_bebe']); ?>"
+                                           value="<?php echo htmlspecialchars($accouchement['taille_bebe'] ?? ''); ?>"
                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                                 </div>
                                 
@@ -271,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         Score APGAR
                                     </label>
                                     <input type="text" name="apgar_score" 
-                                           value="<?php echo htmlspecialchars($accouchement['apgar_score']); ?>"
+                                           value="<?php echo htmlspecialchars($accouchement['apgar_score'] ?? ''); ?>"
                                            placeholder="ex: 9/10"
                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                                 </div>
@@ -322,7 +322,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </label>
                                     <textarea name="complications" rows="3" 
                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                              placeholder="Décrire les complications éventuelles..."><?php echo htmlspecialchars($accouchement['complications']); ?></textarea>
+                                              placeholder="Décrire les complications éventuelles..."><?php echo htmlspecialchars($accouchement['complications'] ?? ''); ?></textarea>
                                 </div>
                                 
                                 <div>
@@ -331,7 +331,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </label>
                                     <textarea name="observations" rows="4" 
                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                              placeholder="Observations sur l'accouchement..."><?php echo htmlspecialchars($accouchement['observations']); ?></textarea>
+                                              placeholder="Observations sur l'accouchement..."><?php echo htmlspecialchars($accouchement['observations'] ?? ''); ?></textarea>
                                 </div>
                             </div>
                         </div>

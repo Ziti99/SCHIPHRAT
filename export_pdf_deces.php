@@ -18,7 +18,7 @@ if (!in_array($user['role'], ['admin', 'medecin', 'sage_femme'])) {
     exit();
 }
 
-$db = Database::getInstance();
+$db = new Database();
 
 // Filtres
 $search = $_GET['search'] ?? '';

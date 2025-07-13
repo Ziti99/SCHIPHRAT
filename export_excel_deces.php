@@ -18,14 +18,13 @@ if (!in_array($user['role'], ['admin', 'medecin', 'sage_femme'])) {
     exit();
 }
 
-use Clinique\Config\Database;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-$db = Database::getInstance();
+$db = new Database();
 
 // Filtres
 $search = $_GET['search'] ?? '';

@@ -116,7 +116,7 @@ if (!$accouchement) {
                                 </div>
                                 <div>
                                     <span class="font-medium text-gray-700">Durée du travail:</span>
-                                    <span class="ml-2"><?php echo htmlspecialchars($accouchement['duree_travail']); ?></span>
+                                    <span class="ml-2"><?php echo htmlspecialchars($accouchement['duree_travail'] ?? ''); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -127,23 +127,23 @@ if (!$accouchement) {
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <span class="font-medium text-gray-700">Nom du bébé:</span>
-                                <span class="ml-2"><?php echo htmlspecialchars($accouchement['nom_bebe']); ?></span>
+                                <span class="ml-2"><?php echo htmlspecialchars($accouchement['nom_bebe'] ?? ''); ?></span>
                             </div>
                             <div>
                                 <span class="font-medium text-gray-700">Sexe:</span>
-                                <span class="ml-2"><?php echo $accouchement['sexe_bebe'] === 'M' ? 'Masculin' : 'Féminin'; ?></span>
+                                <span class="ml-2"><?php echo $accouchement['sexe_bebe'] ? ($accouchement['sexe_bebe'] === 'M' ? 'Masculin' : 'Féminin') : 'Non renseigné'; ?></span>
                             </div>
                             <div>
                                 <span class="font-medium text-gray-700">Poids:</span>
-                                <span class="ml-2"><?php echo $accouchement['poids_bebe']; ?> kg</span>
+                                <span class="ml-2"><?php echo $accouchement['poids_bebe'] ? $accouchement['poids_bebe'] . ' kg' : 'Non renseigné'; ?></span>
                             </div>
                             <div>
                                 <span class="font-medium text-gray-700">Taille:</span>
-                                <span class="ml-2"><?php echo $accouchement['taille_bebe']; ?> cm</span>
+                                <span class="ml-2"><?php echo $accouchement['taille_bebe'] ? $accouchement['taille_bebe'] . ' cm' : 'Non renseigné'; ?></span>
                             </div>
                             <div>
                                 <span class="font-medium text-gray-700">Score APGAR:</span>
-                                <span class="ml-2"><?php echo htmlspecialchars($accouchement['apgar_score']); ?></span>
+                                <span class="ml-2"><?php echo htmlspecialchars($accouchement['apgar_score'] ?? ''); ?></span>
                             </div>
                         </div>
                     </div>
@@ -171,13 +171,13 @@ if (!$accouchement) {
                             <?php if ($accouchement['complications']): ?>
                             <div>
                                 <span class="font-medium text-gray-700">Complications:</span>
-                                <p class="mt-1 text-gray-600"><?php echo nl2br(htmlspecialchars($accouchement['complications'])); ?></p>
+                                <p class="mt-1 text-gray-600"><?php echo nl2br(htmlspecialchars($accouchement['complications'] ?? '')); ?></p>
                             </div>
                             <?php endif; ?>
                             <?php if ($accouchement['observations']): ?>
                             <div>
                                 <span class="font-medium text-gray-700">Observations:</span>
-                                <p class="mt-1 text-gray-600"><?php echo nl2br(htmlspecialchars($accouchement['observations'])); ?></p>
+                                <p class="mt-1 text-gray-600"><?php echo nl2br(htmlspecialchars($accouchement['observations'] ?? '')); ?></p>
                             </div>
                             <?php endif; ?>
                         </div>

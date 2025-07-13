@@ -20,7 +20,6 @@ if (!in_array($user['role'], ['admin', 'medecin', 'sage_femme'])) {
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use Clinique\Config\Database;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -28,7 +27,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Font;
 
-$db = Database::getInstance();
+$db = new Database();
 
 // Récupération des paramètres de filtrage
 $search = $_GET['search'] ?? '';

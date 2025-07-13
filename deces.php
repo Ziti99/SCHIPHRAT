@@ -227,7 +227,22 @@ function exportExcel() {
                         <h2 class="text-2xl font-bold text-gray-900">Registre des Décès</h2>
                         <p class="text-gray-600">Registre officiel des décès enregistrés</p>
                     </div>
+                    
+                    <!-- Message de succès -->
+                    <?php if (isset($_GET['success'])): ?>
+                        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                            <div class="flex">
+                                <i class="fas fa-check-circle mr-2 mt-1"></i>
+                                <div>
+                                    <strong>Succès !</strong> Le décès a été enregistré avec succès.
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                     <div class="flex space-x-4">
+                        <a href="ajouter_deces.php" class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center">
+                            <i class="fas fa-plus mr-2"></i>Ajouter un décès
+                        </a>
                         <a href="?export=pdf&search=<?php echo urlencode($search); ?>&date_debut=<?php echo urlencode($date_debut); ?>&date_fin=<?php echo urlencode($date_fin); ?>&lieu=<?php echo urlencode($lieu); ?>&cause=<?php echo urlencode($cause); ?>" 
                            class="bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center">
                             <i class="fas fa-file-pdf mr-2"></i>Exporter PDF
@@ -339,7 +354,6 @@ function exportExcel() {
                                     <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">N°</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Date</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Patiente</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Dossier</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Cause</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Lieu</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Médecin</th>
@@ -348,7 +362,7 @@ function exportExcel() {
                             <tbody class="bg-white divide-y divide-gray-200">
                                 <?php if (empty($deces)): ?>
                                     <tr>
-                                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
                                             <i class="fas fa-heart text-4xl mb-4 text-gray-300"></i>
                                             <p class="text-lg">Aucun décès trouvé</p>
                                             <p class="text-sm">Aucun décès ne correspond aux critères de recherche.</p>
@@ -376,9 +390,7 @@ function exportExcel() {
                                                     <?php echo htmlspecialchars($deces_item['nationalite'] ?: 'Non défini'); ?>
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-    
-                                            </td>
+
                                             <td class="px-6 py-4">
                                                 <div class="text-sm text-gray-900 max-w-xs">
                                                     <?php echo htmlspecialchars($deces_item['cause_deces']); ?>
