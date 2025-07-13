@@ -4,16 +4,34 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: /login.php');
     exit;
 }
-require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/../config/database.php';
 
 $db = new Database();
-$error = '';
-$success = '';
 
-// Récupération de l'ID de l'accouchement si fourni
-$accouchement_id = $_GET['accouchement_id'] ?? null;
+$id = $_GET['id'] ?? null;
+if (!$id) {
+    header('Location: /suivi-postnatal.php');
+    exit;
+}
 
-// Récupération de tous les accouchements pour le formulaire
+// Récupérer les détails de la visite
+$visite = $db->fetchOne("
+    SELECT 
+        sp.*,
+        p.nom, p.prenom, p.telephone,
+        a.nom_bebe, a.sexe_bebe, a.poids_bebe, a.taille_bebe
+    FROM suivi_postnatal sp
+    JOIN accouchements a ON sp.accouchement_id = a.id
+    JOIN patientes p ON a.patiente_id = p.id
+    WHERE sp.id = ?
+", [$id]);
+
+if (!$visite) {
+    header('Location: /suivi-postnatal.php');
+    exit;
+}
+
+// Récupérer tous les accouchements
 $accouchements = $db->fetchAll("
     SELECT a.id, a.date_accouchement, a.nom_bebe, a.sexe_bebe,
            p.nom, p.prenom
@@ -22,7 +40,7 @@ $accouchements = $db->fetchAll("
     ORDER BY a.date_accouchement DESC
 ");
 
-// Récupération des médecins
+// Récupérer les médecins
 $medecins = $db->fetchAll("
     SELECT id, nom, prenom, specialite
     FROM users 
@@ -30,13 +48,16 @@ $medecins = $db->fetchAll("
     ORDER BY nom, prenom
 ");
 
-// Récupération des sage-femmes
+// Récupérer les sage-femmes
 $sage_femmes = $db->fetchAll("
     SELECT id, nom, prenom, specialite
     FROM users 
     WHERE role = 'sage_femme' AND is_active = 1
     ORDER BY nom, prenom
 ");
+
+$error = '';
+$success = '';
 
 // Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -51,25 +72,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $prochaine_visite = !empty($_POST['prochaine_visite']) ? $_POST['prochaine_visite'] : null;
     
     if (empty($accouchement_id) || empty($date_visite) || empty($type_visite)) {
-        $error = 'Veuillez remplir tous les champs obligatoires (accouchement, date de visite, type de visite).';
+        $error = 'Veuillez remplir tous les champs obligatoires.';
     } elseif (empty($medecin_id) && empty($sage_femme_id)) {
         $error = 'Veuillez sélectionner soit un médecin soit une sage-femme.';
     } else {
         try {
             $db->query("
-                INSERT INTO suivi_postnatal (
-                    accouchement_id, date_visite, type_visite, medecin_id, sage_femme_id,
-                    observations_mere, observations_bebe, vaccinations, prochaine_visite
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                UPDATE suivi_postnatal SET 
+                    accouchement_id = ?, date_visite = ?, type_visite = ?, 
+                    medecin_id = ?, sage_femme_id = ?, observations_mere = ?, 
+                    observations_bebe = ?, vaccinations = ?, prochaine_visite = ?
+                WHERE id = ?
             ", [
                 $accouchement_id, $date_visite, $type_visite, 
                 $medecin_id ?: null, $sage_femme_id ?: null,
-                $observations_mere, $observations_bebe, $vaccinations, $prochaine_visite
+                $observations_mere, $observations_bebe, $vaccinations, 
+                $prochaine_visite, $id
             ]);
             
-            $success = 'Visite post-natale enregistrée avec succès !';
+            $success = 'Visite post-natale modifiée avec succès !';
+            
+            // Recharger les données
+            $visite = $db->fetchOne("
+                SELECT 
+                    sp.*,
+                    p.nom, p.prenom, p.telephone,
+                    a.nom_bebe, a.sexe_bebe, a.poids_bebe, a.taille_bebe
+                FROM suivi_postnatal sp
+                JOIN accouchements a ON sp.accouchement_id = a.id
+                JOIN patientes p ON a.patiente_id = p.id
+                WHERE sp.id = ?
+            ", [$id]);
         } catch (Exception $e) {
-            $error = 'Erreur lors de l\'enregistrement : ' . $e->getMessage();
+            $error = 'Erreur lors de la modification : ' . $e->getMessage();
         }
     }
 }
@@ -79,14 +114,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nouvelle Visite Post-natale - Clinique Obstétrique</title>
+    <title>Modifier Visite Post-natale - Clinique Obstétrique</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-gradient-to-br from-purple-50 via-pink-50 to-cyan-50 min-h-screen">
     <div class="flex">
         <!-- Sidebar -->
-        <?php include 'includes/sidebar.php'; ?>
+        <?php include '../includes/sidebar.php'; ?>
         
         <!-- Contenu principal -->
         <div class="flex-1">
@@ -95,12 +130,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between h-16">
                         <div class="flex items-center">
-                            <a href="../suivi-postnatal.php" class="text-purple-600 hover:text-purple-800 mr-4">
+                            <a href="/suivi-postnatal.php" class="text-purple-600 hover:text-purple-800 mr-4">
                                 <i class="fas fa-arrow-left mr-2"></i>Retour
                             </a>
                             <div class="flex-shrink-0 flex items-center">
                                 <i class="fas fa-heartbeat text-2xl text-purple-600 mr-3"></i>
-                                <span class="text-xl font-bold text-gray-900">Nouvelle Visite Post-natale</span>
+                                <span class="text-xl font-bold text-gray-900">Modifier Visite Post-natale</span>
                             </div>
                         </div>
                         <div class="flex items-center space-x-4">
@@ -108,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <i class="fas fa-user mr-2"></i>
                                 <?php echo htmlspecialchars($_SESSION['username']); ?>
                             </span>
-                            <a href="../logout.php" class="text-red-600 hover:text-red-800">
+                            <a href="/logout.php" class="text-red-600 hover:text-red-800">
                                 <i class="fas fa-sign-out-alt mr-2"></i>Déconnexion
                             </a>
                         </div>
@@ -138,8 +173,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 <!-- En-tête -->
                 <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Nouvelle Visite Post-natale</h1>
-                    <p class="text-gray-600">Enregistrer une nouvelle visite de suivi post-natal</p>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Modifier la Visite Post-natale</h1>
+                    <p class="text-gray-600">Modifier les informations de la visite</p>
                 </div>
 
                 <!-- Formulaire -->
@@ -154,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <select name="accouchement_id" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
                                     <option value="">Sélectionner un accouchement</option>
                                     <?php foreach ($accouchements as $acc): ?>
-                                        <option value="<?php echo $acc['id']; ?>" <?php echo $accouchement_id == $acc['id'] ? 'selected' : ''; ?>>
+                                        <option value="<?php echo $acc['id']; ?>" <?php echo $visite['accouchement_id'] == $acc['id'] ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($acc['prenom'] . ' ' . $acc['nom']); ?> 
                                             - <?php echo date('d/m/Y', strtotime($acc['date_accouchement'])); ?>
                                             <?php if ($acc['nom_bebe']): ?>
@@ -170,7 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     Date de visite <span class="text-red-500">*</span>
                                 </label>
                                 <input type="datetime-local" name="date_visite" required
-                                       value="<?php echo date('Y-m-d\TH:i'); ?>"
+                                       value="<?php echo date('Y-m-d\TH:i', strtotime($visite['date_visite'])); ?>"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
                             </div>
                         </div>
@@ -182,12 +217,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </label>
                                 <select name="type_visite" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
                                     <option value="">Sélectionner</option>
-                                    <option value="mere">Mère uniquement</option>
-                                    <option value="bebe">Bébé uniquement</option>
-                                    <option value="mere_et_bebe">Mère et bébé</option>
+                                    <option value="mere" <?php echo $visite['type_visite'] === 'mere' ? 'selected' : ''; ?>>Mère uniquement</option>
+                                    <option value="bebe" <?php echo $visite['type_visite'] === 'bebe' ? 'selected' : ''; ?>>Bébé uniquement</option>
+                                    <option value="mere_et_bebe" <?php echo $visite['type_visite'] === 'mere_et_bebe' ? 'selected' : ''; ?>>Mère et bébé</option>
                                 </select>
                             </div>
                             
+                            <div>
+                                <label for="prochaine_visite" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Prochaine visite
+                                </label>
+                                <input type="date" name="prochaine_visite" 
+                                       value="<?php echo $visite['prochaine_visite'] ? date('Y-m-d', strtotime($visite['prochaine_visite'])) : ''; ?>"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label for="medecin_id" class="block text-sm font-medium text-gray-700 mb-2">
                                     Médecin
@@ -195,15 +241,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <select name="medecin_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
                                     <option value="">Sélectionner un médecin</option>
                                     <?php foreach ($medecins as $medecin): ?>
-                                        <option value="<?php echo $medecin['id']; ?>">
+                                        <option value="<?php echo $medecin['id']; ?>" <?php echo $visite['medecin_id'] == $medecin['id'] ? 'selected' : ''; ?>>
                                             Dr. <?php echo htmlspecialchars($medecin['nom'] . ' ' . $medecin['prenom']); ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
                             <div>
                                 <label for="sage_femme_id" class="block text-sm font-medium text-gray-700 mb-2">
                                     Sage-femme
@@ -211,73 +255,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <select name="sage_femme_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
                                     <option value="">Sélectionner une sage-femme</option>
                                     <?php foreach ($sage_femmes as $sage_femme): ?>
-                                        <option value="<?php echo $sage_femme['id']; ?>">
+                                        <option value="<?php echo $sage_femme['id']; ?>" <?php echo $visite['sage_femme_id'] == $sage_femme['id'] ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($sage_femme['nom'] . ' ' . $sage_femme['prenom']); ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            
-                            <div class="flex items-center justify-center">
-                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-                                    <i class="fas fa-info-circle text-blue-600 mb-2"></i>
-                                    <p class="text-sm text-blue-800">
-                                        <strong>Note :</strong> Sélectionnez soit un médecin soit une sage-femme
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="vaccinations" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Vaccinations
-                                </label>
-                                <input type="text" name="vaccinations" value="<?php echo htmlspecialchars($_POST['vaccinations'] ?? ''); ?>"
-                                       placeholder="ex: BCG, Hépatite B, DTP..."
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            </div>
-                            
-                            <div>
-                                <label for="prochaine_visite" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Prochaine visite
-                                </label>
-                                <input type="date" name="prochaine_visite" value="<?php echo htmlspecialchars($_POST['prochaine_visite'] ?? ''); ?>"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            </div>
                         </div>
 
                         <!-- Observations -->
-                        <div class="border-t border-gray-200 pt-6">
+                        <div class="border-t pt-6">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">Observations</h3>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
                                 <div>
                                     <label for="observations_mere" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Observations de la mère
+                                        Observations mère
                                     </label>
-                                    <textarea name="observations_mere" rows="4"
+                                    <textarea name="observations_mere" rows="4" 
                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                              placeholder="Observations sur l'état de la mère..."><?php echo htmlspecialchars($_POST['observations_mere'] ?? ''); ?></textarea>
+                                              placeholder="Observations sur la mère..."><?php echo htmlspecialchars($visite['observations_mere']); ?></textarea>
                                 </div>
                                 
                                 <div>
                                     <label for="observations_bebe" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Observations du bébé
+                                        Observations bébé
                                     </label>
-                                    <textarea name="observations_bebe" rows="4"
+                                    <textarea name="observations_bebe" rows="4" 
                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                              placeholder="Observations sur l'état du bébé..."><?php echo htmlspecialchars($_POST['observations_bebe'] ?? ''); ?></textarea>
+                                              placeholder="Observations sur le bébé..."><?php echo htmlspecialchars($visite['observations_bebe']); ?></textarea>
+                                </div>
+                                
+                                <div>
+                                    <label for="vaccinations" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Vaccinations
+                                    </label>
+                                    <textarea name="vaccinations" rows="3" 
+                                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                              placeholder="Vaccinations effectuées..."><?php echo htmlspecialchars($visite['vaccinations']); ?></textarea>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Boutons -->
                         <div class="flex justify-end space-x-4 pt-6">
-                            <a href="../suivi-postnatal.php" class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
-                                Annuler
+                            <a href="/suivi-postnatal.php" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-times mr-2"></i>Annuler
                             </a>
-                            <button type="submit" class="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md hover:shadow-lg transition-all duration-300">
+                            <button type="submit" class="px-6 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors">
                                 <i class="fas fa-save mr-2"></i>Enregistrer
                             </button>
                         </div>
@@ -288,11 +312,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <script>
-        function closeMessage(messageId) {
-            const message = document.getElementById(messageId);
-            if (message) {
-                message.style.display = 'none';
-            }
+        function closeMessage(id) {
+            document.getElementById(id).style.display = 'none';
         }
     </script>
 </body>

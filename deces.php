@@ -190,7 +190,7 @@ function exportExcel() {
 <body class="bg-gradient-to-br from-gray-50 via-red-50 to-pink-50 min-h-screen">
     <div class="flex">
         <!-- Sidebar -->
-        <?php include '../includes/sidebar.php'; ?>
+        <?php include 'includes/sidebar.php'; ?>
         
         <!-- Contenu principal -->
         <div class="flex-1">

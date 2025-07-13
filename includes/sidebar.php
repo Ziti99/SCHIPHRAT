@@ -50,7 +50,7 @@ if (!isset($_SESSION['user_id'])) {
             <?php if ($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'caissiere'): ?>
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Permanences</p>
-                <?php if ($_SESSION['role'] === 'admin'): ?>
+                <?php if ($_SESSION['user_role'] === 'admin'): ?>
                                         <a href="/permanences.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
                             <i class="fas fa-check-circle mr-3"></i>
                             Validation permanences
@@ -62,7 +62,7 @@ if (!isset($_SESSION['user_id'])) {
                 </a>
             </div>
             <?php endif; ?>
-            <?php if ($_SESSION['role'] === 'admin'): ?>
+            <?php if ($_SESSION['user_role'] === 'admin'): ?>
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Administration</p>
                 <a href="/utilisateurs.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
@@ -82,7 +82,7 @@ if (!isset($_SESSION['user_id'])) {
 <!-- Script de debug pour la sidebar -->
 <script>
     console.log('🔍 DEBUG: Sidebar chargée');
-    console.log('👤 User role:', '<?php echo $_SESSION['role']; ?>');
+    console.log('👤 User role:', '<?php echo $_SESSION['user_role']; ?>');
     console.log('🔐 User logged in:', <?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>);
     
     // Log spécifique pour le lien Patientes

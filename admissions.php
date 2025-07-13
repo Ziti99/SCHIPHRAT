@@ -1,12 +1,12 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /login.php');
+    exit;
+}
+require_once __DIR__ . '/config/database.php';
 
-use Clinique\Config\Database;
-
-$auth = new Auth();
-$auth->requireAnyRole(['admin', 'medecin', 'sage_femme', 'secretaire']);
-
-$db = Database::getInstance();
+$db = new Database();
 
 // Paramètres de filtrage
 $search = $_GET['search'] ?? '';
@@ -97,7 +97,7 @@ $admissions_ce_mois = $db->fetch("
 <body class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 min-h-screen">
     <div class="flex">
         <!-- Sidebar -->
-        <?php include '../includes/sidebar.php'; ?>
+        <?php include 'includes/sidebar.php'; ?>
         
         <!-- Contenu principal -->
         <div class="flex-1">
@@ -117,7 +117,7 @@ $admissions_ce_mois = $db->fetch("
                         <div class="flex items-center space-x-4">
                             <span class="text-gray-700">
                                 <i class="fas fa-user mr-2"></i>
-                                <?php echo htmlspecialchars($auth->getCurrentUserName()); ?>
+                                <?php echo htmlspecialchars($_SESSION['username']); ?>
                             </span>
                             <a href="../logout.php" class="text-red-600 hover:text-red-800">
                                 <i class="fas fa-sign-out-alt mr-2"></i>Déconnexion

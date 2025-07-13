@@ -136,7 +136,7 @@ $top_medecins = $db->fetchAll("
                 <div class="flex items-center space-x-4">
                     <div class="text-right">
                         <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($_SESSION['username'] ?? ''); ?></p>
-                        <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $_SESSION['role'] ?? ''); ?></p>
+                        <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $_SESSION['user_role'] ?? ''); ?></p>
                     </div>
                     <a href="/logout.php" class="text-gray-600 hover:text-red-600 transition-colors">
                         <i class="fas fa-sign-out-alt"></i>

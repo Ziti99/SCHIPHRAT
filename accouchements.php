@@ -153,7 +153,7 @@ $cesariennes = $db->fetch("
 <body class="bg-gradient-to-br from-green-50 via-cyan-50 to-blue-50 min-h-screen">
     <div class="flex">
         <!-- Sidebar -->
-        <?php include '../includes/sidebar.php'; ?>
+        <?php include 'includes/sidebar.php'; ?>
         
         <!-- Contenu principal -->
         <div class="flex-1">
