@@ -1,6 +1,13 @@
 <?php
 session_start();
+
+// Debug: Afficher les informations de session
+error_log("Session debug - user_id: " . ($_SESSION['user_id'] ?? 'non défini'));
+error_log("Session debug - username: " . ($_SESSION['username'] ?? 'non défini'));
+error_log("Session debug - user_role: " . ($_SESSION['user_role'] ?? 'non défini'));
+
 if (!isset($_SESSION['user_id'])) {
+    error_log("Redirection vers login.php - user_id non défini");
     header('Location: /login.php');
     exit;
 }
@@ -12,7 +19,10 @@ $db = new Database();
 // Récupérer l'ID de la consultation
 $consultation_id = $_GET['id'] ?? 0;
 
+error_log("Consultation ID: " . $consultation_id);
+
 if (!$consultation_id) {
+    error_log("Redirection vers consultations.php - consultation_id vide");
     header('Location: /consultations.php');
     exit;
 }
@@ -28,6 +38,7 @@ $consultation = $db->fetch("
 ", [$consultation_id]);
 
 if (!$consultation) {
+    error_log("Redirection vers consultations.php - consultation non trouvée pour ID: " . $consultation_id);
     header('Location: /consultations.php');
     exit;
 }
