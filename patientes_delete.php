@@ -1,10 +1,9 @@
 <?php
-// Point d'entrée public pour la suppression de patientes
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/../config/database.php';
-
-// Démarrer la session
+// Démarrer la session en premier, avant tout autre code
 session_start();
+
+// Point d'entrée public pour la suppression de patientes
+require_once __DIR__ . '/../config/database.php';
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit();
@@ -101,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="flex items-center space-x-4">
                             <span class="text-gray-700">
                                 <i class="fas fa-user mr-2"></i>
-                                <?php echo htmlspecialchars($user['nom'] . ' ' . $user['prenom']); ?>
+                                <?php echo htmlspecialchars($user['username']); ?>
                             </span>
                             <a href="logout.php" class="text-red-600 hover:text-red-800">
                                 <i class="fas fa-sign-out-alt mr-2"></i>Déconnexion

@@ -1,11 +1,11 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
+// Démarrer la session en premier, avant tout autre code
+session_start();
+
 require_once __DIR__ . '/config/database.php';
 
 use Clinique\Config\Database;
 
-// Démarrer la session
-session_start();
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit();
