@@ -4,8 +4,22 @@ require_once __DIR__ . '/config/database.php';
 
 use Clinique\Config\Database;
 
-$auth = new Auth();
-$auth->requireAnyRole(['admin', 'medecin', 'sage_femme']);
+// Démarrer la session
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit();
+}
+$user = [
+    'id' => $_SESSION['user_id'],
+    'username' => $_SESSION['username'] ?? '',
+    'role' => $_SESSION['role'] ?? '',
+];
+// Vérifier le rôle
+if (!in_array($user['role'], ['admin', 'medecin', 'sage_femme'])) {
+    header('Location: dashboard.php');
+    exit();
+}
 
 $db = new Database();
 
@@ -69,7 +83,7 @@ if (!$visite) {
                         <div class="flex items-center space-x-4">
                             <span class="text-gray-700">
                                 <i class="fas fa-user mr-2"></i>
-                                <?php echo htmlspecialchars($auth->getCurrentUserName()); ?>
+                                <?php echo htmlspecialchars($user['username']); ?>
                             </span>
                             <a href="../logout.php" class="text-red-600 hover:text-red-800">
                                 <i class="fas fa-sign-out-alt mr-2"></i>Déconnexion

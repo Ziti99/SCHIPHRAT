@@ -3,15 +3,19 @@
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config/database.php';
 
-// Utiliser la classe Auth correcte
-
-$auth = new Auth();
-if (!$auth->isLoggedIn()) {
+// Démarrer la session
+session_start();
+if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
-    exit;
+    exit();
 }
+// Récupérer les infos utilisateur depuis la session
+$user = [
+    'id' => $_SESSION['user_id'],
+    'username' => $_SESSION['username'] ?? '',
+    'role' => $_SESSION['role'] ?? '',
+];
 
-$user = $auth->getUser();
 $db = new Database();
 
 $message = '';
