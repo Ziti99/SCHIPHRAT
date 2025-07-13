@@ -1,18 +1,10 @@
 <?php
-// Point d'entrée public pour la gestion des patientes
-error_log("🔍 DEBUG: patientes.php accessed - " . date('Y-m-d H:i:s'));
-
-// PAUSE POUR DEBUG - Vérifier si le fichier est bien exécuté
-if (isset($_GET['debug'])) {
-    echo "🛑 DEBUG: patientes.php exécuté correctement<br>";
-    echo "Timestamp: " . date('Y-m-d H:i:s') . "<br>";
-    echo "User Agent: " . $_SERVER['HTTP_USER_AGENT'] . "<br>";
-    echo "Referer: " . ($_SERVER['HTTP_REFERER'] ?? 'Aucun') . "<br>";
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /login.php');
     exit;
 }
-
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/config/database.php';
 
 // Utiliser la classe Auth correcte
 use Clinique\Auth\Auth;
