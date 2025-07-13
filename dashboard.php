@@ -8,13 +8,14 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Configuration de la base de données
-$host = $_ENV['DB_HOST'] ?? 'localhost';
-$dbname = $_ENV['DB_NAME'] ?? 'clinique';
-$username = $_ENV['DB_USER'] ?? 'root';
-$password = $_ENV['DB_PASSWORD'] ?? '';
+$host = 'metro.proxy.rlwy.net';
+$port = '29698';
+$dbname = 'railway';
+$username = 'root';
+$password = 'UJxUfmCzEGIdbYPVwFXKUbAQoFzmByrI';
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
+    $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     die("Erreur de connexion : " . $e->getMessage());
