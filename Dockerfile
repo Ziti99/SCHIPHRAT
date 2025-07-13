@@ -39,5 +39,14 @@ RUN chown -R www-data:www-data /var/www/html \
 # Exposer le port (Railway définira le port)
 EXPOSE $PORT
 
-# Démarrer Apache
-CMD ["apache2-foreground"] 
+# Script de démarrage pour configurer le port dynamique
+RUN echo '#!/bin/bash' > /start.sh && \
+    echo 'echo "🚀 Configuration du port $PORT..."' >> /start.sh && \
+    echo 'sed -i "s/Listen 80/Listen $PORT/g" /etc/apache2/ports.conf' >> /start.sh && \
+    echo 'sed -i "s/:80/:$PORT/g" /etc/apache2/sites-available/000-default.conf' >> /start.sh && \
+    echo 'echo "🌐 Démarrage dApache sur le port $PORT..."' >> /start.sh && \
+    echo 'apache2-foreground' >> /start.sh && \
+    chmod +x /start.sh
+
+# Démarrer avec le script personnalisé
+CMD ["/start.sh"] 
