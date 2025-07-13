@@ -1,0 +1,25 @@
+{
+    "name": "clinique/obstetrique",
+    "description": "Système de gestion de clinique obstétrique",
+    "type": "project",
+    "require": {
+        "php": ">=8.0",
+        "vlucas/phpdotenv": "^5.5",
+        "phpmailer/phpmailer": "^6.8",
+        "dompdf/dompdf": "^2.0",
+        "phpoffice/phpspreadsheet": "^1.29"
+    },
+    "autoload": {
+        "psr-4": {
+            "Clinique\\": "src/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "php -r \"copy('.env.example', '.env');\""
+        ]
+    }
+} 

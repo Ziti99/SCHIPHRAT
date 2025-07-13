@@ -1,0 +1,39 @@
+# Fichiers de configuration locale
+.env
+.env.local
+.env.production
+
+# Fichiers temporaires
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Dossiers de cache
+vendor/cache/
+*.cache
+
+# Fichiers de backup
+*.bak
+*.backup
+
+# Fichiers de configuration IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Fichiers de test
+tests/
+*.test.php
+*.spec.php
+
+# Fichiers de documentation
+docs/
+*.md
+
+# Fichiers Docker (optionnel)
+# Dockerfile
+# .dockerignore
+# docker-compose.yml 
