@@ -6,7 +6,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 require_once __DIR__ . '/config/database.php';
 
-$db = Database::getInstance();
+$db = new Database();
 $message = '';
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 if (!$id) {

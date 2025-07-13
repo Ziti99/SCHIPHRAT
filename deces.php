@@ -6,7 +6,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 require_once __DIR__ . '/config/database.php';
 
-$db = Database::getInstance();
+$db = new Database();
 
 // Créer la table deces si elle n'existe pas
 $db->query("

@@ -1,13 +1,13 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/config/database.php';
 
-use Clinique\Auth\Auth;
 use Clinique\Config\Database;
 
 $auth = new Auth();
 $auth->requireAnyRole(['admin', 'medecin', 'sage_femme']);
 
-$db = Database::getInstance();
+$db = new Database();
 $error = '';
 $success = '';
 

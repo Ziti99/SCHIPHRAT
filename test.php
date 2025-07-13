@@ -85,7 +85,7 @@ foreach ($env_vars as $var) {
 // 6. Test de base de données
 echo "<h2>🗄️ TEST BASE DE DONNÉES</h2>";
 try {
-    $pdo = new PDO('mysql:host=localhost;dbname=test', 'root', '');
+    $pdo = new PDO('mysql:host=metro.proxy.rlwy.net;port=29698;dbname=railway', 'root', 'UJxUfmCzEGIdbYPVwFXKUbAQoFzmByrI');
     echo "<p style='color: green;'>✅ Connexion MySQL réussie</p>";
 } catch (PDOException $e) {
     echo "<p style='color: red;'>❌ Erreur MySQL: " . $e->getMessage() . "</p>";

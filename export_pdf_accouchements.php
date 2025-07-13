@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
 
-use Clinique\Auth\Auth;
 use Clinique\Config\Database;
 
 $auth = new Auth();

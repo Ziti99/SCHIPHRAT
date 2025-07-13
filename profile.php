@@ -6,7 +6,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 require_once __DIR__ . '/config/database.php';
 
-$db = Database::getInstance();
+$db = new Database();
 $user = $db->fetch("SELECT * FROM users WHERE id = ?", [$_SESSION['user_id']]);
 
 $message = '';

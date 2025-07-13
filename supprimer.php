@@ -1,13 +1,13 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/config/database.php';
 
-use Clinique\Auth\Auth;
 use Clinique\Config\Database;
 
 $auth = new Auth();
 $auth->requireAnyRole(['admin', 'medecin']);
 
-$db = Database::getInstance();
+$db = new Database();
 
 // Récupération de l'ID du décès
 $deces_id = $_GET['id'] ?? null;
