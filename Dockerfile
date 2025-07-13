@@ -26,6 +26,9 @@ RUN a2enmod rewrite headers
 RUN echo "display_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
+# Configurer Apache pour utiliser le dossier public
+RUN sed -i 's/DocumentRoot \/var\/www\/html/DocumentRoot \/var\/www\/html\/public/' /etc/apache2/sites-available/000-default.conf
+
 # Définir le répertoire de travail
 WORKDIR /var/www/html
 
@@ -35,6 +38,7 @@ COPY . /var/www/html/
 # Configurer les permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
+    && chmod -R 755 /var/www/html/public \
     && mkdir -p /var/log/apache2 \
     && chown -R www-data:www-data /var/log/apache2 \
     && chmod -R 755 /var/log/apache2
