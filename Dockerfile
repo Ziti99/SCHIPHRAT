@@ -34,21 +34,10 @@ COPY . /var/www/html/
 
 # Configurer les permissions
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html \
-    && mkdir -p /var/log/apache2 \
-    && chown -R www-data:www-data /var/log/apache2 \
-    && chmod -R 755 /var/log/apache2
+    && chmod -R 755 /var/www/html
 
 # Exposer le port (Railway définira le port)
 EXPOSE $PORT
 
-# Créer un script de démarrage simple
-RUN echo '#!/bin/bash' > /start.sh && \
-    echo 'echo "🚀 Démarrage du conteneur..."' >> /start.sh && \
-    echo 'echo "🌐 Démarrage dApache sur le port $PORT..."' >> /start.sh && \
-    echo 'sed -i "s/Listen 80/Listen $PORT/g" /etc/apache2/ports.conf' >> /start.sh && \
-    echo 'apache2-foreground' >> /start.sh && \
-    chmod +x /start.sh
-
-# Démarrer avec le script personnalisé
-CMD ["/start.sh"] 
+# Démarrer Apache
+CMD ["apache2-foreground"] 
