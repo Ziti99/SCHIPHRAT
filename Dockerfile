@@ -32,21 +32,12 @@ WORKDIR /var/www/html
 # Copier les fichiers de l'application
 COPY . /var/www/html/
 
-# Copier le contenu de public directement dans /var/www/html
-RUN cp -r /var/www/html/public/* /var/www/html/
-
-# Configurer les permissions de manière plus permissive pour le développement
+# Configurer les permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
     && mkdir -p /var/log/apache2 \
     && chown -R www-data:www-data /var/log/apache2 \
     && chmod -R 755 /var/log/apache2
-
-# Installer Composer et les dépendances si vendor n'existe pas
-RUN if [ ! -d "/var/www/html/vendor" ]; then \
-        curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
-        cd /var/www/html && composer install --no-dev --optimize-autoloader; \
-    fi
 
 # Exposer le port (Railway définira le port)
 EXPOSE $PORT
