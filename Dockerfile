@@ -55,10 +55,15 @@ RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf &&
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
     && chmod -R 755 /var/www/html/public \
-    && chmod -R 755 /var/www/html/vendor \
     && mkdir -p /var/log/apache2 \
     && chown -R www-data:www-data /var/log/apache2 \
     && chmod -R 755 /var/log/apache2
+
+# Installer Composer et les dépendances si vendor n'existe pas
+RUN if [ ! -d "/var/www/html/vendor" ]; then \
+        curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
+        cd /var/www/html && composer install --no-dev --optimize-autoloader; \
+    fi
 
 # Exposer le port (Railway définira le port)
 EXPOSE $PORT
