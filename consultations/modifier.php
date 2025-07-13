@@ -138,7 +138,7 @@ if (!$consultation) {
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Spécialité</label>
-                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['specialite'] ?: 'Non renseigné'); ?></p>
+                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['specialite'] ?: 'Non défini'); ?></p>
                         </div>
                     </div>
                 </div>

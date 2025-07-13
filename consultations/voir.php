@@ -113,15 +113,15 @@ if (!$consultation) {
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Téléphone</label>
-                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['telephone']); ?></p>
+                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['telephone'] ?: 'Non défini'); ?></p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Adresse</label>
-                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['adresse']); ?></p>
+                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['adresse'] ?: 'Non défini'); ?></p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Groupe sanguin</label>
-                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['groupe_sanguin'] ?: 'Non renseigné'); ?></p>
+                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['groupe_sanguin'] ?: 'Non défini'); ?></p>
                         </div>
                     </div>
                 </div>
@@ -142,27 +142,27 @@ if (!$consultation) {
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Spécialité</label>
-                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['specialite'] ?: 'Non renseigné'); ?></p>
+                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['specialite'] ?: 'Non défini'); ?></p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Tension artérielle</label>
-                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['tension_arterielle'] ?: 'Non renseigné'); ?></p>
+                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['tension_arterielle'] ?: 'Non défini'); ?></p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Poids (kg)</label>
-                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['poids'] ?: 'Non renseigné'); ?></p>
+                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['poids'] ?: 'Non défini'); ?></p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Hauteur utérine (cm)</label>
-                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['hauteur_uterine'] ?: 'Non renseigné'); ?></p>
+                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['hauteur_uterine'] ?: 'Non défini'); ?></p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Position du fœtus</label>
-                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['position_foetus'] ?: 'Non renseigné'); ?></p>
+                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['position_foetus'] ?: 'Non défini'); ?></p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Fréquence cardiaque fœtale</label>
-                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['frequence_cardiaque_foetale'] ?: 'Non renseigné'); ?></p>
+                            <p class="text-gray-900"><?php echo htmlspecialchars($consultation['frequence_cardiaque_foetale'] ?: 'Non défini'); ?></p>
                         </div>
                     </div>
                 </div>
