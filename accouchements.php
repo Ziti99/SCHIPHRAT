@@ -10,8 +10,7 @@ $db = new Database();
 
 // Paramètres de filtrage
 $search = $_GET['search'] ?? '';
-$date_debut = $_GET['date_debut'] ?? '';
-$date_fin = $_GET['date_fin'] ?? '';
+$date_accouchement = $_GET['date_accouchement'] ?? '';
 $mode_accouchement = $_GET['mode_accouchement'] ?? '';
 $sexe_bebe = $_GET['sexe_bebe'] ?? '';
 $medecin_id = $_GET['medecin_id'] ?? '';
@@ -29,14 +28,9 @@ if (!empty($search)) {
     $params[] = $search_param;
 }
 
-if (!empty($date_debut)) {
-    $where_conditions[] = "a.date_accouchement >= ?";
-    $params[] = $date_debut . ' 00:00:00';
-}
-
-if (!empty($date_fin)) {
-    $where_conditions[] = "a.date_accouchement <= ?";
-    $params[] = $date_fin . ' 23:59:59';
+if (!empty($date_accouchement)) {
+    $where_conditions[] = "DATE(a.date_accouchement) = ?";
+    $params[] = $date_accouchement;
 }
 
 if (!empty($mode_accouchement)) {
@@ -274,14 +268,8 @@ $cesariennes = $db->fetch("
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Date début</label>
-                            <input type="date" name="date_debut" value="<?php echo htmlspecialchars($date_debut); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Date fin</label>
-                            <input type="date" name="date_fin" value="<?php echo htmlspecialchars($date_fin); ?>"
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date d'accouchement</label>
+                            <input type="date" name="date_accouchement" value="<?php echo htmlspecialchars($date_accouchement); ?>"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                         </div>
                         

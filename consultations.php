@@ -11,8 +11,7 @@ $db = new Database();
 // Recherche et filtres
 $search = $_GET['search'] ?? '';
 $medecin_id = $_GET['medecin_id'] ?? '';
-$date_debut = $_GET['date_debut'] ?? '';
-$date_fin = $_GET['date_fin'] ?? '';
+$date_consultation = $_GET['date_consultation'] ?? '';
 $page = max(1, intval($_GET['page'] ?? 1));
 $limit = 20;
 $offset = ($page - 1) * $limit;
@@ -32,14 +31,9 @@ if (!empty($medecin_id)) {
     $params[] = $medecin_id;
 }
 
-if (!empty($date_debut)) {
-    $where[] = "DATE(cp.date_consultation) >= ?";
-    $params[] = $date_debut;
-}
-
-if (!empty($date_fin)) {
-    $where[] = "DATE(cp.date_consultation) <= ?";
-    $params[] = $date_fin;
+if (!empty($date_consultation)) {
+    $where[] = "DATE(cp.date_consultation) = ?";
+    $params[] = $date_consultation;
 }
 
 $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
@@ -181,25 +175,13 @@ $medecins = $db->fetchAll("
                         </div>
                         
                         <div>
-                            <label for="date_debut" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-calendar mr-2"></i>Date début
+                            <label for="date_consultation" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-calendar mr-2"></i>Date de consultation
                             </label>
                             <input 
                                 type="date" 
-                                name="date_debut" 
-                                value="<?php echo htmlspecialchars($date_debut); ?>"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-                            >
-                        </div>
-                        
-                        <div>
-                            <label for="date_fin" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-calendar mr-2"></i>Date fin
-                            </label>
-                            <input 
-                                type="date" 
-                                name="date_fin" 
-                                value="<?php echo htmlspecialchars($date_fin); ?>"
+                                name="date_consultation" 
+                                value="<?php echo htmlspecialchars($date_consultation); ?>"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                             >
                         </div>
@@ -210,7 +192,7 @@ $medecins = $db->fetchAll("
                             <i class="fas fa-search mr-2"></i>
                             Filtrer
                         </button>
-                        <?php if (!empty($search) || !empty($medecin_id) || !empty($date_debut) || !empty($date_fin)): ?>
+                        <?php if (!empty($search) || !empty($medecin_id) || !empty($date_consultation)): ?>
                             <a href="/consultations.php" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors">
                                 <i class="fas fa-times mr-2"></i>
                                 Effacer les filtres
@@ -252,7 +234,7 @@ $medecins = $db->fetchAll("
                                     <td colspan="6" class="px-6 py-12 text-center text-gray-500">
                                         <i class="fas fa-calendar-check text-4xl mb-4 text-gray-300"></i>
                                         <p class="text-lg font-medium">Aucune consultation trouvée</p>
-                                        <p class="text-sm"><?php echo !empty($search) || !empty($medecin_id) || !empty($date_debut) || !empty($date_fin) ? 'Essayez de modifier vos critères de recherche.' : 'Commencez par ajouter une nouvelle consultation.'; ?></p>
+                                        <p class="text-sm"><?php echo !empty($search) || !empty($medecin_id) || !empty($date_consultation) ? 'Essayez de modifier vos critères de recherche.' : 'Commencez par ajouter une nouvelle consultation.'; ?></p>
                                     </td>
                                 </tr>
                             <?php else: ?>
@@ -320,12 +302,12 @@ $medecins = $db->fetchAll("
                     <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
                         <div class="flex-1 flex justify-between sm:hidden">
                             <?php if ($page > 1): ?>
-                                <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&medecin_id=<?php echo urlencode($medecin_id); ?>&date_debut=<?php echo urlencode($date_debut); ?>&date_fin=<?php echo urlencode($date_fin); ?>" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                <a href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&medecin_id=<?php echo urlencode($medecin_id); ?>&date_consultation=<?php echo urlencode($date_consultation); ?>" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                     Précédent
                                 </a>
                             <?php endif; ?>
                             <?php if ($page < $totalPages): ?>
-                                <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&medecin_id=<?php echo urlencode($medecin_id); ?>&date_debut=<?php echo urlencode($date_debut); ?>&date_fin=<?php echo urlencode($date_fin); ?>" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                <a href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&medecin_id=<?php echo urlencode($medecin_id); ?>&date_consultation=<?php echo urlencode($date_consultation); ?>" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                     Suivant
                                 </a>
                             <?php endif; ?>
@@ -339,7 +321,7 @@ $medecins = $db->fetchAll("
                             <div>
                                 <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
                                     <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
-                                        <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&medecin_id=<?php echo urlencode($medecin_id); ?>&date_debut=<?php echo urlencode($date_debut); ?>&date_fin=<?php echo urlencode($date_fin); ?>" class="relative inline-flex items-center px-4 py-2 border text-sm font-medium <?php echo $i === $page ? 'z-10 bg-purple-50 border-purple-500 text-purple-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'; ?>">
+                                        <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&medecin_id=<?php echo urlencode($medecin_id); ?>&date_consultation=<?php echo urlencode($date_consultation); ?>" class="relative inline-flex items-center px-4 py-2 border text-sm font-medium <?php echo $i === $page ? 'z-10 bg-purple-50 border-purple-500 text-purple-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'; ?>">
                                             <?php echo $i; ?>
                                         </a>
                                     <?php endfor; ?>

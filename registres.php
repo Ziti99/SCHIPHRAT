@@ -178,7 +178,7 @@ try {
                             <i class="fas fa-arrow-right text-blue-500"></i>
                         </a>
                         
-                        <a href="accouchements.php" class="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
+                        <a href="registres_accouchements.php" class="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
                             <div>
                                 <p class="font-medium text-green-800">Registre des Accouchements</p>
                                 <p class="text-sm text-green-600">Accouchements avec filtres avancés</p>
@@ -186,7 +186,7 @@ try {
                             <i class="fas fa-arrow-right text-green-500"></i>
                         </a>
                         
-                        <a href="deces.php" class="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
+                        <a href="registres_deces.php" class="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
                             <div>
                                 <p class="font-medium text-red-800">Registre des Décès</p>
                                 <p class="text-sm text-red-600">Décès avec filtres avancés</p>
@@ -236,7 +236,7 @@ try {
                         <i class="fas fa-baby text-green-500 mr-2"></i>
                         Registre des accouchements
                     </h3>
-                    <a href="accouchements.php" class="text-purple-600 hover:text-purple-700 font-medium">
+                    <a href="registres_accouchements.php" class="text-purple-600 hover:text-purple-700 font-medium">
                         Voir tout <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>
@@ -293,7 +293,7 @@ try {
                         <i class="fas fa-cross text-red-500 mr-2"></i>
                         Registre des décès néonataux
                     </h3>
-                    <a href="deces.php" class="text-purple-600 hover:text-purple-700 font-medium">
+                    <a href="registres_deces.php" class="text-purple-600 hover:text-purple-700 font-medium">
                         Voir tout <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>

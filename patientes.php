@@ -22,8 +22,7 @@ $db = new Database();
 
 // Paramètres de recherche et filtres
 $search = $_GET['search'] ?? '';
-$date_debut = $_GET['date_debut'] ?? '';
-$date_fin = $_GET['date_fin'] ?? '';
+$date_creation = $_GET['date_creation'] ?? '';
 
 // Construction de la requête avec filtres
 $where = [];
@@ -50,14 +49,9 @@ if (!empty($search)) {
     }
 }
 
-if (!empty($date_debut)) {
-    $where[] = "DATE(created_at) >= ?";
-    $params[] = $date_debut;
-}
-
-if (!empty($date_fin)) {
-    $where[] = "DATE(created_at) <= ?";
-    $params[] = $date_fin;
+if (!empty($date_creation)) {
+    $where[] = "DATE(created_at) = ?";
+    $params[] = $date_creation;
 }
 
 $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
@@ -209,20 +203,11 @@ error_log("📊 DEBUG: Found " . count($patientes) . " patientes");
                         </div>
                         
                         <div>
-                            <label for="date_debut" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-calendar mr-2"></i>Date de création (du)
+                            <label for="date_creation" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-calendar mr-2"></i>Date de création
                             </label>
-                            <input type="date" id="date_debut" name="date_debut" 
-                                   value="<?php echo htmlspecialchars($date_debut); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                        </div>
-                        
-                        <div>
-                            <label for="date_fin" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-calendar mr-2"></i>Date de création (au)
-                            </label>
-                            <input type="date" id="date_fin" name="date_fin" 
-                                   value="<?php echo htmlspecialchars($date_fin); ?>"
+                            <input type="date" id="date_creation" name="date_creation" 
+                                   value="<?php echo htmlspecialchars($date_creation); ?>"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                         </div>
                         
@@ -233,7 +218,7 @@ error_log("📊 DEBUG: Found " . count($patientes) . " patientes");
                         </div>
                     </form>
                     
-                    <?php if (!empty($search) || !empty($date_debut) || !empty($date_fin)): ?>
+                    <?php if (!empty($search) || !empty($date_creation)): ?>
                         <div class="mt-4 flex items-center justify-between">
                             <div class="text-sm text-gray-600">
                                 <i class="fas fa-filter mr-2"></i>
@@ -241,11 +226,8 @@ error_log("📊 DEBUG: Found " . count($patientes) . " patientes");
                                 <?php if (!empty($search)): ?>
                                     <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded">Recherche: "<?php echo htmlspecialchars($search); ?>"</span>
                                 <?php endif; ?>
-                                <?php if (!empty($date_debut)): ?>
-                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">Du: <?php echo htmlspecialchars($date_debut); ?></span>
-                                <?php endif; ?>
-                                <?php if (!empty($date_fin)): ?>
-                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">Au: <?php echo htmlspecialchars($date_fin); ?></span>
+                                <?php if (!empty($date_creation)): ?>
+                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">Date: <?php echo htmlspecialchars($date_creation); ?></span>
                                 <?php endif; ?>
                             </div>
                             <a href="patientes.php" class="text-red-600 hover:text-red-800 text-sm">

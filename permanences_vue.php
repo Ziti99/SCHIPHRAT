@@ -13,58 +13,78 @@ if (!in_array($_SESSION['user_role'], ['admin', 'caissiere'])) {
     exit;
 }
 
-$db = new Database();
+try {
+    $db = new Database();
+    
+    // Gestion des filtres de date et statut
+    $date_du = $_GET['date_du'] ?? date('Y-m-d');  // Jour actuel par défaut
+    $date_au = $_GET['date_au'] ?? date('Y-m-d');  // Jour actuel par défaut
+    $statut_filter = $_GET['statut'] ?? '';
 
-// Gestion des filtres de date et statut
-$date_du = $_GET['date_du'] ?? date('Y-m-d');  // Jour actuel par défaut
-$date_au = $_GET['date_au'] ?? date('Y-m-d');  // Jour actuel par défaut
-$statut_filter = $_GET['statut'] ?? '';
+    // Construire la requête avec filtres
+    $where_conditions = ["DATE(p.created_at) >= ?", "DATE(p.created_at) <= ?"];
+    $params = [$date_du, $date_au];
 
-// Construire la requête avec filtres
-$where_conditions = ["DATE(p.created_at) >= ?", "DATE(p.created_at) <= ?"];
-$params = [$date_du, $date_au];
+    if (!empty($statut_filter)) {
+        $where_conditions[] = "p.statut_final = ?";
+        $params[] = $statut_filter;
+    }
 
-if (!empty($statut_filter)) {
-    $where_conditions[] = "p.statut_final = ?";
-    $params[] = $statut_filter;
+    $where_clause = implode(" AND ", $where_conditions);
+
+    // Récupérer toutes les permanences filtrées
+    $permanences = $db->fetchAll("
+        SELECT p.*, a.nom_acte, u.nom as secretaire_nom, u.prenom as secretaire_prenom
+        FROM permanences p
+        JOIN actes_poses a ON p.acte_id = a.id
+        JOIN users u ON p.secretaire_id = u.id
+        WHERE $where_clause
+        ORDER BY p.created_at DESC
+    ", $params);
+    
+} catch (Exception $e) {
+    // En cas d'erreur, initialiser des tableaux vides
+    $permanences = [];
+    $stats = [
+        'total_permanences' => 0,
+        'total_montant' => 0,
+        'validees' => 0,
+        'annulees' => 0,
+        'en_attente' => 0,
+        'moyenne_montant' => 0,
+        'en_attente_aujourd_hui' => 0
+    ];
+    $total_par_acte = [];
+    $periode_affichee = "Erreur de connexion";
+    
+    // Log de l'erreur pour debug
+    error_log("Erreur DB dans permanences_vue.php: " . $e->getMessage());
 }
 
-$where_clause = implode(" AND ", $where_conditions);
+    // Statistiques pour le dashboard
+    $stats = $db->fetch("
+        SELECT 
+            COUNT(*) as total_permanences,
+            SUM(montant_paye) as total_montant,
+            COUNT(CASE WHEN statut_final = 'ok' THEN 1 END) as validees,
+            COUNT(CASE WHEN statut_final = 'annule' THEN 1 END) as annulees,
+            COUNT(CASE WHEN statut_final = 'en_attente' THEN 1 END) as en_attente,
+            AVG(montant_paye) as moyenne_montant,
+            COUNT(CASE WHEN statut_final = 'en_attente' AND DATE(created_at) = CURDATE() THEN 1 END) as en_attente_aujourd_hui
+        FROM permanences 
+        WHERE DATE(created_at) >= ? AND DATE(created_at) <= ?
+    ", [$date_du, $date_au]);
 
-// Récupérer toutes les permanences filtrées
-$permanences = $db->fetchAll("
-    SELECT p.*, a.nom_acte, u.nom as secretaire_nom, u.prenom as secretaire_prenom
-    FROM permanences p
-    JOIN actes_poses a ON p.acte_id = a.id
-    JOIN users u ON p.secretaire_id = u.id
-    WHERE $where_clause
-    ORDER BY p.created_at DESC
-", $params);
-
-// Statistiques pour le dashboard
-$stats = $db->fetch("
-    SELECT 
-        COUNT(*) as total_permanences,
-        SUM(montant_paye) as total_montant,
-        COUNT(CASE WHEN statut_final = 'ok' THEN 1 END) as validees,
-        COUNT(CASE WHEN statut_final = 'annule' THEN 1 END) as annulees,
-        COUNT(CASE WHEN statut_final = 'en_attente' THEN 1 END) as en_attente,
-        AVG(montant_paye) as moyenne_montant,
-        COUNT(CASE WHEN statut_final = 'en_attente' AND DATE(created_at) = CURDATE() THEN 1 END) as en_attente_aujourd_hui
-    FROM permanences 
-    WHERE DATE(created_at) >= ? AND DATE(created_at) <= ?
-", [$date_du, $date_au]);
-
-// Total par acte posé (uniquement les validées)
-$total_par_acte = $db->fetchAll("
-    SELECT a.nom_acte, COUNT(*) as nb_fois, SUM(p.montant_paye) as total_montant
-    FROM permanences p
-    JOIN actes_poses a ON p.acte_id = a.id
-    WHERE DATE(p.created_at) >= ? AND DATE(p.created_at) <= ? 
-    AND p.statut_final = 'ok'
-    GROUP BY a.id, a.nom_acte
-    ORDER BY nb_fois DESC
-", [$date_du, $date_au]);
+    // Total par acte posé (uniquement les validées)
+    $total_par_acte = $db->fetchAll("
+        SELECT a.nom_acte, COUNT(*) as nb_fois, SUM(p.montant_paye) as total_montant
+        FROM permanences p
+        JOIN actes_poses a ON p.acte_id = a.id
+        WHERE DATE(p.created_at) >= ? AND DATE(p.created_at) <= ? 
+        AND p.statut_final = 'ok'
+        GROUP BY a.id, a.nom_acte
+        ORDER BY nb_fois DESC
+    ", [$date_du, $date_au]);
 
 // Déterminer la période affichée
 $periode_affichee = '';
@@ -408,48 +428,101 @@ if ($date_du === $date_au) {
         let currentPage = 1;
         let isLoading = false;
 
+        // Fonction de logging pour debug
+        function logDebug(message, data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            console.log(`[${timestamp}] DEBUG: ${message}`, data);
+            
+            // Afficher aussi dans une div de debug si elle existe
+            const debugDiv = document.getElementById('debugLogs');
+            if (debugDiv) {
+                const logEntry = document.createElement('div');
+                logEntry.className = 'text-xs text-gray-600 mb-1';
+                logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+                if (data) {
+                    logEntry.innerHTML += `<br><pre class="text-xs">${JSON.stringify(data, null, 2)}</pre>`;
+                }
+                debugDiv.appendChild(logEntry);
+                
+                // Garder seulement les 10 derniers logs
+                while (debugDiv.children.length > 10) {
+                    debugDiv.removeChild(debugDiv.firstChild);
+                }
+            }
+        }
+
         // Fonction pour charger les données via AJAX
         async function loadPermanences() {
-            if (isLoading) return;
+            if (isLoading) {
+                logDebug('Chargement déjà en cours, ignoré');
+                return;
+            }
             
             isLoading = true;
+            logDebug('Début du chargement des permanences');
+            
             const form = document.querySelector('form');
             const formData = new FormData(form);
             const params = new URLSearchParams(formData);
+            
+            logDebug('Paramètres de filtrage:', Object.fromEntries(params));
             
             // Afficher un indicateur de chargement
             const tbody = document.getElementById('permanenceTableBody');
             tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8"><div class="flex items-center justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div><span class="ml-2">Chargement...</span></div></td></tr>';
             
             try {
+                logDebug('Envoi de la requête AJAX vers permanences_ajax.php');
                 const response = await fetch(`permanences_ajax.php?${params.toString()}`);
+                logDebug('Réponse reçue:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries())
+                });
+                
                 const data = await response.json();
+                logDebug('Données JSON reçues:', data);
                 
                 if (response.ok) {
-                    allPermanences = data.permanences;
-                    currentStats = data.stats;
-                    currentTotalParActe = data.total_par_acte;
-                    currentPeriode = data.periode_affichee;
+                    logDebug('Requête réussie, mise à jour des données');
+                    allPermanences = data.permanences || [];
+                    currentStats = data.stats || {};
+                    currentTotalParActe = data.total_par_acte || [];
+                    currentPeriode = data.periode_affichee || '';
                     currentPage = 1;
+                    
+                    logDebug('Données mises à jour:', {
+                        permanencesCount: allPermanences.length,
+                        stats: currentStats,
+                        totalParActeCount: currentTotalParActe.length,
+                        periode: currentPeriode
+                    });
+                    
                     renderTable();
                     updateStats();
                     updateTotalParActe();
                     updatePeriode();
                 } else {
+                    logDebug('Erreur de réponse:', data.error);
                     console.error('Erreur:', data.error);
-                    tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-red-500">Erreur de chargement</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-red-500">Erreur de chargement: ' + (data.error || 'Erreur inconnue') + '</td></tr>';
                 }
             } catch (error) {
+                logDebug('Erreur AJAX:', error);
                 console.error('Erreur AJAX:', error);
-                tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-red-500">Erreur de connexion</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-red-500">Erreur de connexion: ' + error.message + '</td></tr>';
             } finally {
                 isLoading = false;
+                logDebug('Chargement terminé');
             }
         }
 
         // Fonction pour rendre le tableau
         function renderTable() {
+            logDebug('Rendu du tableau');
             const search = document.getElementById('searchInput').value.toLowerCase();
+            logDebug('Terme de recherche:', search);
+            
             let filteredPermanences = allPermanences.filter(permanence => {
                 const permanenceText = Object.values(permanence).join(' ').toLowerCase();
                 const searchTerms = search.split(' ').filter(term => term.length > 0);
@@ -461,28 +534,43 @@ if ($date_du === $date_au) {
                 }
             });
             
+            logDebug('Permanences filtrées:', {
+                total: allPermanences.length,
+                filtered: filteredPermanences.length,
+                search: search
+            });
+            
             const tbody = document.getElementById('permanenceTableBody');
             const startIndex = (currentPage - 1) * rowsPerPage;
             const endIndex = startIndex + rowsPerPage;
             const pagePermanences = filteredPermanences.slice(startIndex, endIndex);
             
+            logDebug('Pagination:', {
+                currentPage: currentPage,
+                startIndex: startIndex,
+                endIndex: endIndex,
+                pagePermanences: pagePermanences.length
+            });
+            
             if (pagePermanences.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-gray-500">Aucune permanence trouvée</td></tr>';
+                logDebug('Aucune permanence à afficher');
             } else {
                 tbody.innerHTML = pagePermanences.map(permanence => `
                     <tr>
-                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-semibold">${permanence.nom}</td>
-                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-semibold">${permanence.prenom}</td>
-                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${permanence.age}</td>
-                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${permanence.nationalite}</td>
-                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${permanence.acte}</td>
-                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${permanence.montant}</td>
-                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${permanence.contact}</td>
-                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${permanence.heure}</td>
-                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${permanence.secretaire}</td>
-                        <td class="px-4 py-2 whitespace-nowrap text-xs">${permanence.statut}</td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-semibold">${permanence.nom || permanence.nom_patient || ''}</td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-semibold">${permanence.prenom || permanence.prenom_patient || ''}</td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${permanence.age || ''}</td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${permanence.nationalite || ''}</td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${permanence.acte || permanence.nom_acte || ''}</td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${permanence.montant || permanence.montant_paye || ''}</td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${permanence.contact || ''}</td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${permanence.heure || ''}</td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${permanence.secretaire || ''}</td>
+                        <td class="px-4 py-2 whitespace-nowrap text-xs">${permanence.statut || ''}</td>
                     </tr>
                 `).join('');
+                logDebug('Tableau rendu avec', pagePermanences.length, 'lignes');
             }
             
             renderPagination(filteredPermanences.length);
@@ -490,22 +578,48 @@ if ($date_du === $date_au) {
 
         // Fonction pour mettre à jour les statistiques
         function updateStats() {
+            logDebug('Mise à jour des statistiques:', currentStats);
             const stats = currentStats;
             
             // Mettre à jour les cartes de statistiques
-            document.querySelector('[data-stat="total_permanences"]').textContent = stats.total_permanences || 0;
-            document.querySelector('[data-stat="total_montant"]').textContent = (stats.total_montant ? (parseInt(stats.total_montant).toLocaleString('fr-FR') + ' FCFA') : '0 FCFA');
-            document.querySelector('[data-stat="moyenne_montant"]').textContent = (stats.moyenne_montant ? (parseInt(stats.moyenne_montant).toLocaleString('fr-FR') + ' FCFA') : '0 FCFA');
-            document.querySelector('[data-stat="en_attente"]').textContent = stats.en_attente || 0;
-            document.querySelector('[data-stat="validees"]').textContent = stats.validees || 0;
-            document.querySelector('[data-stat="annulees"]').textContent = stats.annulees || 0;
-            document.querySelector('[data-stat="en_attente_detail"]').textContent = stats.en_attente || 0;
+            const elements = {
+                total_permanences: document.querySelector('[data-stat="total_permanences"]'),
+                total_montant: document.querySelector('[data-stat="total_montant"]'),
+                moyenne_montant: document.querySelector('[data-stat="moyenne_montant"]'),
+                en_attente: document.querySelector('[data-stat="en_attente"]'),
+                validees: document.querySelector('[data-stat="validees"]'),
+                annulees: document.querySelector('[data-stat="annulees"]'),
+                en_attente_detail: document.querySelector('[data-stat="en_attente_detail"]')
+            };
+            
+            // Vérifier que tous les éléments existent
+            Object.entries(elements).forEach(([key, element]) => {
+                if (!element) {
+                    logDebug(`Élément manquant: ${key}`);
+                }
+            });
+            
+            if (elements.total_permanences) elements.total_permanences.textContent = stats.total_permanences || 0;
+            if (elements.total_montant) elements.total_montant.textContent = (stats.total_montant ? (parseInt(stats.total_montant).toLocaleString('fr-FR') + ' FCFA') : '0 FCFA');
+            if (elements.moyenne_montant) elements.moyenne_montant.textContent = (stats.moyenne_montant ? (parseInt(stats.moyenne_montant).toLocaleString('fr-FR') + ' FCFA') : '0 FCFA');
+            if (elements.en_attente) elements.en_attente.textContent = stats.en_attente || 0;
+            if (elements.validees) elements.validees.textContent = stats.validees || 0;
+            if (elements.annulees) elements.annulees.textContent = stats.annulees || 0;
+            if (elements.en_attente_detail) elements.en_attente_detail.textContent = stats.en_attente || 0;
+            
+            logDebug('Statistiques mises à jour');
         }
 
         // Fonction pour mettre à jour le total par acte
         function updateTotalParActe() {
+            logDebug('Mise à jour du total par acte:', currentTotalParActe);
             const totalParActe = currentTotalParActe;
             const container = document.getElementById('totalParActeContainer');
+            
+            if (!container) {
+                logDebug('Container totalParActeContainer non trouvé');
+                return;
+            }
             
             if (totalParActe.length === 0) {
                 container.innerHTML = `
@@ -514,6 +628,7 @@ if ($date_du === $date_au) {
                         <p class="text-gray-500">Aucun acte validé enregistré pour cette période</p>
                     </div>
                 `;
+                logDebug('Aucun acte à afficher');
                 return;
             }
             
@@ -521,6 +636,8 @@ if ($date_du === $date_au) {
             totalParActe.forEach(acte => {
                 totalMontantGlobal += parseFloat(acte.total_montant);
             });
+            
+            logDebug('Total montant global:', totalMontantGlobal);
             
             let tableHTML = `
                 <div class="overflow-x-auto">
@@ -593,39 +710,56 @@ if ($date_du === $date_au) {
             `;
             
             container.innerHTML = tableHTML;
+            logDebug('Total par acte mis à jour');
         }
 
         // Fonction pour mettre à jour la période affichée
         function updatePeriode() {
+            logDebug('Mise à jour de la période:', currentPeriode);
             const periodeElement = document.getElementById('periodeAffichee');
             if (periodeElement) {
                 periodeElement.textContent = currentPeriode;
+            } else {
+                logDebug('Élément periodeAffichee non trouvé');
             }
             
             // Mettre à jour aussi dans le titre des statistiques
             const statsTitle = document.querySelector('[data-stat="stats_title"]');
             if (statsTitle) {
                 statsTitle.textContent = `Statistiques - ${currentPeriode}`;
+            } else {
+                logDebug('Élément stats_title non trouvé');
             }
             
             // Mettre à jour le titre du total par acte
             const totalActeTitle = document.querySelector('[data-stat="total_acte_title"]');
             if (totalActeTitle) {
                 totalActeTitle.textContent = `Total par Acte Posé - ${currentPeriode}`;
+            } else {
+                logDebug('Élément total_acte_title non trouvé');
             }
         }
 
         // Fonction pour rendre la pagination
         function renderPagination(totalRows) {
+            logDebug('Rendu de la pagination:', { totalRows, currentPage, rowsPerPage });
             const nav = document.getElementById('paginationNav');
+            if (!nav) {
+                logDebug('Élément paginationNav non trouvé');
+                return;
+            }
+            
             nav.innerHTML = '';
             const totalPages = Math.ceil(totalRows / rowsPerPage);
+            
+            logDebug('Pages totales:', totalPages);
             
             for (let i = 1; i <= totalPages; i++) {
                 const btn = document.createElement('button');
                 btn.textContent = i;
                 btn.className = 'mx-1 px-3 py-1 rounded border ' + (i === currentPage ? 'bg-purple-500 text-white' : 'bg-white text-purple-600 border-purple-300');
                 btn.onclick = () => { 
+                    logDebug('Changement de page:', i);
                     currentPage = i; 
                     renderTable(); 
                 };
@@ -635,21 +769,45 @@ if ($date_du === $date_au) {
 
         // Événements
         document.addEventListener('DOMContentLoaded', function() {
+            logDebug('DOM chargé, initialisation...');
+            
+            // Créer une div de debug si elle n'existe pas
+            if (!document.getElementById('debugLogs')) {
+                const debugDiv = document.createElement('div');
+                debugDiv.id = 'debugLogs';
+                debugDiv.className = 'fixed bottom-4 right-4 w-80 h-64 bg-black bg-opacity-75 text-white p-4 rounded-lg overflow-y-auto text-xs z-50';
+                debugDiv.innerHTML = '<div class="font-bold mb-2">Logs de Debug</div>';
+                document.body.appendChild(debugDiv);
+            }
+            
             // Charger les données initiales
             loadPermanences();
             
             // Gestionnaire pour le formulaire de filtrage
             const form = document.querySelector('form');
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                loadPermanences();
-            });
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    logDebug('Soumission du formulaire de filtrage');
+                    loadPermanences();
+                });
+            } else {
+                logDebug('Formulaire de filtrage non trouvé');
+            }
             
             // Gestionnaire pour la recherche
-            document.getElementById('searchInput').addEventListener('input', function() {
-                currentPage = 1;
-                renderTable();
-            });
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    logDebug('Recherche modifiée:', this.value);
+                    currentPage = 1;
+                    renderTable();
+                });
+            } else {
+                logDebug('Champ de recherche non trouvé');
+            }
+            
+            logDebug('Initialisation terminée');
         });
     </script>
 </body>
