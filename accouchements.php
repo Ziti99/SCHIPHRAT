@@ -360,8 +360,7 @@ $cesariennes = $db->fetch("
                                                     <div class="text-sm font-medium text-gray-900">
                                                         <?php echo htmlspecialchars($accouchement['prenom'] . ' ' . $accouchement['nom']); ?>
                                                     </div>
-                                                    <div class="text-sm text-gray-500">
-                                                    </div>
+                                                    <div class="text-sm text-gray-500"></div>
                                                     <div class="text-xs text-gray-400">
                                                         Tél: <?php echo htmlspecialchars($accouchement['telephone']); ?>
                                                     </div>
