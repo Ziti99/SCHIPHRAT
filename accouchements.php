@@ -4,16 +4,10 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: /login.php');
     exit;
 }
-// Tous les logs et affichages commencent ici
-// LOG 1 : Début du script
-error_log('--- DEBUT accouchements.php ---');
-echo '<script>console.log("[LOG] Début du script accouchements.php");</script>';
 
 require_once __DIR__ . '/config/database.php';
-echo '<script>console.log("[LOG] Database.php inclus");</script>';
 
 $db = new Database();
-echo '<script>console.log("[LOG] Instance Database créée");</script>';
 
 // Paramètres de filtrage
 $search = $_GET['search'] ?? '';
@@ -21,9 +15,7 @@ $date_accouchement = $_GET['date_accouchement'] ?? '';
 $mode_accouchement = $_GET['mode_accouchement'] ?? '';
 $sexe_bebe = $_GET['sexe_bebe'] ?? '';
 $medecin_id = $_GET['medecin_id'] ?? '';
-echo '<script>console.log("[LOG] Paramètres : search='.addslashes($search).', date_accouchement='.addslashes($date_accouchement).', mode_accouchement='.addslashes($mode_accouchement).', sexe_bebe='.addslashes($sexe_bebe).', medecin_id='.addslashes($medecin_id).'");</script>';
 
-// Correction de la gestion des filtres pour la recherche
 $where_conditions = [];
 $params = [];
 
@@ -34,61 +26,42 @@ if (!empty($search)) {
     $params[] = $search_param;
     $params[] = $search_param;
 }
-
 if (!empty($date_accouchement)) {
     $where_conditions[] = "DATE(a.date_accouchement) = ?";
     $params[] = $date_accouchement;
 }
-
 if (!empty($mode_accouchement)) {
     $where_conditions[] = "a.mode_accouchement = ?";
     $params[] = $mode_accouchement;
 }
-
 if (!empty($sexe_bebe)) {
     $where_conditions[] = "a.sexe_bebe = ?";
     $params[] = $sexe_bebe;
 }
-
 if (!empty($medecin_id)) {
     $where_conditions[] = "a.medecin_id = ?";
     $params[] = $medecin_id;
 }
-
 $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
-echo '<script>console.log("[LOG] WHERE CLAUSE : '.addslashes($where_clause).' | Params : '.json_encode($params).'");</script>';
 
-// Fonction pour générer l'ID d'accouchement (même fonction que dans ajouter.php)
 function generateAccouchementId($db, $date_accouchement, $accouchement_db_id) {
     $mois = date('m', strtotime($date_accouchement));
     $annee = date('Y', strtotime($date_accouchement));
-    
-    // Compter les accouchements du mois jusqu'à cet accouchement
     $accouchements_mois = $db->fetch("
         SELECT COUNT(*) as count 
         FROM accouchements 
         WHERE MONTH(date_accouchement) = ? AND YEAR(date_accouchement) = ? AND id <= ?
     ", [$mois, $annee, $accouchement_db_id])['count'];
-    
-    // Compter les accouchements de l'année jusqu'à cet accouchement
     $accouchements_annee = $db->fetch("
         SELECT COUNT(*) as count 
         FROM accouchements 
         WHERE YEAR(date_accouchement) = ? AND id <= ?
     ", [$annee, $accouchement_db_id])['count'];
-    
-    // Générer l'ID : 5eme accouchement du 3eme mois et 12eme de l'année = 0503122025
     $numero_mois = str_pad($accouchements_mois, 2, '0', STR_PAD_LEFT);
     $numero_annee = str_pad($accouchements_annee, 2, '0', STR_PAD_LEFT);
-    
     return $numero_mois . $mois . $numero_annee . $annee;
 }
 
-// LOG 4 : Pause 5 secondes avant requête SQL
-sleep(5);
-echo '<script>console.log("[LOG] Pause 5s avant requête SQL");</script>';
-
-// Récupération des accouchements
 $accouchements = $db->fetchAll("
     SELECT 
         a.id as accouchement_id,
@@ -117,35 +90,17 @@ $accouchements = $db->fetchAll("
     $where_clause
     ORDER BY a.date_accouchement DESC
 ", $params);
-echo '<script>console.log("[LOG] Requête SQL exécutée");</script>';
-echo '<pre style=\'background:yellow; color:black; font-size:14px;\'>[LOG] Résultat $accouchements : '.print_r($accouchements,1).'</pre>';
-
-// LOG 6 : Pause 5 secondes après récupération SQL
-sleep(5);
-echo '<script>console.log("[LOG] Pause 5s après récupération SQL");</script>';
-
-// Générer les IDs pour chaque accouchement
 foreach ($accouchements as &$accouchement) {
     $accouchement['generated_id'] = generateAccouchementId($db, $accouchement['date_accouchement'], $accouchement['accouchement_id']);
 }
-echo '<script>console.log("[LOG] IDs générés pour chaque accouchement");</script>';
-echo '<pre style=\'background:orange; color:black; font-size:14px;\'>[LOG] Après génération ID : '.print_r($accouchements,1).'</pre>';
 
-// LOG 8 : Pause 5 secondes avant affichage tableau
-sleep(5);
-echo '<script>console.log("[LOG] Pause 5s avant affichage tableau");</script>';
-
-// Récupération des médecins pour le filtre
 $medecins = $db->fetchAll("
     SELECT id, nom, prenom, specialite
     FROM users 
     WHERE role IN ('medecin', 'sage_femme') AND is_active = 1
     ORDER BY nom, prenom
 ");
-echo '<script>console.log("[LOG] Médecins récupérés : '.addslashes(json_encode($medecins)).'");</script>';
-echo '<script>console.log("[LOG] Total médecins : '.count($medecins).'");</script>';
 
-// Statistiques
 $total_accouchements = count($accouchements);
 $accouchements_ce_mois = $db->fetch("
     SELECT COUNT(*) as count 
@@ -153,7 +108,6 @@ $accouchements_ce_mois = $db->fetch("
     WHERE MONTH(date_accouchement) = MONTH(CURDATE()) 
     AND YEAR(date_accouchement) = YEAR(CURDATE())
 ")['count'];
-
 $cesariennes = $db->fetch("
     SELECT COUNT(*) as count 
     FROM accouchements 
@@ -174,7 +128,6 @@ $cesariennes = $db->fetch("
     <div class="flex">
         <!-- Sidebar -->
         <?php include 'includes/sidebar.php'; ?>
-        
         <!-- Contenu principal -->
         <div class="flex-1">
             <!-- Navigation -->
@@ -202,7 +155,6 @@ $cesariennes = $db->fetch("
                     </div>
                 </div>
             </nav>
-
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <!-- En-tête -->
                 <div class="flex justify-between items-center mb-8">
@@ -215,7 +167,6 @@ $cesariennes = $db->fetch("
                         Nouvel accouchement
                     </a>
                 </div>
-
                 <!-- Message de succès -->
                 <?php if (isset($_GET['success'])): ?>
                     <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
@@ -227,7 +178,6 @@ $cesariennes = $db->fetch("
                         </div>
                     </div>
                 <?php endif; ?>
-
                 <!-- Statistiques -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div class="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-6 text-white">
@@ -241,7 +191,6 @@ $cesariennes = $db->fetch("
                             </div>
                         </div>
                     </div>
-
                     <div class="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl p-6 text-white">
                         <div class="flex items-center justify-between">
                             <div>
@@ -253,7 +202,6 @@ $cesariennes = $db->fetch("
                             </div>
                         </div>
                     </div>
-
                     <div class="bg-gradient-to-r from-red-500 to-pink-500 rounded-xl p-6 text-white">
                         <div class="flex items-center justify-between">
                             <div>
@@ -265,7 +213,6 @@ $cesariennes = $db->fetch("
                             </div>
                         </div>
                     </div>
-
                     <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-6 text-white">
                         <div class="flex items-center justify-between">
                             <div>
@@ -278,13 +225,11 @@ $cesariennes = $db->fetch("
                         </div>
                     </div>
                 </div>
-
                 <!-- Filtres -->
                 <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
                         <i class="fas fa-filter mr-2 text-green-600"></i>Filtres de recherche
                     </h3>
-                    
                     <form method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Recherche</label>
@@ -292,13 +237,11 @@ $cesariennes = $db->fetch("
                                    placeholder="Nom, prénom, dossier ou nom bébé..."
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                         </div>
-                        
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Date d'accouchement</label>
                             <input type="date" name="date_accouchement" value="<?php echo htmlspecialchars($date_accouchement); ?>"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                         </div>
-                        
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Mode d'accouchement</label>
                             <select name="mode_accouchement" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
@@ -309,7 +252,6 @@ $cesariennes = $db->fetch("
                                 <option value="ventouse" <?php echo $mode_accouchement === 'ventouse' ? 'selected' : ''; ?>>Ventouse</option>
                             </select>
                         </div>
-                        
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Sexe du bébé</label>
                             <select name="sexe_bebe" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
@@ -318,7 +260,6 @@ $cesariennes = $db->fetch("
                                 <option value="F" <?php echo $sexe_bebe === 'F' ? 'selected' : ''; ?>>Féminin</option>
                             </select>
                         </div>
-                        
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Médecin</label>
                             <select name="medecin_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
@@ -330,7 +271,6 @@ $cesariennes = $db->fetch("
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        
                         <div class="md:col-span-2 lg:col-span-4 flex justify-end space-x-3">
                             <button type="submit" class="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-md hover:shadow-lg transition-all duration-300">
                                 <i class="fas fa-search mr-2"></i>Filtrer
@@ -341,12 +281,10 @@ $cesariennes = $db->fetch("
                         </div>
                     </form>
                 </div>
-
                 <!-- Liste des accouchements -->
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-gray-900">Liste des Accouchements</h2>
                 </div>
-
                 <!-- Tableau des accouchements -->
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                     <div class="overflow-x-auto">
@@ -372,8 +310,7 @@ $cesariennes = $db->fetch("
                                         </td>
                                     </tr>
                                 <?php else: ?>
-                                    <?php foreach ($accouchements as $idx => $accouchement): ?>
-                                        <?php echo '<script>console.log("[LOG] Affichage ligne '.$idx.' : '.addslashes(json_encode($accouchement)).'");</script>'; ?>
+                                    <?php foreach ($accouchements as $accouchement): ?>
                                         <tr class="hover:bg-gray-50 transition-colors">
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm font-bold text-green-600">
@@ -471,7 +408,6 @@ $cesariennes = $db->fetch("
             </div>
         </div>
     </div>
-
     <script>
         function viewDetails(accouchementId) {
             window.location.href = '../accouchements/voir.php?id=' + accouchementId;
