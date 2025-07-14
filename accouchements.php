@@ -1,15 +1,14 @@
 <?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /login.php');
+    exit;
+}
+// Tous les logs et affichages commencent ici
 // LOG 1 : Début du script
 error_log('--- DEBUT accouchements.php ---');
 echo '<script>console.log("[LOG] Début du script accouchements.php");</script>';
 
-session_start();
-echo '<script>console.log("[LOG] Session démarrée");</script>';
-if (!isset($_SESSION['user_id'])) {
-    echo '<script>console.log("[LOG] Redirection login");</script>';
-    header('Location: /login.php');
-    exit;
-}
 require_once __DIR__ . '/config/database.php';
 echo '<script>console.log("[LOG] Database.php inclus");</script>';
 
