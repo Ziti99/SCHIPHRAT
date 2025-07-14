@@ -90,8 +90,9 @@ $accouchements = $db->fetchAll("
     $where_clause
     ORDER BY a.date_accouchement DESC
 ", $params);
-foreach ($accouchements as &$accouchement) {
-    $accouchement['generated_id'] = generateAccouchementId($db, $accouchement['date_accouchement'], $accouchement['accouchement_id']);
+// Remplacer la boucle avec référence par une boucle par index
+foreach ($accouchements as $k => $accouchement) {
+    $accouchements[$k]['generated_id'] = generateAccouchementId($db, $accouchement['date_accouchement'], $accouchement['accouchement_id']);
 }
 
 $medecins = $db->fetchAll("
