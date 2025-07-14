@@ -11,9 +11,9 @@ if (!isset($_SESSION['user_id'])) {
 $user = [
     'id' => $_SESSION['user_id'],
     'username' => $_SESSION['username'] ?? '',
-    'role' => $_SESSION['role'] ?? '',
+    'role' => $_SESSION['user_role'] ?? '',
 ];
-if (!in_array($user['role'], ['admin', 'medecin', 'sage_femme'])) {
+if (!in_array($user['role'], ['admin', 'medecin', 'sagefemme'])) {
     header('Location: dashboard.php');
     exit();
 }
@@ -593,5 +593,11 @@ $dompdf->setPaper('A4', 'landscape');
 $dompdf->render();
 
 // Envoi du PDF
+header('Content-Type: application/pdf');
+header('Content-Disposition: attachment; filename="registre_accouchements_' . date('Y-m-d_H-i-s') . '.pdf"');
+header('Cache-Control: no-cache, must-revalidate');
+header('Pragma: no-cache');
+
 $dompdf->stream('registre_accouchements_' . date('Y-m-d_H-i-s') . '.pdf', array('Attachment' => true));
+exit;
 ?> 

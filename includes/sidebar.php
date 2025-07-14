@@ -21,17 +21,13 @@ if (!isset($_SESSION['user_id'])) {
                 <i class="fas fa-calendar-check mr-3"></i>
                 Consultations
             </a>
-            <a href="/registres_accouchements.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+            <a href="/accouchements.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
                 <i class="fas fa-baby mr-3"></i>
-                Registre Accouchements
+                Accouchements
             </a>
             <a href="/suivi-postnatal.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
                 <i class="fas fa-heartbeat mr-3"></i>
                 Suivi Post-natal
-            </a>
-            <a href="/registres_deces.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                <i class="fas fa-cross mr-3"></i>
-                Registre Décès
             </a>
             <a href="/registres.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
                 <i class="fas fa-book-medical mr-3"></i>

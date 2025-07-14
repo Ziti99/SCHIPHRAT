@@ -24,9 +24,9 @@ $error = '';
 
 // Traitement du formulaire de création
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_user']) && !isset($_POST['update_user'])) {
-    $username = $_POST['username'] ?? '';
+    $username = $_POST['new_username'] ?? '';
     $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
+    $password = $_POST['new_password'] ?? '';
     $nom = $_POST['nom'] ?? '';
     $prenom = $_POST['prenom'] ?? '';
     $role = $_POST['role'] ?? '';
@@ -56,7 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_user']) && !i
                         ", [$username, $email, $hashed_password, $nom, $prenom, $role, $telephone, $specialite]);
                         
                         $message = 'Utilisateur créé avec succès !';
-                        $_POST = array();
                     }
                 } else {
                     // Pas d'email, créer directement
@@ -67,13 +66,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_user']) && !i
                     ", [$username, $email, $hashed_password, $nom, $prenom, $role, $telephone, $specialite]);
                     
                     $message = 'Utilisateur créé avec succès !';
-                    $_POST = array();
                 }
             }
         } catch (Exception $e) {
             $error = 'Erreur lors de la création : ' . $e->getMessage();
         }
     }
+    
+    // Vider $_POST après traitement, que ce soit un succès ou une erreur
+    $_POST = array();
 }
 
 // Traitement de la suppression d'utilisateur
@@ -87,6 +88,9 @@ if (isset($_POST['delete_user'])) {
             $error = 'Erreur lors de la suppression : ' . $e->getMessage();
         }
     }
+    
+    // Vider $_POST après traitement
+    $_POST = array();
 }
 
 // Traitement de la modification d'utilisateur
@@ -121,6 +125,9 @@ if (isset($_POST['update_user'])) {
             $error = 'Erreur lors de la modification : ' . $e->getMessage();
         }
     }
+    
+    // Vider $_POST après traitement
+    $_POST = array();
 }
 
 // Récupération des utilisateurs existants
@@ -189,7 +196,10 @@ $utilisateurs = $db->fetchAll("
                     </h2>
                     <button id="hideAddUserBtn" type="button" class="text-gray-400 hover:text-red-500 text-xl font-bold">&times;</button>
                 </div>
-                <form method="POST" autocomplete="off" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form method="POST" autocomplete="new-password" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Champ caché pour tromper l'auto-complétion -->
+                    <input type="text" style="display:none" autocomplete="username">
+                    <input type="password" style="display:none" autocomplete="current-password">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nom <span class="text-red-500">*</span></label>
                         <input type="text" name="nom" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" value="<?php echo htmlspecialchars($_POST['nom'] ?? ''); ?>">
@@ -200,15 +210,15 @@ $utilisateurs = $db->fetchAll("
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nom d'utilisateur <span class="text-red-500">*</span></label>
-                        <input type="text" name="username" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
+                        <input type="text" name="new_username" required autocomplete="new-password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" value="<?php echo htmlspecialchars($_POST['new_username'] ?? ''); ?>">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
+                        <input type="email" name="email" autocomplete="new-password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe <span class="text-red-500">*</span></label>
-                        <input type="password" name="password" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="password" name="new_password" required autocomplete="new-password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Rôle <span class="text-red-500">*</span></label>
@@ -403,6 +413,17 @@ $utilisateurs = $db->fetchAll("
             showAddUserBtn.onclick = function() {
                 formAddUser.style.display = '';
                 showAddUserBtn.style.display = 'none';
+                
+                // Vider tous les champs du formulaire
+                const form = formAddUser.querySelector('form');
+                if (form) {
+                    form.reset();
+                    // Vider aussi les champs avec autocomplete
+                    const inputs = form.querySelectorAll('input, select');
+                    inputs.forEach(input => {
+                        input.value = '';
+                    });
+                }
             };
         }
         if (hideAddUserBtn && formAddUser) {

@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Validation des données
         $patiente_id = $_POST['patiente_id'] ?? '';
         $medecin_id = $_POST['medecin_id'] ?? '';
+        $sagefemme_id = $_POST['sagefemme_id'] ?? '';
         $date_consultation = $_POST['date_consultation'] ?? '';
         $tension_arterielle = $_POST['tension_arterielle'] ?? '';
         $poids = $_POST['poids'] ?? '';
@@ -31,19 +32,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $observations = $_POST['observations'] ?? '';
         $recommandations = $_POST['recommandations'] ?? '';
 
-        if (empty($patiente_id) || empty($medecin_id) || empty($date_consultation)) {
+        if (empty($patiente_id) || empty($date_consultation)) {
             throw new Exception('Les champs obligatoires doivent être remplis');
         }
+
+        // Vérifier qu'un médecin OU une sage-femme est sélectionné (pas les deux)
+        if (empty($medecin_id) && empty($sagefemme_id)) {
+            throw new Exception('Veuillez sélectionner un médecin OU une sage-femme');
+        }
+
+        if (!empty($medecin_id) && !empty($sagefemme_id)) {
+            throw new Exception('Veuillez sélectionner soit un médecin soit une sage-femme, pas les deux');
+        }
+
+        // Déterminer qui est le praticien (médecin ou sage-femme)
+        $praticien_id = !empty($medecin_id) ? $medecin_id : $sagefemme_id;
+        $praticien_type = !empty($medecin_id) ? 'medecin' : 'sagefemme';
 
         // Insertion de la consultation
         $consultation_id = $db->insert("
             INSERT INTO consultations_prenatales (
-                patiente_id, medecin_id, date_consultation, tension_arterielle, 
+                patiente_id, medecin_id, sagefemme_id, date_consultation, tension_arterielle, 
                 poids, hauteur_uterine, position_foetus, frequence_cardiaque_foetale,
                 observations, recommandations, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
         ", [
-            $patiente_id, $medecin_id, $date_consultation, $tension_arterielle,
+            $patiente_id, $medecin_id, $sagefemme_id, $date_consultation, $tension_arterielle,
             $poids, $hauteur_uterine, $position_foetus, $frequence_cardiaque_foetale,
             $observations, $recommandations
         ]);
@@ -72,6 +86,14 @@ $medecins = $db->fetchAll("
     SELECT id, nom, prenom, specialite
     FROM users 
     WHERE role = 'medecin'
+    ORDER BY nom, prenom
+");
+
+// Récupérer la liste des sages-femmes
+$sagefemmes = $db->fetchAll("
+    SELECT id, nom, prenom, specialite
+    FROM users 
+    WHERE role = 'sagefemme'
     ORDER BY nom, prenom
 ");
 ?>
@@ -163,15 +185,31 @@ $medecins = $db->fetchAll("
                             </div>
                             <div>
                                 <label for="medecin_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Médecin <span class="text-red-500">*</span>
+                                    Médecin
                                 </label>
-                                <select id="medecin_id" name="medecin_id" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <select id="medecin_id" name="medecin_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">Sélectionner un médecin</option>
                                     <?php foreach ($medecins as $medecin): ?>
                                         <option value="<?php echo $medecin['id']; ?>">
                                             Dr. <?php echo htmlspecialchars($medecin['prenom'] . ' ' . $medecin['nom']); ?>
                                             <?php if ($medecin['specialite']): ?>
                                                 (<?php echo htmlspecialchars($medecin['specialite']); ?>)
+                                            <?php endif; ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="sagefemme_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Sage-femme
+                                </label>
+                                <select id="sagefemme_id" name="sagefemme_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Sélectionner une sage-femme</option>
+                                    <?php foreach ($sagefemmes as $sagefemme): ?>
+                                        <option value="<?php echo $sagefemme['id']; ?>">
+                                            <?php echo htmlspecialchars($sagefemme['prenom'] . ' ' . $sagefemme['nom']); ?>
+                                            <?php if ($sagefemme['specialite']): ?>
+                                                (<?php echo htmlspecialchars($sagefemme['specialite']); ?>)
                                             <?php endif; ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -297,7 +335,27 @@ $medecins = $db->fetchAll("
             const form = document.querySelector('form');
             const patienteSelect = document.getElementById('patiente_id');
             const medecinSelect = document.getElementById('medecin_id');
+            const sagefemmeSelect = document.getElementById('sagefemme_id');
             const dateInput = document.getElementById('date_consultation');
+
+            // Fonction pour gérer la sélection exclusive médecin/sage-femme
+            function handlePractitionerSelection(changedSelect, otherSelect) {
+                if (changedSelect.value) {
+                    otherSelect.value = '';
+                    otherSelect.disabled = true;
+                } else {
+                    otherSelect.disabled = false;
+                }
+            }
+
+            // Écouter les changements sur les sélections
+            medecinSelect.addEventListener('change', function() {
+                handlePractitionerSelection(this, sagefemmeSelect);
+            });
+
+            sagefemmeSelect.addEventListener('change', function() {
+                handlePractitionerSelection(this, medecinSelect);
+            });
 
             form.addEventListener('submit', function(e) {
                 let isValid = true;
@@ -309,8 +367,13 @@ $medecins = $db->fetchAll("
                     isValid = false;
                 }
 
-                if (!medecinSelect.value) {
-                    errorMessage += 'Veuillez sélectionner un médecin.\n';
+                if (!medecinSelect.value && !sagefemmeSelect.value) {
+                    errorMessage += 'Veuillez sélectionner un médecin OU une sage-femme.\n';
+                    isValid = false;
+                }
+
+                if (medecinSelect.value && sagefemmeSelect.value) {
+                    errorMessage += 'Veuillez sélectionner soit un médecin soit une sage-femme, pas les deux.\n';
                     isValid = false;
                 }
 

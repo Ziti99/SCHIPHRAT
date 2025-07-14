@@ -13,7 +13,7 @@ $user = [
     'username' => $_SESSION['username'] ?? '',
     'role' => $_SESSION['user_role'] ?? '',
 ];
-if (!in_array($user['role'], ['admin', 'medecin', 'sage_femme'])) {
+if (!in_array($user['role'], ['admin', 'medecin', 'sagefemme'])) {
     header('Location: dashboard.php');
     exit();
 }
