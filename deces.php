@@ -23,8 +23,7 @@ if (isset($_POST['delete_deces'])) {
 
 // Récupération des paramètres de filtrage
 $search = $_GET['search'] ?? '';
-$date_debut = $_GET['date_debut'] ?? '';
-$date_fin = $_GET['date_fin'] ?? '';
+$date_deces = $_GET['date_deces'] ?? '';
 $lieu = $_GET['lieu'] ?? '';
 $cause = $_GET['cause'] ?? '';
 
@@ -39,14 +38,9 @@ if (!empty($search)) {
     $params[] = $search_param;
 }
 
-if (!empty($date_debut)) {
-    $where_conditions[] = "DATE(d.date_deces) >= ?";
-    $params[] = $date_debut;
-}
-
-if (!empty($date_fin)) {
-    $where_conditions[] = "DATE(d.date_deces) <= ?";
-    $params[] = $date_fin;
+if (!empty($date_deces)) {
+    $where_conditions[] = "DATE(d.date_deces) = ?";
+    $params[] = $date_deces;
 }
 
 if (!empty($lieu)) {
@@ -135,18 +129,14 @@ if (isset($_POST['delete_deces'])) {
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
                     <i class="fas fa-filter mr-2 text-red-600"></i>Filtres
                 </h3>
-                <form method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <form method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Recherche</label>
                         <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Nom, prénom..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Date début</label>
-                        <input type="date" name="date_debut" value="<?php echo htmlspecialchars($date_debut); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Date fin</label>
-                        <input type="date" name="date_fin" value="<?php echo htmlspecialchars($date_fin); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date de décès</label>
+                        <input type="date" name="date_deces" value="<?php echo htmlspecialchars($date_deces); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Lieu</label>
@@ -156,7 +146,7 @@ if (isset($_POST['delete_deces'])) {
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cause</label>
                         <input type="text" name="cause" value="<?php echo htmlspecialchars($cause); ?>" placeholder="Cause du décès..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
                     </div>
-                    <div class="md:col-span-2 lg:col-span-5 flex justify-end space-x-2">
+                    <div class="md:col-span-2 lg:col-span-4 flex justify-end space-x-2">
                         <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors">
                             <i class="fas fa-search mr-2"></i>Filtrer
                         </button>
@@ -234,7 +224,7 @@ if (isset($_POST['delete_deces'])) {
                                     <td colspan="6" class="px-6 py-12 text-center text-gray-500">
                                         <i class="fas fa-cross text-4xl mb-4 text-gray-300"></i>
                                         <p class="text-lg">Aucun décès trouvé</p>
-                                        <?php if (!empty($search) || !empty($date_debut) || !empty($date_fin) || !empty($lieu) || !empty($cause)): ?>
+                                        <?php if (!empty($search) || !empty($date_deces) || !empty($lieu) || !empty($cause)): ?>
                                             <p class="text-sm text-gray-400 mt-2">Essayez de modifier vos filtres</p>
                                         <?php endif; ?>
                                     </td>
