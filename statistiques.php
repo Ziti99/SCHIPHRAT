@@ -158,7 +158,7 @@ $top_medecins = $db->fetchAll("
                     <p class="text-gray-600">Analyse complète des données de la clinique</p>
                 </div>
                 <div class="flex space-x-4">
-                    <a href="/statistiques/export-pdf.php" class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition-colors">
+                    <a href="/export_pdf_statistiques.php" class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition-colors">
                         <i class="fas fa-file-pdf mr-2"></i>
                         Export PDF
                     </a>
