@@ -158,10 +158,15 @@ $top_medecins = $db->fetchAll("
                     <p class="text-gray-600">Analyse complète des données de la clinique</p>
                 </div>
                 <div class="flex space-x-4">
-                    <a href="/export_pdf_statistiques.php" class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition-colors">
+                    <form id="exportPdfForm" method="post" action="/export_pdf_statistiques.php" target="_blank">
+                      <input type="hidden" name="chart1" id="chart1Input">
+                      <input type="hidden" name="chart2" id="chart2Input">
+                      <input type="hidden" name="chart3" id="chart3Input">
+                      <button type="submit" class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition-colors">
                         <i class="fas fa-file-pdf mr-2"></i>
                         Export PDF
-                    </a>
+                      </button>
+                    </form>
                     <a href="/statistiques/export-excel.php" class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors">
                         <i class="fas fa-file-excel mr-2"></i>
                         Export Excel
@@ -395,5 +400,23 @@ $top_medecins = $db->fetchAll("
             }
         });
     </script>
+    <script>
+// On suppose que les graphiques sont créés dans des variables globales
+let accouchementsChart, ageChart;
+window.addEventListener('DOMContentLoaded', function() {
+    // Récupère les instances Chart.js créées dans les scripts existants
+    // (on suppose qu'elles sont accessibles, sinon il faut les rendre globales)
+    accouchementsChart = Chart.getChart('accouchementsChart');
+    ageChart = Chart.getChart('ageChart');
+
+    document.getElementById('exportPdfForm').addEventListener('submit', function(e) {
+        // Si les graphiques existent, on les exporte en base64
+        document.getElementById('chart1Input').value = accouchementsChart ? accouchementsChart.toBase64Image() : '';
+        document.getElementById('chart2Input').value = ageChart ? ageChart.toBase64Image() : '';
+        // chart3 facultatif, laisse vide ou ajoute un autre graphique si besoin
+        document.getElementById('chart3Input').value = '';
+    });
+});
+</script>
 </body>
 </html> 
