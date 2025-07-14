@@ -346,13 +346,6 @@ $cesariennes = $db->fetch("
                                         </td>
                                     </tr>
                                 <?php else: ?>
-                                    <?php 
-                                    echo '<pre>';
-                                    foreach ($accouchements as $idx => $acc) {
-                                        echo "Ligne ".($idx+1)." : ID=".$acc['accouchement_id'].", Patiente=".$acc['prenom'].' '.$acc['nom'].", Date=".$acc['date_accouchement']."\n";
-                                    }
-                                    echo '</pre>';
-                                    ?>
                                     <?php foreach ($accouchements as $accouchement): ?>
                                         <tr class="hover:bg-gray-50 transition-colors">
                                             <td class="px-6 py-4 whitespace-nowrap">
