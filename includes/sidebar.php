@@ -25,6 +25,10 @@ if (!isset($_SESSION['user_id'])) {
                 <i class="fas fa-baby mr-3"></i>
                 Accouchements
             </a>
+            <a href="/deces.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                <i class="fas fa-cross mr-3"></i>
+                Décès
+            </a>
             <a href="/suivi-postnatal.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
                 <i class="fas fa-heartbeat mr-3"></i>
                 Suivi Post-natal
