@@ -428,100 +428,52 @@ if ($date_du === $date_au) {
         let currentPage = 1;
         let isLoading = false;
 
-        // Fonction de logging pour debug
-        function logDebug(message, data = null) {
-            const timestamp = new Date().toLocaleTimeString();
-            console.log(`[${timestamp}] DEBUG: ${message}`, data);
-            
-            // Afficher aussi dans une div de debug si elle existe
-            const debugDiv = document.getElementById('debugLogs');
-            if (debugDiv) {
-                const logEntry = document.createElement('div');
-                logEntry.className = 'text-xs text-gray-600 mb-1';
-                logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
-                if (data) {
-                    logEntry.innerHTML += `<br><pre class="text-xs">${JSON.stringify(data, null, 2)}</pre>`;
-                }
-                debugDiv.appendChild(logEntry);
-                
-                // Garder seulement les 10 derniers logs
-                while (debugDiv.children.length > 10) {
-                    debugDiv.removeChild(debugDiv.firstChild);
-                }
-            }
-        }
+
 
         // Fonction pour charger les données via AJAX
         async function loadPermanences() {
-            if (isLoading) {
-                logDebug('Chargement déjà en cours, ignoré');
-                return;
-            }
+            if (isLoading) return;
             
             isLoading = true;
-            logDebug('Début du chargement des permanences');
             
             const form = document.querySelector('form');
             const formData = new FormData(form);
             const params = new URLSearchParams(formData);
-            
-            logDebug('Paramètres de filtrage:', Object.fromEntries(params));
             
             // Afficher un indicateur de chargement
             const tbody = document.getElementById('permanenceTableBody');
             tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8"><div class="flex items-center justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div><span class="ml-2">Chargement...</span></div></td></tr>';
             
             try {
-                logDebug('Envoi de la requête AJAX vers permanences_ajax.php');
                 const response = await fetch(`permanences_ajax.php?${params.toString()}`);
-                logDebug('Réponse reçue:', {
-                    status: response.status,
-                    statusText: response.statusText,
-                    headers: Object.fromEntries(response.headers.entries())
-                });
-                
                 const data = await response.json();
-                logDebug('Données JSON reçues:', data);
                 
                 if (response.ok) {
-                    logDebug('Requête réussie, mise à jour des données');
                     allPermanences = data.permanences || [];
                     currentStats = data.stats || {};
                     currentTotalParActe = data.total_par_acte || [];
                     currentPeriode = data.periode_affichee || '';
                     currentPage = 1;
                     
-                    logDebug('Données mises à jour:', {
-                        permanencesCount: allPermanences.length,
-                        stats: currentStats,
-                        totalParActeCount: currentTotalParActe.length,
-                        periode: currentPeriode
-                    });
-                    
                     renderTable();
                     updateStats();
                     updateTotalParActe();
                     updatePeriode();
                 } else {
-                    logDebug('Erreur de réponse:', data.error);
                     console.error('Erreur:', data.error);
                     tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-red-500">Erreur de chargement: ' + (data.error || 'Erreur inconnue') + '</td></tr>';
                 }
             } catch (error) {
-                logDebug('Erreur AJAX:', error);
                 console.error('Erreur AJAX:', error);
                 tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-red-500">Erreur de connexion: ' + error.message + '</td></tr>';
             } finally {
                 isLoading = false;
-                logDebug('Chargement terminé');
             }
         }
 
         // Fonction pour rendre le tableau
         function renderTable() {
-            logDebug('Rendu du tableau');
             const search = document.getElementById('searchInput').value.toLowerCase();
-            logDebug('Terme de recherche:', search);
             
             let filteredPermanences = allPermanences.filter(permanence => {
                 const permanenceText = Object.values(permanence).join(' ').toLowerCase();
@@ -534,27 +486,13 @@ if ($date_du === $date_au) {
                 }
             });
             
-            logDebug('Permanences filtrées:', {
-                total: allPermanences.length,
-                filtered: filteredPermanences.length,
-                search: search
-            });
-            
             const tbody = document.getElementById('permanenceTableBody');
             const startIndex = (currentPage - 1) * rowsPerPage;
             const endIndex = startIndex + rowsPerPage;
             const pagePermanences = filteredPermanences.slice(startIndex, endIndex);
             
-            logDebug('Pagination:', {
-                currentPage: currentPage,
-                startIndex: startIndex,
-                endIndex: endIndex,
-                pagePermanences: pagePermanences.length
-            });
-            
             if (pagePermanences.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-gray-500">Aucune permanence trouvée</td></tr>';
-                logDebug('Aucune permanence à afficher');
             } else {
                 tbody.innerHTML = pagePermanences.map(permanence => `
                     <tr>
@@ -570,7 +508,6 @@ if ($date_du === $date_au) {
                         <td class="px-4 py-2 whitespace-nowrap text-xs">${permanence.statut || ''}</td>
                     </tr>
                 `).join('');
-                logDebug('Tableau rendu avec', pagePermanences.length, 'lignes');
             }
             
             renderPagination(filteredPermanences.length);
@@ -578,7 +515,6 @@ if ($date_du === $date_au) {
 
         // Fonction pour mettre à jour les statistiques
         function updateStats() {
-            logDebug('Mise à jour des statistiques:', currentStats);
             const stats = currentStats;
             
             // Mettre à jour les cartes de statistiques
@@ -592,13 +528,6 @@ if ($date_du === $date_au) {
                 en_attente_detail: document.querySelector('[data-stat="en_attente_detail"]')
             };
             
-            // Vérifier que tous les éléments existent
-            Object.entries(elements).forEach(([key, element]) => {
-                if (!element) {
-                    logDebug(`Élément manquant: ${key}`);
-                }
-            });
-            
             if (elements.total_permanences) elements.total_permanences.textContent = stats.total_permanences || 0;
             if (elements.total_montant) elements.total_montant.textContent = (stats.total_montant ? (parseInt(stats.total_montant).toLocaleString('fr-FR') + ' FCFA') : '0 FCFA');
             if (elements.moyenne_montant) elements.moyenne_montant.textContent = (stats.moyenne_montant ? (parseInt(stats.moyenne_montant).toLocaleString('fr-FR') + ' FCFA') : '0 FCFA');
@@ -606,18 +535,14 @@ if ($date_du === $date_au) {
             if (elements.validees) elements.validees.textContent = stats.validees || 0;
             if (elements.annulees) elements.annulees.textContent = stats.annulees || 0;
             if (elements.en_attente_detail) elements.en_attente_detail.textContent = stats.en_attente || 0;
-            
-            logDebug('Statistiques mises à jour');
         }
 
         // Fonction pour mettre à jour le total par acte
         function updateTotalParActe() {
-            logDebug('Mise à jour du total par acte:', currentTotalParActe);
             const totalParActe = currentTotalParActe;
             const container = document.getElementById('totalParActeContainer');
             
             if (!container) {
-                logDebug('Container totalParActeContainer non trouvé');
                 return;
             }
             
@@ -628,7 +553,6 @@ if ($date_du === $date_au) {
                         <p class="text-gray-500">Aucun acte validé enregistré pour cette période</p>
                     </div>
                 `;
-                logDebug('Aucun acte à afficher');
                 return;
             }
             
@@ -636,8 +560,6 @@ if ($date_du === $date_au) {
             totalParActe.forEach(acte => {
                 totalMontantGlobal += parseFloat(acte.total_montant);
             });
-            
-            logDebug('Total montant global:', totalMontantGlobal);
             
             let tableHTML = `
                 <div class="overflow-x-auto">
@@ -710,56 +632,43 @@ if ($date_du === $date_au) {
             `;
             
             container.innerHTML = tableHTML;
-            logDebug('Total par acte mis à jour');
         }
 
         // Fonction pour mettre à jour la période affichée
         function updatePeriode() {
-            logDebug('Mise à jour de la période:', currentPeriode);
             const periodeElement = document.getElementById('periodeAffichee');
             if (periodeElement) {
                 periodeElement.textContent = currentPeriode;
-            } else {
-                logDebug('Élément periodeAffichee non trouvé');
             }
             
             // Mettre à jour aussi dans le titre des statistiques
             const statsTitle = document.querySelector('[data-stat="stats_title"]');
             if (statsTitle) {
                 statsTitle.textContent = `Statistiques - ${currentPeriode}`;
-            } else {
-                logDebug('Élément stats_title non trouvé');
             }
             
             // Mettre à jour le titre du total par acte
             const totalActeTitle = document.querySelector('[data-stat="total_acte_title"]');
             if (totalActeTitle) {
                 totalActeTitle.textContent = `Total par Acte Posé - ${currentPeriode}`;
-            } else {
-                logDebug('Élément total_acte_title non trouvé');
             }
         }
 
         // Fonction pour rendre la pagination
         function renderPagination(totalRows) {
-            logDebug('Rendu de la pagination:', { totalRows, currentPage, rowsPerPage });
             const nav = document.getElementById('paginationNav');
             if (!nav) {
-                logDebug('Élément paginationNav non trouvé');
                 return;
             }
             
             nav.innerHTML = '';
             const totalPages = Math.ceil(totalRows / rowsPerPage);
             
-            logDebug('Pages totales:', totalPages);
-            
             for (let i = 1; i <= totalPages; i++) {
                 const btn = document.createElement('button');
                 btn.textContent = i;
                 btn.className = 'mx-1 px-3 py-1 rounded border ' + (i === currentPage ? 'bg-purple-500 text-white' : 'bg-white text-purple-600 border-purple-300');
                 btn.onclick = () => { 
-                    logDebug('Changement de page:', i);
                     currentPage = i; 
                     renderTable(); 
                 };
@@ -769,17 +678,6 @@ if ($date_du === $date_au) {
 
         // Événements
         document.addEventListener('DOMContentLoaded', function() {
-            logDebug('DOM chargé, initialisation...');
-            
-            // Créer une div de debug si elle n'existe pas
-            if (!document.getElementById('debugLogs')) {
-                const debugDiv = document.createElement('div');
-                debugDiv.id = 'debugLogs';
-                debugDiv.className = 'fixed bottom-4 right-4 w-80 h-64 bg-black bg-opacity-75 text-white p-4 rounded-lg overflow-y-auto text-xs z-50';
-                debugDiv.innerHTML = '<div class="font-bold mb-2">Logs de Debug</div>';
-                document.body.appendChild(debugDiv);
-            }
-            
             // Charger les données initiales
             loadPermanences();
             
@@ -788,26 +686,18 @@ if ($date_du === $date_au) {
             if (form) {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    logDebug('Soumission du formulaire de filtrage');
                     loadPermanences();
                 });
-            } else {
-                logDebug('Formulaire de filtrage non trouvé');
             }
             
             // Gestionnaire pour la recherche
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
-                    logDebug('Recherche modifiée:', this.value);
                     currentPage = 1;
                     renderTable();
                 });
-            } else {
-                logDebug('Champ de recherche non trouvé');
             }
-            
-            logDebug('Initialisation terminée');
         });
     </script>
 </body>
