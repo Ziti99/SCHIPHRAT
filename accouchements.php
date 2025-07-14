@@ -15,14 +15,13 @@ $mode_accouchement = $_GET['mode_accouchement'] ?? '';
 $sexe_bebe = $_GET['sexe_bebe'] ?? '';
 $medecin_id = $_GET['medecin_id'] ?? '';
 
-// Construction de la requête avec filtres
+// Correction de la gestion des filtres pour la recherche
 $where_conditions = [];
 $params = [];
 
 if (!empty($search)) {
     $where_conditions[] = "(p.nom LIKE ? OR p.prenom LIKE ? OR a.nom_bebe LIKE ?)";
     $search_param = "%$search%";
-    $params[] = $search_param;
     $params[] = $search_param;
     $params[] = $search_param;
     $params[] = $search_param;
@@ -362,7 +361,6 @@ $cesariennes = $db->fetch("
                                                         <?php echo htmlspecialchars($accouchement['prenom'] . ' ' . $accouchement['nom']); ?>
                                                     </div>
                                                     <div class="text-sm text-gray-500">
-            
                                                     </div>
                                                     <div class="text-xs text-gray-400">
                                                         Tél: <?php echo htmlspecialchars($accouchement['telephone']); ?>
