@@ -166,7 +166,7 @@ $recent_accouchements = $pdo->query("
                         Actions rapides
                     </h3>
                     <div class="grid grid-cols-2 gap-4">
-                        <a href="/patientes/ajouter.php" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-lg text-center hover:shadow-lg transition-all duration-200">
+                        <a href="/patientes_create.php" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-lg text-center hover:shadow-lg transition-all duration-200">
                             <i class="fas fa-user-plus text-2xl mb-2"></i>
                             <p class="font-semibold">Nouvelle patiente</p>
                         </a>
