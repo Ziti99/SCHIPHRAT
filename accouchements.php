@@ -1,12 +1,20 @@
 <?php
+// LOG 1 : Début du script
+error_log('--- DEBUT accouchements.php ---');
+echo '<script>console.log("[LOG] Début du script accouchements.php");</script>';
+
 session_start();
+echo '<script>console.log("[LOG] Session démarrée");</script>';
 if (!isset($_SESSION['user_id'])) {
+    echo '<script>console.log("[LOG] Redirection login");</script>';
     header('Location: /login.php');
     exit;
 }
 require_once __DIR__ . '/config/database.php';
+echo '<script>console.log("[LOG] Database.php inclus");</script>';
 
 $db = new Database();
+echo '<script>console.log("[LOG] Instance Database créée");</script>';
 
 // Paramètres de filtrage
 $search = $_GET['search'] ?? '';
@@ -14,6 +22,7 @@ $date_accouchement = $_GET['date_accouchement'] ?? '';
 $mode_accouchement = $_GET['mode_accouchement'] ?? '';
 $sexe_bebe = $_GET['sexe_bebe'] ?? '';
 $medecin_id = $_GET['medecin_id'] ?? '';
+echo '<script>console.log("[LOG] Paramètres : search='.addslashes($search).', date_accouchement='.addslashes($date_accouchement).', mode_accouchement='.addslashes($mode_accouchement).', sexe_bebe='.addslashes($sexe_bebe).', medecin_id='.addslashes($medecin_id).'");</script>';
 
 // Correction de la gestion des filtres pour la recherche
 $where_conditions = [];
@@ -48,6 +57,7 @@ if (!empty($medecin_id)) {
 }
 
 $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+echo '<script>console.log("[LOG] WHERE CLAUSE : '.addslashes($where_clause).' | Params : '.json_encode($params).'");</script>';
 
 // Fonction pour générer l'ID d'accouchement (même fonction que dans ajouter.php)
 function generateAccouchementId($db, $date_accouchement, $accouchement_db_id) {
@@ -74,6 +84,10 @@ function generateAccouchementId($db, $date_accouchement, $accouchement_db_id) {
     
     return $numero_mois . $mois . $numero_annee . $annee;
 }
+
+// LOG 4 : Pause 5 secondes avant requête SQL
+sleep(5);
+echo '<script>console.log("[LOG] Pause 5s avant requête SQL");</script>';
 
 // Récupération des accouchements
 $accouchements = $db->fetchAll("
@@ -104,11 +118,23 @@ $accouchements = $db->fetchAll("
     $where_clause
     ORDER BY a.date_accouchement DESC
 ", $params);
+echo '<script>console.log("[LOG] Requête SQL exécutée");</script>';
+echo '<pre style=\'background:yellow; color:black; font-size:14px;\'>[LOG] Résultat $accouchements : '.print_r($accouchements,1).'</pre>';
+
+// LOG 6 : Pause 5 secondes après récupération SQL
+sleep(5);
+echo '<script>console.log("[LOG] Pause 5s après récupération SQL");</script>';
 
 // Générer les IDs pour chaque accouchement
 foreach ($accouchements as &$accouchement) {
     $accouchement['generated_id'] = generateAccouchementId($db, $accouchement['date_accouchement'], $accouchement['accouchement_id']);
 }
+echo '<script>console.log("[LOG] IDs générés pour chaque accouchement");</script>';
+echo '<pre style=\'background:orange; color:black; font-size:14px;\'>[LOG] Après génération ID : '.print_r($accouchements,1).'</pre>';
+
+// LOG 8 : Pause 5 secondes avant affichage tableau
+sleep(5);
+echo '<script>console.log("[LOG] Pause 5s avant affichage tableau");</script>';
 
 // Récupération des médecins pour le filtre
 $medecins = $db->fetchAll("
@@ -117,6 +143,8 @@ $medecins = $db->fetchAll("
     WHERE role IN ('medecin', 'sage_femme') AND is_active = 1
     ORDER BY nom, prenom
 ");
+echo '<script>console.log("[LOG] Médecins récupérés : '.addslashes(json_encode($medecins)).'");</script>';
+echo '<script>console.log("[LOG] Total médecins : '.count($medecins).'");</script>';
 
 // Statistiques
 $total_accouchements = count($accouchements);
@@ -345,7 +373,8 @@ $cesariennes = $db->fetch("
                                         </td>
                                     </tr>
                                 <?php else: ?>
-                                    <?php foreach ($accouchements as $accouchement): ?>
+                                    <?php foreach ($accouchements as $idx => $accouchement): ?>
+                                        <?php echo '<script>console.log("[LOG] Affichage ligne '.$idx.' : '.addslashes(json_encode($accouchement)).'");</script>'; ?>
                                         <tr class="hover:bg-gray-50 transition-colors">
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm font-bold text-green-600">
