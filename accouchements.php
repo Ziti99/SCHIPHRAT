@@ -448,14 +448,23 @@ $cesariennes = $db->fetch("
     </div>
 
     <script>
-        // Log du tableau HTML après génération
         document.addEventListener('DOMContentLoaded', function() {
-            // Log chaque ligne du tableau accouchements
             const rows = document.querySelectorAll('table tbody tr');
-            console.log('Nombre de lignes dans le tableau:', rows.length);
+            let ids = [];
             rows.forEach((row, idx) => {
-                console.log('Ligne', idx + 1, row.innerText);
+                // Cherche l'ID dans la première colonne
+                const idCell = row.querySelector('div.text-xs.text-gray-500');
+                let id = idCell ? idCell.textContent.replace('ID: ', '').trim() : 'inconnu';
+                ids.push(id);
+                console.log(`Ligne ${idx + 1} - ID: ${id} - Contenu:`, row.innerText);
             });
+            // Détection de doublons
+            const doublons = ids.filter((id, i, arr) => arr.indexOf(id) !== i);
+            if (doublons.length > 0) {
+                console.warn('Doublons détectés côté client pour les IDs:', doublons);
+            } else {
+                console.log('Aucun doublon détecté côté client.');
+            }
         });
         // Log de la redirection lors du clic sur "voir"
         function viewDetails(accouchementId) {
