@@ -80,7 +80,7 @@ if (isset($_SESSION['user_id'])) {
                 <i class="fas fa-heartbeat text-white text-2xl"></i>
             </div>
             <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Clinique Obstétrique
+                Clinique Obstétrique Shiprat
             </h1>
             <p class="text-gray-600 mt-2">Connexion au système</p>
         </div>
