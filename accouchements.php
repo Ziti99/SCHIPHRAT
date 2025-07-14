@@ -448,8 +448,18 @@ $cesariennes = $db->fetch("
     </div>
 
     <script>
+        // Log du tableau HTML après génération
+        document.addEventListener('DOMContentLoaded', function() {
+            // Log chaque ligne du tableau accouchements
+            const rows = document.querySelectorAll('table tbody tr');
+            console.log('Nombre de lignes dans le tableau:', rows.length);
+            rows.forEach((row, idx) => {
+                console.log('Ligne', idx + 1, row.innerText);
+            });
+        });
+        // Log de la redirection lors du clic sur "voir"
         function viewDetails(accouchementId) {
-            // Rediriger vers la page de détails
+            console.log('Redirection vers la fiche accouchement ID:', accouchementId);
             window.location.href = '../accouchements/voir.php?id=' + accouchementId;
         }
     </script>
