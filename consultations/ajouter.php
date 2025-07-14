@@ -1,0 +1,341 @@
+<?php
+session_start();
+
+// Debug: Afficher les informations de session
+error_log("Session debug - user_id: " . ($_SESSION['user_id'] ?? 'non défini'));
+error_log("Session debug - username: " . ($_SESSION['username'] ?? 'non défini'));
+error_log("Session debug - user_role: " . ($_SESSION['user_role'] ?? 'non défini'));
+
+if (!isset($_SESSION['user_id'])) {
+    error_log("Redirection vers login.php - user_id non défini");
+    header('Location: /login.php');
+    exit;
+}
+
+require_once __DIR__ . '/../config/database.php';
+
+$db = new Database();
+
+// Traitement du formulaire
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        // Validation des données
+        $patiente_id = $_POST['patiente_id'] ?? '';
+        $medecin_id = $_POST['medecin_id'] ?? '';
+        $date_consultation = $_POST['date_consultation'] ?? '';
+        $tension_arterielle = $_POST['tension_arterielle'] ?? '';
+        $poids = $_POST['poids'] ?? '';
+        $hauteur_uterine = $_POST['hauteur_uterine'] ?? '';
+        $position_foetus = $_POST['position_foetus'] ?? '';
+        $frequence_cardiaque_foetale = $_POST['frequence_cardiaque_foetale'] ?? '';
+        $observations = $_POST['observations'] ?? '';
+        $recommandations = $_POST['recommandations'] ?? '';
+
+        if (empty($patiente_id) || empty($medecin_id) || empty($date_consultation)) {
+            throw new Exception('Les champs obligatoires doivent être remplis');
+        }
+
+        // Insertion de la consultation
+        $consultation_id = $db->insert("
+            INSERT INTO consultations_prenatales (
+                patiente_id, medecin_id, date_consultation, tension_arterielle, 
+                poids, hauteur_uterine, position_foetus, frequence_cardiaque_foetale,
+                observations, recommandations, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        ", [
+            $patiente_id, $medecin_id, $date_consultation, $tension_arterielle,
+            $poids, $hauteur_uterine, $position_foetus, $frequence_cardiaque_foetale,
+            $observations, $recommandations
+        ]);
+
+        error_log("Consultation créée avec succès, ID: " . $consultation_id);
+        
+        // Redirection vers la page de détails
+        header('Location: voir.php?id=' . $consultation_id . '&success=1');
+        exit;
+
+    } catch (Exception $e) {
+        error_log("Erreur lors de la création de la consultation: " . $e->getMessage());
+        $error_message = $e->getMessage();
+    }
+}
+
+// Récupérer la liste des patientes
+$patientes = $db->fetchAll("
+    SELECT id, nom, prenom, date_naissance, telephone
+    FROM patientes 
+    ORDER BY nom, prenom
+");
+
+// Récupérer la liste des médecins
+$medecins = $db->fetchAll("
+    SELECT id, nom, prenom, specialite
+    FROM users 
+    WHERE role = 'medecin'
+    ORDER BY nom, prenom
+");
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouvelle Consultation - Clinique Obstétrique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
+    <div class="flex">
+        <!-- Sidebar -->
+        <?php include '../includes/sidebar.php'; ?>
+        
+        <!-- Contenu principal -->
+        <div class="flex-1">
+            <!-- Navigation -->
+            <nav class="bg-white shadow-lg border-b border-gray-200">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16">
+                        <div class="flex items-center">
+                            <a href="../consultations.php" class="text-purple-600 hover:text-purple-800 mr-4">
+                                <i class="fas fa-arrow-left mr-2"></i>Retour
+                            </a>
+                            <div class="flex-shrink-0 flex items-center">
+                                <i class="fas fa-plus-circle text-2xl text-blue-600 mr-3"></i>
+                                <span class="text-xl font-bold text-gray-900">Nouvelle Consultation</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-gray-700">
+                                <i class="fas fa-user mr-2"></i>
+                                <?php echo htmlspecialchars($_SESSION['username']); ?>
+                            </span>
+                            <a href="../logout.php" class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Déconnexion
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <!-- En-tête -->
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900">Nouvelle Consultation Prénatale</h2>
+                    <p class="text-gray-600">Ajouter une nouvelle consultation pour une patiente</p>
+                </div>
+
+                <!-- Message d'erreur -->
+                <?php if (isset($error_message)): ?>
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+                        <div class="flex">
+                            <i class="fas fa-exclamation-circle mr-2 mt-1"></i>
+                            <div>
+                                <strong>Erreur !</strong> <?php echo htmlspecialchars($error_message); ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Formulaire -->
+                <form method="POST" class="bg-white rounded-xl shadow-lg p-6">
+                    <!-- Informations de base -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-info-circle mr-2 text-blue-600"></i>Informations de Base
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="patiente_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Patiente <span class="text-red-500">*</span>
+                                </label>
+                                <select id="patiente_id" name="patiente_id" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Sélectionner une patiente</option>
+                                    <?php foreach ($patientes as $patiente): ?>
+                                        <option value="<?php echo $patiente['id']; ?>">
+                                            <?php echo htmlspecialchars($patiente['prenom'] . ' ' . $patiente['nom']); ?>
+                                            (<?php echo date('d/m/Y', strtotime($patiente['date_naissance'])); ?>)
+                                            <?php if ($patiente['telephone']): ?>
+                                                - <?php echo htmlspecialchars($patiente['telephone']); ?>
+                                            <?php endif; ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="medecin_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Médecin <span class="text-red-500">*</span>
+                                </label>
+                                <select id="medecin_id" name="medecin_id" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Sélectionner un médecin</option>
+                                    <?php foreach ($medecins as $medecin): ?>
+                                        <option value="<?php echo $medecin['id']; ?>">
+                                            Dr. <?php echo htmlspecialchars($medecin['prenom'] . ' ' . $medecin['nom']); ?>
+                                            <?php if ($medecin['specialite']): ?>
+                                                (<?php echo htmlspecialchars($medecin['specialite']); ?>)
+                                            <?php endif; ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="date_consultation" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Date et heure de consultation <span class="text-red-500">*</span>
+                                </label>
+                                <input type="datetime-local" id="date_consultation" name="date_consultation" required 
+                                       value="<?php echo date('Y-m-d\TH:i'); ?>"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Signes vitaux -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-heartbeat mr-2 text-red-600"></i>Signes Vitaux
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="tension_arterielle" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Tension artérielle
+                                </label>
+                                <input type="text" id="tension_arterielle" name="tension_arterielle" 
+                                       placeholder="ex: 120/80 mmHg"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="poids" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Poids (kg)
+                                </label>
+                                <input type="number" id="poids" name="poids" step="0.1" min="0"
+                                       placeholder="ex: 65.5"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Examen obstétrical -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-baby mr-2 text-pink-600"></i>Examen Obstétrical
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="hauteur_uterine" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Hauteur utérine (cm)
+                                </label>
+                                <input type="number" id="hauteur_uterine" name="hauteur_uterine" step="0.1" min="0"
+                                       placeholder="ex: 28.5"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="position_foetus" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Position du fœtus
+                                </label>
+                                <select id="position_foetus" name="position_foetus" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Sélectionner</option>
+                                    <option value="céphalique">Céphalique</option>
+                                    <option value="siège">Siège</option>
+                                    <option value="transverse">Transverse</option>
+                                    <option value="oblique">Oblique</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="frequence_cardiaque_foetale" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Fréquence cardiaque fœtale (bpm)
+                                </label>
+                                <input type="number" id="frequence_cardiaque_foetale" name="frequence_cardiaque_foetale" 
+                                       min="0" max="300"
+                                       placeholder="ex: 140"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Observations et recommandations -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-notes-medical mr-2 text-green-600"></i>Observations et Recommandations
+                        </h3>
+                        <div class="space-y-6">
+                            <div>
+                                <label for="observations" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Observations
+                                </label>
+                                <textarea id="observations" name="observations" rows="4"
+                                          placeholder="Décrivez les observations cliniques..."
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                            <div>
+                                <label for="recommandations" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Recommandations
+                                </label>
+                                <textarea id="recommandations" name="recommandations" rows="4"
+                                          placeholder="Indiquez les recommandations pour la patiente..."
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Boutons d'action -->
+                    <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+                        <a href="../consultations.php" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-times mr-2"></i>Annuler
+                        </a>
+                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-save mr-2"></i>Enregistrer la Consultation
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Validation côté client
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const patienteSelect = document.getElementById('patiente_id');
+            const medecinSelect = document.getElementById('medecin_id');
+            const dateInput = document.getElementById('date_consultation');
+
+            form.addEventListener('submit', function(e) {
+                let isValid = true;
+                let errorMessage = '';
+
+                // Validation des champs obligatoires
+                if (!patienteSelect.value) {
+                    errorMessage += 'Veuillez sélectionner une patiente.\n';
+                    isValid = false;
+                }
+
+                if (!medecinSelect.value) {
+                    errorMessage += 'Veuillez sélectionner un médecin.\n';
+                    isValid = false;
+                }
+
+                if (!dateInput.value) {
+                    errorMessage += 'Veuillez saisir la date de consultation.\n';
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Erreurs de validation:\n' + errorMessage);
+                }
+            });
+
+            // Validation de la date (ne pas permettre les dates futures)
+            dateInput.addEventListener('change', function() {
+                const selectedDate = new Date(this.value);
+                const now = new Date();
+                
+                if (selectedDate > now) {
+                    alert('La date de consultation ne peut pas être dans le futur.');
+                    this.value = '';
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
