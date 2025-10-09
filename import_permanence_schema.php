@@ -7,7 +7,7 @@ try {
     // Lire le fichier SQL
     $sql = file_get_contents('database/permanence_schema.sql');
     
-    // Exécuter les requêtes SQL
+    // Exécuter les requêtes SQL yo
     $queries = explode(';', $sql);
     
     foreach ($queries as $query) {
