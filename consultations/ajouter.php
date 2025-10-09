@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $praticien_type = !empty($medecin_id) ? 'medecin' : 'sagefemme';
 
         // Insertion de la consultation
-        $consultation_id = $db->insert("
+        $db->query("
             INSERT INTO consultations_prenatales (
                 patiente_id, medecin_id, sagefemme_id, date_consultation, tension_arterielle, 
                 poids, hauteur_uterine, position_foetus, frequence_cardiaque_foetale,
@@ -61,8 +61,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $poids, $hauteur_uterine, $position_foetus, $frequence_cardiaque_foetale,
             $observations, $recommandations
         ]);
-
+        
+        $consultation_id = $db->lastInsertId();
         error_log("Consultation créée avec succès, ID: " . $consultation_id);
+        
+        // Enregistrer les actes médicaux sélectionnés
+        if (isset($_POST['actes']) && is_array($_POST['actes'])) {
+            foreach ($_POST['actes'] as $acte_id) {
+                // Récupérer le montant de l'acte
+                $acte = $db->fetch("SELECT montant FROM actes_poses WHERE id = ?", [$acte_id]);
+                if ($acte) {
+                    $db->query("
+                        INSERT INTO consultation_actes (consultation_id, acte_id, quantite, montant)
+                        VALUES (?, ?, 1, ?)
+                    ", [$consultation_id, $acte_id, $acte['montant']]);
+                    error_log("Acte médical $acte_id enregistré pour la consultation $consultation_id");
+                }
+            }
+        }
         
         // Redirection vers la page de détails
         header('Location: voir.php?id=' . $consultation_id . '&success=1');
@@ -95,6 +111,14 @@ $sagefemmes = $db->fetchAll("
     FROM users 
     WHERE role = 'sagefemme'
     ORDER BY nom, prenom
+");
+
+// Récupérer la liste des actes médicaux actifs
+$actes = $db->fetchAll("
+    SELECT id, nom_acte, montant, description
+    FROM actes_poses 
+    WHERE is_active = 1
+    ORDER BY nom_acte
 ");
 ?>
 <!DOCTYPE html>
@@ -290,6 +314,61 @@ $sagefemmes = $db->fetchAll("
                         </div>
                     </div>
 
+                    <!-- Actes médicaux -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-stethoscope mr-2 text-purple-600"></i>Actes Médicaux Posés
+                        </h3>
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
+                            <p class="text-sm text-purple-700 mb-3">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Sélectionnez les actes médicaux effectués durant cette consultation
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <?php if (empty($actes)): ?>
+                                    <p class="text-sm text-gray-600 col-span-2">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                                        Aucun acte disponible. 
+                                        <a href="../actes.php" class="text-purple-600 underline">Configurer les actes</a>
+                                    </p>
+                                <?php else: ?>
+                                    <?php foreach ($actes as $acte): ?>
+                                        <label class="flex items-start p-3 bg-white border border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 hover:shadow-md transition-all">
+                                            <input type="checkbox" 
+                                                   name="actes[]" 
+                                                   value="<?php echo $acte['id']; ?>" 
+                                                   data-montant="<?php echo $acte['montant']; ?>"
+                                                   data-nom="<?php echo htmlspecialchars($acte['nom_acte']); ?>"
+                                                   class="mt-1 mr-3 w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                            <div class="flex-1">
+                                                <div class="font-medium text-gray-900"><?php echo htmlspecialchars($acte['nom_acte']); ?></div>
+                                                <div class="text-sm text-purple-600 font-semibold">
+                                                    <?php echo number_format($acte['montant'], 0, ',', ' '); ?> FCFA
+                                                </div>
+                                                <?php if ($acte['description']): ?>
+                                                    <div class="text-xs text-gray-500 mt-1">
+                                                        <?php echo htmlspecialchars($acte['description']); ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        </label>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                            <!-- Résumé des actes sélectionnés -->
+                            <div id="actes-summary" class="mt-4 p-3 bg-white rounded-lg border border-purple-300 hidden">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-semibold text-gray-900">
+                                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                                        Actes sélectionnés:
+                                    </span>
+                                    <span id="total-actes" class="text-lg font-bold text-purple-600">0 FCFA</span>
+                                </div>
+                                <div id="actes-list" class="text-sm text-gray-700"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Observations et recommandations -->
                     <div class="mb-8">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">
@@ -397,6 +476,50 @@ $sagefemmes = $db->fetchAll("
                     alert('La date de consultation ne peut pas être dans le futur.');
                     this.value = '';
                 }
+            });
+            
+            // Gestion de la sélection des actes et calcul du total
+            const actesCheckboxes = document.querySelectorAll('input[name="actes[]"]');
+            const actesSummary = document.getElementById('actes-summary');
+            const totalActesSpan = document.getElementById('total-actes');
+            const actesListDiv = document.getElementById('actes-list');
+            
+            function updateActesTotal() {
+                let total = 0;
+                let selectedActes = [];
+                
+                actesCheckboxes.forEach(function(checkbox) {
+                    if (checkbox.checked) {
+                        const montant = parseFloat(checkbox.dataset.montant);
+                        const nom = checkbox.dataset.nom;
+                        total += montant;
+                        selectedActes.push({
+                            nom: nom,
+                            montant: montant
+                        });
+                    }
+                });
+                
+                if (selectedActes.length > 0) {
+                    actesSummary.classList.remove('hidden');
+                    totalActesSpan.textContent = total.toLocaleString('fr-FR') + ' FCFA';
+                    
+                    let html = '<ul class="space-y-1">';
+                    selectedActes.forEach(function(acte) {
+                        html += '<li class="flex justify-between items-center">';
+                        html += '<span>• ' + acte.nom + '</span>';
+                        html += '<span class="font-semibold">' + acte.montant.toLocaleString('fr-FR') + ' FCFA</span>';
+                        html += '</li>';
+                    });
+                    html += '</ul>';
+                    actesListDiv.innerHTML = html;
+                } else {
+                    actesSummary.classList.add('hidden');
+                }
+            }
+            
+            actesCheckboxes.forEach(function(checkbox) {
+                checkbox.addEventListener('change', updateActesTotal);
             });
         });
     </script>
