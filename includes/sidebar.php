@@ -6,16 +6,11 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 ?>
-<!-- Bouton menu mobile -->
-<button id="mobileMenuButton" class="lg:hidden fixed top-4 left-4 z-50 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 rounded-lg shadow-lg">
-    <i class="fas fa-bars text-xl"></i>
-</button>
-
 <!-- Overlay pour fermer le menu sur mobile -->
 <div id="mobileMenuOverlay" class="hidden lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"></div>
 
 <!-- Sidebar responsive -->
-<aside id="sidebar" class="w-64 bg-white shadow-lg min-h-screen fixed lg:static transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-40">
+<aside id="sidebar" class="w-64 bg-white shadow-lg min-h-screen fixed lg:static transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-40 top-0 lg:top-auto">
     <!-- Bouton fermer (mobile uniquement) -->
     <button id="closeSidebarButton" class="lg:hidden absolute top-4 right-4 text-gray-600 hover:text-red-600">
         <i class="fas fa-times text-2xl"></i>
