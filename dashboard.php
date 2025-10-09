@@ -112,7 +112,7 @@ $recent_accouchements = $pdo->query("
         <!-- Sidebar -->
         <?php include __DIR__ . '/includes/sidebar.php'; ?>
         <!-- Contenu principal -->
-        <main class="flex-1 p-8">
+        <main class="flex-1 p-4 sm:p-6 lg:p-8">
             <!-- En-tête -->
             <div class="mb-8">
                 <h2 class="text-3xl font-bold text-gray-900 mb-2">Tableau de bord</h2>
@@ -120,7 +120,7 @@ $recent_accouchements = $pdo->query("
             </div>
 
             <!-- Statistiques -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
                 <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>

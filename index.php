@@ -33,23 +33,25 @@ if (isset($_SESSION['user_id'])) {
     <nav class="bg-white/80 backdrop-blur-md border-b border-purple-100 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-heartbeat text-white text-xl"></i>
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-heartbeat text-white text-base sm:text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        <h1 class="text-base sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                             Clinique Obstétrique
                         </h1>
-                        <p class="text-xs text-gray-500">Excellence en soins maternels</p>
+                        <p class="hidden sm:block text-xs text-gray-500">Excellence en soins maternels</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <a href="/login.php" class="text-gray-600 hover:text-purple-600 transition-colors">
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <a href="/login.php" class="hidden sm:flex text-gray-600 hover:text-purple-600 transition-colors items-center">
                         <i class="fas fa-sign-in-alt mr-2"></i>Connexion
                     </a>
-                    <a href="/login.php" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                        Accès Personnel
+                    <a href="/login.php" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-2 sm:px-6 sm:py-2 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 text-sm sm:text-base">
+                        <i class="fas fa-sign-in-alt sm:hidden mr-1"></i>
+                        <span class="hidden sm:inline">Accès Personnel</span>
+                        <span class="sm:hidden">Connexion</span>
                     </a>
                 </div>
             </div>
@@ -277,9 +279,9 @@ if (isset($_SESSION['user_id'])) {
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12">
+    <footer class="bg-gray-900 text-white py-8 sm:py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
                 <div>
                     <div class="flex items-center space-x-3 mb-4">
                         <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">

@@ -6,8 +6,22 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 ?>
-<aside class="w-64 bg-white shadow-lg min-h-screen">
-    <nav class="mt-8">
+<!-- Bouton menu mobile -->
+<button id="mobileMenuButton" class="lg:hidden fixed top-4 left-4 z-50 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 rounded-lg shadow-lg">
+    <i class="fas fa-bars text-xl"></i>
+</button>
+
+<!-- Overlay pour fermer le menu sur mobile -->
+<div id="mobileMenuOverlay" class="hidden lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+
+<!-- Sidebar responsive -->
+<aside id="sidebar" class="w-64 bg-white shadow-lg min-h-screen fixed lg:static transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-40">
+    <!-- Bouton fermer (mobile uniquement) -->
+    <button id="closeSidebarButton" class="lg:hidden absolute top-4 right-4 text-gray-600 hover:text-red-600">
+        <i class="fas fa-times text-2xl"></i>
+    </button>
+    
+    <nav class="mt-16 lg:mt-8">
         <div class="px-4 space-y-2">
             <a href="/dashboard.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
                 <i class="fas fa-tachometer-alt mr-3"></i>
@@ -79,43 +93,50 @@ if (!isset($_SESSION['user_id'])) {
     </nav>
 </aside>
 
-<!-- Script de debug pour la sidebar -->
+<!-- Script pour le menu mobile responsive -->
 <script>
-    console.log('🔍 DEBUG: Sidebar chargée');
-    console.log('👤 User role:', '<?php echo $_SESSION['user_role']; ?>');
-    console.log('🔐 User logged in:', <?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>);
+    // Gestion du menu mobile
+    const mobileMenuButton = document.getElementById('mobileMenuButton');
+    const closeSidebarButton = document.getElementById('closeSidebarButton');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('mobileMenuOverlay');
     
-    // Log spécifique pour le lien Patientes
-    const patientesLink = document.getElementById('sidebar-patientes-link');
-    if (patientesLink) {
-        console.log('🔗 Lien Patientes trouvé:', patientesLink.href);
-        console.log('📝 Texte du lien:', patientesLink.textContent.trim());
-        
-        // Intercepter le clic sur le lien Patientes
-        patientesLink.addEventListener('click', function(e) {
-            console.log('🖱️ CLIC sur lien Patientes dans sidebar');
-            console.log('📍 URL de destination:', this.href);
-            console.log('⏰ Timestamp:', new Date().toISOString());
-            console.log('🎯 Élément cliqué:', e.target);
-            console.log('📱 Événement complet:', e);
-            
-            // Vérifier si le lien est valide
-            if (!this.href || this.href === '#' || this.href === window.location.href) {
-                console.error('❌ Lien Patientes invalide:', this.href);
-                e.preventDefault();
-                return false;
-            }
-            
-            console.log('✅ Lien Patientes valide, navigation autorisée');
-        });
-    } else {
-        console.error('❌ Lien Patientes non trouvé dans la sidebar');
+    function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Empêcher le scroll
     }
     
-    // Log tous les liens de la sidebar
-    const sidebarLinks = document.querySelectorAll('aside a');
-    console.log('🔗 Total liens sidebar:', sidebarLinks.length);
-    sidebarLinks.forEach((link, index) => {
-        console.log(`🔗 Sidebar lien ${index + 1}:`, link.href, link.textContent.trim());
+    function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+        document.body.style.overflow = 'auto'; // Réactiver le scroll
+    }
+    
+    // Ouvrir le menu
+    if (mobileMenuButton) {
+        mobileMenuButton.addEventListener('click', openSidebar);
+    }
+    
+    // Fermer le menu
+    if (closeSidebarButton) {
+        closeSidebarButton.addEventListener('click', closeSidebar);
+    }
+    
+    // Fermer en cliquant sur l'overlay
+    if (overlay) {
+        overlay.addEventListener('click', closeSidebar);
+    }
+    
+    // Fermer le menu après un clic sur un lien (mobile uniquement)
+    const sidebarLinks = sidebar.querySelectorAll('a');
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth < 1024) { // lg breakpoint
+                closeSidebar();
+            }
+        });
     });
+    
+    console.log('📱 Menu mobile responsive initialisé');
 </script> 

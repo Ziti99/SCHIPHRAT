@@ -178,20 +178,21 @@ error_log("📊 DEBUG: Found " . count($patientes) . " patientes");
                 <?php endif; ?>
                 
                 <!-- En-tête harmonisé -->
-                <div class="flex justify-between items-center mb-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-900 mb-2">Gestion des Patientes</h1>
-                        <p class="text-gray-600">Gérez les dossiers des patientes</p>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">Gestion des Patientes</h1>
+                        <p class="text-sm sm:text-base text-gray-600">Gérez les dossiers des patientes</p>
                     </div>
-                    <a href="patientes_create.php" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center">
+                    <a href="patientes_create.php" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center whitespace-nowrap text-sm sm:text-base">
                         <i class="fas fa-plus mr-2"></i>
-                        Nouvelle Patiente
+                        <span class="hidden sm:inline">Nouvelle Patiente</span>
+                        <span class="sm:hidden">Nouvelle</span>
                     </a>
                 </div>
 
                 <!-- Formulaire de recherche -->
-                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-                    <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6">
+                    <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                         <div>
                             <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-search mr-2"></i>Rechercher par nom/prénom
@@ -211,8 +212,8 @@ error_log("📊 DEBUG: Found " . count($patientes) . " patientes");
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                         </div>
                         
-                        <div class="flex items-end">
-                            <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-end sm:col-span-2 lg:col-span-1">
+                            <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 sm:px-6 rounded-lg hover:shadow-lg transition-all duration-300 text-sm sm:text-base">
                                 <i class="fas fa-search mr-2"></i>Rechercher
                             </button>
                         </div>

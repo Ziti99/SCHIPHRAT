@@ -127,23 +127,24 @@ $medecins = $db->fetchAll("
         <!-- Sidebar -->
         <?php include __DIR__ . '/includes/sidebar.php'; ?>
         <!-- Contenu principal -->
-        <main class="flex-1 p-8">
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-0">
             <!-- En-tête -->
-            <div class="flex justify-between items-center mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
                 <div>
-                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Consultations prénatales</h2>
-                    <p class="text-gray-600"><?php echo $total; ?> consultation(s) enregistrée(s)</p>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">Consultations prénatales</h2>
+                    <p class="text-sm sm:text-base text-gray-600"><?php echo $total; ?> consultation(s) enregistrée(s)</p>
                 </div>
-                <a href="/consultations/ajouter.php" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center">
+                <a href="/consultations/ajouter.php" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center whitespace-nowrap text-sm sm:text-base">
                     <i class="fas fa-plus mr-2"></i>
-                    Nouvelle consultation
+                    <span class="hidden sm:inline">Nouvelle consultation</span>
+                    <span class="sm:hidden">Nouvelle</span>
                 </a>
             </div>
 
             <!-- Filtres et recherche -->
-            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
                 <form method="GET" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         <div>
                             <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-search mr-2"></i>Rechercher
@@ -187,13 +188,13 @@ $medecins = $db->fetchAll("
                         </div>
                     </div>
                     
-                    <div class="flex justify-between items-center">
-                        <button type="submit" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors">
+                    <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+                        <button type="submit" class="bg-purple-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:bg-purple-700 transition-colors text-sm sm:text-base">
                             <i class="fas fa-search mr-2"></i>
                             Filtrer
                         </button>
                         <?php if (!empty($search) || !empty($medecin_id) || !empty($date_consultation)): ?>
-                            <a href="/consultations.php" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors">
+                            <a href="/consultations.php" class="bg-gray-500 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:bg-gray-600 transition-colors text-center text-sm sm:text-base">
                                 <i class="fas fa-times mr-2"></i>
                                 Effacer les filtres
                             </a>
