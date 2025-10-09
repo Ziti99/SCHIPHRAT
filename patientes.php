@@ -265,19 +265,19 @@ error_log("📊 DEBUG: Found " . count($patientes) . " patientes");
                                     <?php foreach ($patientes as $patiente): ?>
                                         <tr class="hover:bg-gray-50">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                <?php echo htmlspecialchars($patiente['nom']); ?>
+                                                <?php echo htmlspecialchars($patiente['nom'] ?? ''); ?>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                <?php echo htmlspecialchars($patiente['prenom']); ?>
+                                                <?php echo htmlspecialchars($patiente['prenom'] ?? ''); ?>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                <?php echo htmlspecialchars($patiente['age']); ?> ans
+                                                <?php echo htmlspecialchars($patiente['age'] ?? '0'); ?> ans
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 <?php echo htmlspecialchars($patiente['nationalite'] ?? 'Non défini'); ?>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                <?php echo htmlspecialchars($patiente['telephone']); ?>
+                                                <?php echo htmlspecialchars($patiente['telephone'] ?? ''); ?>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <a href="patientes_view.php?id=<?php echo $patiente['id']; ?>" class="text-purple-600 hover:text-purple-900 mr-3">
