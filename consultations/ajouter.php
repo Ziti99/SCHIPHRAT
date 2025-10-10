@@ -467,6 +467,14 @@ $actes = $db->fetchAll("
             sagefemmeSelect.addEventListener('change', function() {
                 handlePractitionerSelection(this, medecinSelect);
             });
+            
+            // Vérifier l'état initial au chargement (pré-sélection)
+            if (medecinSelect.value) {
+                handlePractitionerSelection(medecinSelect, sagefemmeSelect);
+            }
+            if (sagefemmeSelect.value) {
+                handlePractitionerSelection(sagefemmeSelect, medecinSelect);
+            }
 
             form.addEventListener('submit', function(e) {
                 let isValid = true;
