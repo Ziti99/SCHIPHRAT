@@ -244,7 +244,8 @@ $actes = $db->fetchAll("
                                 <select id="medecin_id" name="medecin_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">Sélectionner un médecin</option>
                                     <?php foreach ($medecins as $medecin): ?>
-                                        <option value="<?php echo $medecin['id']; ?>">
+                                        <option value="<?php echo $medecin['id']; ?>" 
+                                                <?php echo ($_SESSION['user_role'] === 'medecin' && $_SESSION['user_id'] == $medecin['id']) ? 'selected' : ''; ?>>
                                             Dr. <?php echo htmlspecialchars($medecin['prenom'] . ' ' . $medecin['nom']); ?>
                                             <?php if ($medecin['specialite']): ?>
                                                 (<?php echo htmlspecialchars($medecin['specialite']); ?>)
@@ -260,7 +261,8 @@ $actes = $db->fetchAll("
                                 <select id="sagefemme_id" name="sagefemme_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">Sélectionner une sage-femme</option>
                                     <?php foreach ($sagefemmes as $sagefemme): ?>
-                                        <option value="<?php echo $sagefemme['id']; ?>">
+                                        <option value="<?php echo $sagefemme['id']; ?>"
+                                                <?php echo ($_SESSION['user_role'] === 'sage_femme' && $_SESSION['user_id'] == $sagefemme['id']) ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($sagefemme['prenom'] . ' ' . $sagefemme['nom']); ?>
                                             <?php if ($sagefemme['specialite']): ?>
                                                 (<?php echo htmlspecialchars($sagefemme['specialite']); ?>)
