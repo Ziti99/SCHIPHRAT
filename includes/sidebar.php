@@ -50,27 +50,6 @@ if (!isset($_SESSION['user_id'])) {
                 <i class="fas fa-chart-line mr-3"></i>
                 Statistiques
             </a>
-            <?php if ($_SESSION['user_role'] === 'secretaire'): ?>
-            <a href="/permanence.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
-                <i class="fas fa-calendar-day mr-3"></i>
-                Permanence du Jour
-            </a>
-            <?php endif; ?>
-            <?php if ($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'caissiere'): ?>
-            <div class="border-t border-gray-200 pt-4 mt-4">
-                <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Permanences</p>
-                <?php if ($_SESSION['user_role'] === 'admin'): ?>
-                                        <a href="/permanences.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
-                            <i class="fas fa-check-circle mr-3"></i>
-                            Validation permanences
-                </a>
-                <?php endif; ?>
-                                        <a href="/permanences_vue.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
-                            <i class="fas fa-eye mr-3"></i>
-                            Vue des permanences
-                </a>
-            </div>
-            <?php endif; ?>
             <?php if ($_SESSION['user_role'] === 'admin'): ?>
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Administration</p>
@@ -83,8 +62,7 @@ if (!isset($_SESSION['user_id'])) {
                     Gestion des actes
                 </a>
             </div>
-            <?php endif; ?>
-            <?php if (in_array($_SESSION['user_role'], ['admin', 'caissiere'])): ?>
+            <?php endif; ?>            <?php if (in_array($_SESSION['user_role'], ['admin', 'caissiere'])): ?>
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Gestion de Caisse</p>
                 <a href="/caissiere_dashboard.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
