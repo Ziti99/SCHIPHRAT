@@ -18,7 +18,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 </div>
                 <div>
                     <h1 class="text-base sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                        Clinique Obstétrique
+                        Clinique Obstétrique SHIPHRAT
                     </h1>
                     <?php if (isset($navbarSubtitle) && $navbarSubtitle): ?>
                         <p class="hidden sm:block text-gray-500 text-xs sm:text-sm font-medium mt-0.5"><?php echo htmlspecialchars($navbarSubtitle); ?></p>

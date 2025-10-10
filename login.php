@@ -55,7 +55,7 @@ if (isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - Clinique Obstétrique</title>
+    <title>Connexion - Clinique Obstétrique SHIPHRAT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -80,7 +80,7 @@ if (isset($_SESSION['user_id'])) {
                 <i class="fas fa-heartbeat text-white text-2xl"></i>
             </div>
             <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Clinique Obstétrique Shiprat
+                Clinique Obstétrique SHIPHRAT Shiprat
             </h1>
             <p class="text-sm sm:text-base text-gray-600 mt-2">Connexion au système</p>
         </div>
