@@ -84,7 +84,7 @@ if (!isset($_SESSION['user_id'])) {
                 </a>
             </div>
             <?php endif; ?>
-            <?php if ($_SESSION['user_role'] === 'caissiere'): ?>
+            <?php if (in_array($_SESSION['user_role'], ['admin', 'caissiere'])): ?>
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Gestion de Caisse</p>
                 <a href="/caissiere_dashboard.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
@@ -101,7 +101,7 @@ if (!isset($_SESSION['user_id'])) {
                 </a>
                 <a href="/caissiere_statistiques.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                     <i class="fas fa-chart-bar mr-3"></i>
-                    Statistiques
+                    Statistiques Caisse
                 </a>
             </div>
             <?php endif; ?>
