@@ -93,11 +93,15 @@ if (!isset($_SESSION['user_id'])) {
                 </a>
                 <a href="/caissiere_consultations.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
                     <i class="fas fa-list-alt mr-3"></i>
-                    Consultations
+                    Consultations & Paiements
                 </a>
-                <a href="/caissiere_consultations.php?statut=en_attente" class="flex items-center px-4 py-3 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors">
-                    <i class="fas fa-exclamation-triangle mr-3"></i>
-                    Paiements en Attente
+                <a href="/caissiere_recherche.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+                    <i class="fas fa-search mr-3"></i>
+                    Rechercher Patiente
+                </a>
+                <a href="/caissiere_statistiques.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                    <i class="fas fa-chart-bar mr-3"></i>
+                    Statistiques
                 </a>
             </div>
             <?php endif; ?>
