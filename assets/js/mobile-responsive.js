@@ -8,6 +8,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // Détection mobile
     const isMobile = window.innerWidth < 768;
     
+    // Amélioration du scroll du sidebar
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+        // Smooth scroll
+        sidebar.style.scrollBehavior = 'smooth';
+        
+        // Sur mobile, fermer le menu en touchant en dehors
+        const overlay = document.getElementById('mobileMenuOverlay');
+        if (overlay) {
+            overlay.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            });
+        }
+    }
+    
     // Amélioration du scroll des tableaux sur mobile
     if (isMobile) {
         const tables = document.querySelectorAll('.overflow-x-auto');

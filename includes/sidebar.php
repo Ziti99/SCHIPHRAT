@@ -9,14 +9,14 @@ if (!isset($_SESSION['user_id'])) {
 <!-- Overlay pour fermer le menu sur mobile -->
 <div id="mobileMenuOverlay" class="hidden lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"></div>
 
-<!-- Sidebar responsive -->
-<aside id="sidebar" class="w-64 bg-white shadow-lg min-h-screen fixed lg:static transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-40 top-0 lg:top-auto">
+<!-- Sidebar responsive avec scroll -->
+<aside id="sidebar" class="w-64 bg-white shadow-lg h-screen fixed lg:static transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-40 top-0 lg:top-auto overflow-y-auto">
     <!-- Bouton fermer (mobile uniquement) -->
-    <button id="closeSidebarButton" class="lg:hidden absolute top-4 right-4 text-gray-600 hover:text-red-600">
+    <button id="closeSidebarButton" class="lg:hidden absolute top-4 right-4 text-gray-600 hover:text-red-600 z-50">
         <i class="fas fa-times text-2xl"></i>
     </button>
     
-    <nav class="mt-16 lg:mt-8">
+    <nav class="mt-16 lg:mt-8 pb-8">
         <div class="px-4 space-y-2">
             <a href="/dashboard.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
                 <i class="fas fa-tachometer-alt mr-3"></i>

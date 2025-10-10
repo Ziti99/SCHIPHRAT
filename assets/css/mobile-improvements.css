@@ -3,6 +3,29 @@
  * Complément au design existant - NE REMPLACE RIEN
  */
 
+/* Sidebar avec scroll fluide */
+#sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+}
+
+#sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+    background-color: rgba(139, 92, 246, 0.3);
+    border-radius: 3px;
+}
+
+#sidebar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(139, 92, 246, 0.5);
+}
+
 /* Optimisation des tableaux sur mobile */
 @media (max-width: 768px) {
     /* Réduire le padding des cellules de tableau sur mobile */
@@ -58,6 +81,42 @@
     form .space-y-6 > * {
         margin-top: 1rem !important;
     }
+    
+    /* Grilles en 1 colonne sur mobile */
+    .grid.md\:grid-cols-2, .grid.md\:grid-cols-3, .grid.md\:grid-cols-4 {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* Padding réduit sur mobile */
+    .p-8 {
+        padding: 1rem !important;
+    }
+    
+    .px-8 {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+    
+    /* Titres plus petits sur mobile */
+    h1 {
+        font-size: 1.5rem !important;
+    }
+    
+    h2 {
+        font-size: 1.25rem !important;
+    }
+    
+    /* Cards plus compactes */
+    .rounded-xl, .rounded-2xl {
+        border-radius: 0.5rem !important;
+    }
+    
+    /* Navbar sticky optimisée */
+    nav.sticky {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+    }
 }
 
 /* Mode paysage mobile */
@@ -91,6 +150,51 @@
     
     .hover\:shadow-xl:active, .hover\:shadow-lg:active {
         transform: scale(0.98);
+    }
+}
+
+/* Optimisation containers mobiles */
+@media (max-width: 640px) {
+    /* Max width sur petits écrans */
+    .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl {
+        max-width: 100% !important;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    /* Shadow réduite sur mobile pour économiser ressources */
+    .shadow-2xl, .shadow-xl {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Espacement des sections */
+    .space-y-6 > * + * {
+        margin-top: 1rem !important;
+    }
+    
+    /* Boutons full-width sur très petits écrans */
+    .flex.gap-4 {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+    }
+    
+    .flex.gap-4 > * {
+        width: 100% !important;
+    }
+}
+
+/* Performance mobile */
+@media (max-width: 768px) {
+    /* Accélération matérielle */
+    #sidebar, nav, .modal {
+        transform: translateZ(0);
+        will-change: transform;
+    }
+    
+    /* Réduction des animations pour économiser batterie */
+    * {
+        animation-duration: 0.2s !important;
+        transition-duration: 0.2s !important;
     }
 }
 
