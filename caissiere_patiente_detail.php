@@ -8,11 +8,16 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'caissiere') {
 require_once __DIR__ . '/config/database.php';
 $db = new Database();
 
-// Vérifier si les tables de paiements existent
+// Vérifier si les tables de paiements existent, sinon afficher un message clair
+$tables_exist = true;
 try {
-    $db->query("SELECT 1 FROM paiements LIMIT 1");
+    $db->query("SHOW TABLES LIKE 'paiements'");
+    $db->query("SHOW TABLES LIKE 'historique_paiements'");
 } catch (PDOException $e) {
-    // Tables non créées, rediriger vers l'installation
+    $tables_exist = false;
+}
+
+if (!$tables_exist) {
     ?>
     <!DOCTYPE html>
     <html lang="fr">
@@ -23,16 +28,33 @@ try {
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     </head>
-    <body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
-        <div class="max-w-md w-full bg-white rounded-lg shadow-xl p-8 text-center">
-            <i class="fas fa-exclamation-triangle text-6xl text-orange-500 mb-4"></i>
-            <h1 class="text-2xl font-bold text-gray-900 mb-4">Installation Requise</h1>
-            <p class="text-gray-600 mb-6">
-                Le système de caisse n'est pas encore installé. Veuillez exécuter le script d'installation pour créer les tables nécessaires.
-            </p>
-            <a href="/setup_caisse_system.php" class="inline-block bg-green-500 text-white px-8 py-3 rounded-lg hover:bg-green-600 transition-colors font-semibold">
-                <i class="fas fa-rocket mr-2"></i>Installer Maintenant
-            </a>
+    <body class="bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center min-h-screen p-4">
+        <div class="max-w-2xl w-full bg-white rounded-2xl shadow-2xl p-8">
+            <div class="text-center mb-6">
+                <i class="fas fa-exclamation-triangle text-7xl text-orange-500 mb-4"></i>
+                <h1 class="text-3xl font-bold text-gray-900 mb-3">⚠️ Installation Requise</h1>
+                <p class="text-gray-600 text-lg mb-4">
+                    Le système de caisse n'est pas encore installé sur votre base de données Railway.
+                </p>
+            </div>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                <h2 class="font-semibold text-blue-900 mb-3">📋 Ce qui va être créé :</h2>
+                <ul class="text-sm text-blue-800 space-y-2">
+                    <li>✓ Table <code class="bg-blue-100 px-2 py-1 rounded">paiements</code> - Gestion des paiements</li>
+                    <li>✓ Table <code class="bg-blue-100 px-2 py-1 rounded">historique_paiements</code> - Paiements partiels</li>
+                    <li>✓ Rôle <strong>caissiere</strong> dans la table users</li>
+                    <li>✓ Compte caissière : <strong>caissiere1 / password</strong></li>
+                    <li>✓ Synchronisation des consultations existantes</li>
+                </ul>
+            </div>
+
+            <div class="text-center">
+                <a href="/setup_caisse_system.php" class="inline-block bg-gradient-to-r from-green-500 to-emerald-500 text-white px-10 py-4 rounded-xl hover:shadow-xl transition-all transform hover:scale-105 font-bold text-lg">
+                    <i class="fas fa-rocket mr-2"></i>Lancer l'Installation Maintenant
+                </a>
+                <p class="text-xs text-gray-500 mt-4">Installation en 1 clic • Aucune perte de données</p>
+            </div>
         </div>
     </body>
     </html>
