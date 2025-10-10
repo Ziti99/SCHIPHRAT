@@ -8,6 +8,15 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'caissiere') {
 require_once __DIR__ . '/config/database.php';
 $db = new Database();
 
+// Vérifier si les tables de paiements existent
+try {
+    $db->query("SELECT 1 FROM paiements LIMIT 1");
+} catch (Exception $e) {
+    // Tables non créées, rediriger vers l'installation
+    header('Location: /setup_caisse_system.php');
+    exit;
+}
+
 $paiement_id = $_GET['id'] ?? 0;
 $message = '';
 $error = '';
