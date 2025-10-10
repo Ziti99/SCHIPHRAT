@@ -274,8 +274,8 @@ $medecins = $db->fetchAll("
                                         <td class="px-6 py-4">
                                             <div class="text-sm text-gray-900">
                                                 <?php 
-                                                $acte_pose = $consultation['acte_pose'];
-                                                if (strlen($acte_pose) > 50) {
+                                                $acte_pose = $consultation['acte_pose'] ?? '';
+                                                if ($acte_pose && strlen($acte_pose) > 50) {
                                                     echo htmlspecialchars(substr($acte_pose, 0, 50)) . '...';
                                                 } else {
                                                     echo htmlspecialchars($acte_pose ?: 'Non spécifié');
