@@ -26,6 +26,34 @@
     background-color: rgba(139, 92, 246, 0.5);
 }
 
+/* Bouton burger mobile plus visible */
+#mobileMenuButton {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Animation bouton fermer sidebar */
+#closeSidebarButton {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+#closeSidebarButton:active {
+    animation: none;
+}
+
+/* Overlay amélioration visuelle */
+#mobileMenuOverlay {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
 /* Optimisation des tableaux sur mobile */
 @media (max-width: 768px) {
     /* Réduire le padding des cellules de tableau sur mobile */

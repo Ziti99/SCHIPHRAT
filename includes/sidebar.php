@@ -6,14 +6,14 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 ?>
-<!-- Overlay pour fermer le menu sur mobile -->
-<div id="mobileMenuOverlay" class="hidden lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+<!-- Overlay pour fermer le menu sur mobile - Plus visible -->
+<div id="mobileMenuOverlay" class="hidden lg:hidden fixed inset-0 bg-black bg-opacity-60 z-40 backdrop-blur-sm transition-opacity duration-300"></div>
 
 <!-- Sidebar responsive avec scroll -->
-<aside id="sidebar" class="w-64 bg-white shadow-lg h-screen fixed lg:static transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-40 top-0 lg:top-auto overflow-y-auto">
-    <!-- Bouton fermer (mobile uniquement) -->
-    <button id="closeSidebarButton" class="lg:hidden absolute top-4 right-4 text-gray-600 hover:text-red-600 z-50">
-        <i class="fas fa-times text-2xl"></i>
+<aside id="sidebar" class="w-64 bg-white shadow-lg h-screen fixed lg:static transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-50 top-0 lg:top-auto overflow-y-auto">
+    <!-- Bouton fermer (mobile uniquement) - Design amélioré -->
+    <button id="closeSidebarButton" class="lg:hidden absolute top-4 right-4 bg-red-500 text-white hover:bg-red-600 w-10 h-10 rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-all z-50">
+        <i class="fas fa-times text-lg"></i>
     </button>
     
     <nav class="mt-16 lg:mt-8 pb-8">

@@ -11,9 +11,9 @@ if (session_status() === PHP_SESSION_NONE) {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
             <div class="flex items-center space-x-2 sm:space-x-3">
-                <!-- Bouton menu mobile -->
-                <button id="mobileMenuButton" class="lg:hidden text-purple-600 hover:text-purple-700 p-2 -ml-2">
-                    <i class="fas fa-bars text-2xl"></i>
+                <!-- Bouton menu mobile amélioré -->
+                <button id="mobileMenuButton" class="lg:hidden text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 p-3 rounded-lg shadow-lg active:scale-95 transition-all -ml-2">
+                    <i class="fas fa-bars text-xl"></i>
                 </button>
                 
                 <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
