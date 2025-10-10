@@ -84,6 +84,23 @@ if (!isset($_SESSION['user_id'])) {
                 </a>
             </div>
             <?php endif; ?>
+            <?php if ($_SESSION['user_role'] === 'caissiere'): ?>
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Gestion de Caisse</p>
+                <a href="/caissiere_dashboard.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                    <i class="fas fa-cash-register mr-3"></i>
+                    Dashboard Caisse
+                </a>
+                <a href="/caissiere_consultations.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                    <i class="fas fa-list-alt mr-3"></i>
+                    Consultations
+                </a>
+                <a href="/caissiere_consultations.php?statut=en_attente" class="flex items-center px-4 py-3 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors">
+                    <i class="fas fa-exclamation-triangle mr-3"></i>
+                    Paiements en Attente
+                </a>
+            </div>
+            <?php endif; ?>
         </div>
     </nav>
 </aside>
