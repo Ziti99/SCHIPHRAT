@@ -19,35 +19,35 @@ $db = new Database();
 // Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        // Validation des données
+        // Validation des données - Convertir les chaînes vides en NULL pour les champs INT
         $patiente_id = $_POST['patiente_id'] ?? '';
-        $medecin_id = $_POST['medecin_id'] ?? '';
-        $sagefemme_id = $_POST['sagefemme_id'] ?? '';
+        $medecin_id = !empty($_POST['medecin_id']) ? $_POST['medecin_id'] : null;
+        $sagefemme_id = !empty($_POST['sagefemme_id']) ? $_POST['sagefemme_id'] : null;
         $date_consultation = $_POST['date_consultation'] ?? '';
-        $tension_arterielle = $_POST['tension_arterielle'] ?? '';
-        $poids = $_POST['poids'] ?? '';
-        $hauteur_uterine = $_POST['hauteur_uterine'] ?? '';
-        $position_foetus = $_POST['position_foetus'] ?? '';
-        $frequence_cardiaque_foetale = $_POST['frequence_cardiaque_foetale'] ?? '';
-        $observations = $_POST['observations'] ?? '';
-        $recommandations = $_POST['recommandations'] ?? '';
+        $tension_arterielle = $_POST['tension_arterielle'] ?? null;
+        $poids = !empty($_POST['poids']) ? $_POST['poids'] : null;
+        $hauteur_uterine = !empty($_POST['hauteur_uterine']) ? $_POST['hauteur_uterine'] : null;
+        $position_foetus = $_POST['position_foetus'] ?? null;
+        $frequence_cardiaque_foetale = !empty($_POST['frequence_cardiaque_foetale']) ? $_POST['frequence_cardiaque_foetale'] : null;
+        $observations = $_POST['observations'] ?? null;
+        $recommandations = $_POST['recommandations'] ?? null;
 
         if (empty($patiente_id) || empty($date_consultation)) {
             throw new Exception('Les champs obligatoires doivent être remplis');
         }
 
         // Vérifier qu'un médecin OU une sage-femme est sélectionné (pas les deux)
-        if (empty($medecin_id) && empty($sagefemme_id)) {
+        if ($medecin_id === null && $sagefemme_id === null) {
             throw new Exception('Veuillez sélectionner un médecin OU une sage-femme');
         }
 
-        if (!empty($medecin_id) && !empty($sagefemme_id)) {
+        if ($medecin_id !== null && $sagefemme_id !== null) {
             throw new Exception('Veuillez sélectionner soit un médecin soit une sage-femme, pas les deux');
         }
 
         // Déterminer qui est le praticien (médecin ou sage-femme)
-        $praticien_id = !empty($medecin_id) ? $medecin_id : $sagefemme_id;
-        $praticien_type = !empty($medecin_id) ? 'medecin' : 'sagefemme';
+        $praticien_id = $medecin_id !== null ? $medecin_id : $sagefemme_id;
+        $praticien_type = $medecin_id !== null ? 'medecin' : 'sagefemme';
 
         // Insertion de la consultation
         $db->query("
