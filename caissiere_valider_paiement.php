@@ -61,7 +61,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Mise à jour du paiement
         $nouveau_montant_paye = $paiement['montant_paye'] + $montant_verse;
         $nouveau_montant_restant = $paiement['montant_total'] - $nouveau_montant_paye;
-        $nouveau_statut = $nouveau_montant_restant <= 0 ? 'paye_total' : 'paye_partiel';
+        
+        // S'assurer que le montant restant ne soit jamais négatif
+        if ($nouveau_montant_restant < 0) {
+            $nouveau_montant_restant = 0;
+        }
+        
+        // Déterminer le statut : paye_total si montant restant <= 0, sinon paye_partiel
+        $nouveau_statut = ($nouveau_montant_restant <= 0) ? 'paye_total' : 'paye_partiel';
         
         $db->query("
             UPDATE paiements SET
@@ -209,12 +216,19 @@ if (isset($_GET['success'])) {
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     Montant versé <span class="text-red-500">*</span>
                                 </label>
-                                <input type="number" name="montant_verse" step="0.01" 
+                                <input type="number" name="montant_verse" id="montant_verse" step="0.01" 
                                        max="<?php echo $paiement['montant_restant']; ?>"
                                        value="<?php echo $paiement['montant_restant']; ?>"
                                        required
+                                       oninput="updatePaiementStatus()"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg font-bold">
-                                <p class="text-xs text-gray-500 mt-1">Maximum: <?php echo number_format($paiement['montant_restant'], 0, ',', ' '); ?> FCFA</p>
+                                <div class="flex justify-between items-center mt-2">
+                                    <p class="text-xs text-gray-500">Maximum: <?php echo number_format($paiement['montant_restant'], 0, ',', ' '); ?> FCFA</p>
+                                    <p id="reste_apres" class="text-sm font-semibold"></p>
+                                </div>
+                                <div id="statut_paiement" class="mt-2 p-3 rounded-lg hidden">
+                                    <p class="text-sm font-semibold"></p>
+                                </div>
                             </div>
 
                             <div>
@@ -272,6 +286,48 @@ if (isset($_GET['success'])) {
             </div>
         </div>
     </div>
+
+    <script>
+        const montantRestant = <?php echo $paiement['montant_restant']; ?>;
+        const montantTotal = <?php echo $paiement['montant_total']; ?>;
+        const dejaPaye = <?php echo $paiement['montant_paye']; ?>;
+
+        function updatePaiementStatus() {
+            const montantVerse = parseFloat(document.getElementById('montant_verse').value) || 0;
+            const nouveauMontantPaye = dejaPaye + montantVerse;
+            const nouveauMontantRestant = Math.max(0, montantTotal - nouveauMontantPaye);
+            
+            const resteApresEl = document.getElementById('reste_apres');
+            const statutPaiementEl = document.getElementById('statut_paiement');
+            
+            // Afficher le reste après paiement
+            if (montantVerse > 0) {
+                resteApresEl.textContent = 'Reste après: ' + nouveauMontantRestant.toLocaleString('fr-FR') + ' FCFA';
+                resteApresEl.className = nouveauMontantRestant > 0 ? 'text-sm font-semibold text-orange-600' : 'text-sm font-semibold text-green-600';
+                
+                // Afficher le statut du paiement
+                statutPaiementEl.classList.remove('hidden');
+                
+                if (nouveauMontantRestant <= 0) {
+                    statutPaiementEl.className = 'mt-2 p-3 rounded-lg bg-green-50 border border-green-200';
+                    statutPaiementEl.querySelector('p').innerHTML = '<i class="fas fa-check-circle mr-2"></i>✓ Ce paiement sera marqué comme <strong>PAYÉ INTÉGRALEMENT</strong>';
+                    statutPaiementEl.querySelector('p').className = 'text-sm font-semibold text-green-700';
+                } else {
+                    statutPaiementEl.className = 'mt-2 p-3 rounded-lg bg-yellow-50 border border-yellow-200';
+                    statutPaiementEl.querySelector('p').innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>⚠ Paiement partiel - Il restera ' + nouveauMontantRestant.toLocaleString('fr-FR') + ' FCFA à payer';
+                    statutPaiementEl.querySelector('p').className = 'text-sm font-semibold text-yellow-700';
+                }
+            } else {
+                resteApresEl.textContent = '';
+                statutPaiementEl.classList.add('hidden');
+            }
+        }
+
+        // Initialiser l'affichage au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePaiementStatus();
+        });
+    </script>
 </body>
 </html>
 
