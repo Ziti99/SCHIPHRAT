@@ -66,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         error_log("Consultation créée avec succès, ID: " . $consultation_id);
         
         // Enregistrer les actes médicaux sélectionnés
+        $montant_total_actes = 0;
         if (isset($_POST['actes']) && is_array($_POST['actes'])) {
             foreach ($_POST['actes'] as $acte_id) {
                 // Récupérer le montant de l'acte
@@ -75,9 +76,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         INSERT INTO consultation_actes (consultation_id, acte_id, quantite, montant)
                         VALUES (?, ?, 1, ?)
                     ", [$consultation_id, $acte_id, $acte['montant']]);
+                    $montant_total_actes += $acte['montant'];
                     error_log("Acte médical $acte_id enregistré pour la consultation $consultation_id");
                 }
             }
+        }
+        
+        // Créer automatiquement une entrée de paiement pour la caisse
+        try {
+            // Vérifier si la table paiements existe
+            $db->query("SELECT 1 FROM paiements LIMIT 1");
+            
+            // Créer le paiement en statut "en_attente"
+            $db->query("
+                INSERT INTO paiements (
+                    consultation_id, 
+                    patiente_id, 
+                    montant_total, 
+                    montant_paye, 
+                    montant_restant, 
+                    statut,
+                    created_at
+                ) VALUES (?, ?, ?, 0, ?, 'en_attente', NOW())
+            ", [
+                $consultation_id,
+                $patiente_id,
+                $montant_total_actes,
+                $montant_total_actes
+            ]);
+            error_log("Paiement créé automatiquement pour consultation $consultation_id - Montant: $montant_total_actes FCFA");
+        } catch (PDOException $e) {
+            // Table paiements n'existe pas encore, on ignore silencieusement
+            error_log("Table paiements non disponible - Paiement non créé pour consultation $consultation_id");
         }
         
         // Redirection vers la page de détails
