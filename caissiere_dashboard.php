@@ -11,8 +11,7 @@ $db = new Database();
 // Vérifier si les tables de paiements existent
 try {
     $db->query("SELECT 1 FROM paiements LIMIT 1");
-} catch (Exception $e) {
-    // Tables non créées, rediriger vers l'installation
+} catch (PDOException $e) {
     header('Location: /setup_caisse_system.php');
     exit;
 }

@@ -11,9 +11,32 @@ $db = new Database();
 // Vérifier si les tables de paiements existent
 try {
     $db->query("SELECT 1 FROM paiements LIMIT 1");
-} catch (Exception $e) {
+} catch (PDOException $e) {
     // Tables non créées, rediriger vers l'installation
-    header('Location: /setup_caisse_system.php');
+    ?>
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Installation Requise</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
+        <div class="max-w-md w-full bg-white rounded-lg shadow-xl p-8 text-center">
+            <i class="fas fa-exclamation-triangle text-6xl text-orange-500 mb-4"></i>
+            <h1 class="text-2xl font-bold text-gray-900 mb-4">Installation Requise</h1>
+            <p class="text-gray-600 mb-6">
+                Le système de caisse n'est pas encore installé. Veuillez exécuter le script d'installation pour créer les tables nécessaires.
+            </p>
+            <a href="/setup_caisse_system.php" class="inline-block bg-green-500 text-white px-8 py-3 rounded-lg hover:bg-green-600 transition-colors font-semibold">
+                <i class="fas fa-rocket mr-2"></i>Installer Maintenant
+            </a>
+        </div>
+    </body>
+    </html>
+    <?php
     exit;
 }
 
