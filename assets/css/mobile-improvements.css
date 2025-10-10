@@ -1,0 +1,96 @@
+/**
+ * Améliorations Mobile pour Clinique SHIPHRAT
+ * Complément au design existant - NE REMPLACE RIEN
+ */
+
+/* Optimisation des tableaux sur mobile */
+@media (max-width: 768px) {
+    /* Réduire le padding des cellules de tableau sur mobile */
+    table td, table th {
+        padding: 0.5rem !important;
+        font-size: 0.875rem;
+    }
+    
+    /* Cacher certaines colonnes moins importantes sur mobile */
+    .mobile-hide {
+        display: none !important;
+    }
+    
+    /* Scroll horizontal plus visible */
+    .overflow-x-auto {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    
+    /* Amélioration des cartes sur mobile */
+    .card-mobile {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Amélioration du menu burger */
+@media (max-width: 1024px) {
+    /* Animation fluide du sidebar mobile */
+    aside {
+        transition: transform 0.3s ease-in-out;
+    }
+    
+    /* Overlay plus visible */
+    #mobileMenuOverlay {
+        backdrop-filter: blur(2px);
+    }
+}
+
+/* Boutons tactiles plus grands sur mobile */
+@media (max-width: 640px) {
+    button, .btn, a.btn {
+        min-height: 44px; /* Taille recommandée pour le touch */
+        font-size: 0.9rem;
+    }
+    
+    /* Input plus grands */
+    input, select, textarea {
+        min-height: 44px;
+        font-size: 16px; /* Empêche le zoom auto sur iOS */
+    }
+    
+    /* Espacement des formulaires */
+    form .space-y-6 > * {
+        margin-top: 1rem !important;
+    }
+}
+
+/* Mode paysage mobile */
+@media (max-width: 896px) and (orientation: landscape) {
+    /* Réduire les hauteurs pour maximiser l'espace */
+    .min-h-screen {
+        min-height: auto !important;
+    }
+}
+
+/* Amélioration des modals sur mobile */
+@media (max-width: 640px) {
+    .modal-content {
+        max-width: 95vw !important;
+        max-height: 90vh !important;
+        overflow-y: auto;
+    }
+}
+
+/* Touch feedback */
+@media (hover: none) and (pointer: coarse) {
+    /* Appareils tactiles */
+    a, button {
+        -webkit-tap-highlight-color: rgba(139, 92, 246, 0.1);
+    }
+    
+    /* Cartes cliquables */
+    .hover\:shadow-xl, .hover\:shadow-lg {
+        transition: all 0.2s ease;
+    }
+    
+    .hover\:shadow-xl:active, .hover\:shadow-lg:active {
+        transform: scale(0.98);
+    }
+}
+

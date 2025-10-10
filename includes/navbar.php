@@ -4,6 +4,9 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 ?>
+<!-- Améliorations Mobile CSS & JS -->
+<link rel="stylesheet" href="/assets/css/mobile-improvements.css">
+<script src="/assets/js/mobile-responsive.js" defer></script>
 <nav class="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
