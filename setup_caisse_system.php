@@ -111,7 +111,7 @@
                 if ($result['count'] == 0) {
                     $defaultPassword = password_hash('password', PASSWORD_DEFAULT);
                     $pdo->prepare("
-                        INSERT INTO users (username, email, password, nom, prenom, role, telephone, is_active)
+                        INSERT INTO users (username, email, password_hash, nom, prenom, role, telephone, is_active)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     ")->execute([
                         'caissiere1',

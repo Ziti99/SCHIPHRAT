@@ -26,11 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Veuillez remplir tous les champs.';
     } else {
         // Vérifier les identifiants
-        $stmt = $pdo->prepare("SELECT id, username, password, role, nom, prenom FROM users WHERE username = ?");
+        $stmt = $pdo->prepare("SELECT id, username, password_hash, role, nom, prenom FROM users WHERE username = ?");
         $stmt->execute([$username]);
         $user = $stmt->fetch();
         
-        if ($user && password_verify($password, $user['password'])) {
+        if ($user && password_verify($password, $user['password_hash'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['user_role'] = $user['role'];

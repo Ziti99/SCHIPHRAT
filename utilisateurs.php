@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_user']) && !i
                         // Continuer avec la création
                         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
                         $db->query("
-                            INSERT INTO users (username, email, password, nom, prenom, role, telephone, specialite, is_active)
+                            INSERT INTO users (username, email, password_hash, nom, prenom, role, telephone, specialite, is_active)
                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
                         ", [$username, $email, $hashed_password, $nom, $prenom, $role, $telephone, $specialite]);
                         
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_user']) && !i
                     // Pas d'email, créer directement
                     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
                     $db->query("
-                        INSERT INTO users (username, email, password, nom, prenom, role, telephone, specialite, is_active)
+                        INSERT INTO users (username, email, password_hash, nom, prenom, role, telephone, specialite, is_active)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
                     ", [$username, $email, $hashed_password, $nom, $prenom, $role, $telephone, $specialite]);
                     
