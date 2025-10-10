@@ -135,11 +135,11 @@ $medecins = $db->fetchAll("
     ORDER BY nom, prenom
 ");
 
-// Récupérer la liste des sages-femmes
+// Récupérer la liste des sages-femmes (accepte sage_femme ET sagefemme)
 $sagefemmes = $db->fetchAll("
     SELECT id, nom, prenom, specialite
     FROM users 
-    WHERE role = 'sagefemme'
+    WHERE role IN ('sage_femme', 'sagefemme')
     ORDER BY nom, prenom
 ");
 
@@ -262,7 +262,7 @@ $actes = $db->fetchAll("
                                     <option value="">Sélectionner une sage-femme</option>
                                     <?php foreach ($sagefemmes as $sagefemme): ?>
                                         <option value="<?php echo $sagefemme['id']; ?>"
-                                                <?php echo ($_SESSION['user_role'] === 'sage_femme' && $_SESSION['user_id'] == $sagefemme['id']) ? 'selected' : ''; ?>>
+                                                <?php echo (in_array($_SESSION['user_role'], ['sage_femme', 'sagefemme']) && $_SESSION['user_id'] == $sagefemme['id']) ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($sagefemme['prenom'] . ' ' . $sagefemme['nom']); ?>
                                             <?php if ($sagefemme['specialite']): ?>
                                                 (<?php echo htmlspecialchars($sagefemme['specialite']); ?>)
