@@ -324,7 +324,7 @@ if (isset($_SESSION['user_id'])) {
             </div>
             
             <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2024 Clinique Obstétrique. Tous droits réservés.</p>
+                <p>&copy; 2025 Clinique Obstétrique. Tous droits réservés.</p>
             </div>
         </div>
     </footer>
