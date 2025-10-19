@@ -1,6 +1,6 @@
 /**
  * Améliorations JavaScript pour le responsive mobile
- * Clinique SHIPHRAT
+ * Clinique Obstétrique
  */
 
 document.addEventListener('DOMContentLoaded', function() {

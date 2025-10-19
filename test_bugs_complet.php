@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Test Bugs Complet - SHIPHRAT</title>
+    <title>Test Bugs Complet - Clinique Obstétrique</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -11,7 +11,7 @@
         <div class="bg-white rounded-lg shadow-2xl p-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-6">
                 <i class="fas fa-bug text-red-600 mr-3"></i>
-                Test Complet des Bugs - Clinique SHIPHRAT
+                Test Complet des Bugs - Clinique Obstétrique
             </h1>
 
             <?php

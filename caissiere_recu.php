@@ -86,7 +86,7 @@ $html = '
 </head>
 <body>
     <div class="header">
-        <h1>🏥 CLINIQUE OBSTÉTRIQUE SHIPHRAT</h1>
+        <h1>🏥 CLINIQUE OBSTÉTRIQUE</h1>
         <p>Excellence en soins maternels</p>
         <p>Libreville, Gabon | Tél: +241 XX XX XX XX</p>
     </div>
@@ -225,7 +225,7 @@ $html .= '
     <div class="footer">
         <p>Merci de votre confiance</p>
         <p>Ce reçu est généré électroniquement le ' . date('d/m/Y à H:i') . '</p>
-        <p style="margin-top: 10px; font-size: 10px;">Clinique Obstétrique SHIPHRAT - Libreville, Gabon</p>
+        <p style="margin-top: 10px; font-size: 10px;">Clinique Obstétrique - Libreville, Gabon</p>
     </div>
 </body>
 </html>';

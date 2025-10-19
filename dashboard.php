@@ -51,7 +51,7 @@ $recent_accouchements = $pdo->query("
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Clinique Obstétrique SHIPHRAT</title>
+    <title>Dashboard - Clinique Obstétrique</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -84,7 +84,7 @@ $recent_accouchements = $pdo->query("
                     </div>
                     <div>
                         <h1 class="text-base sm:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                            Clinique Obstétrique SHIPHRAT
+                            Clinique Obstétrique
                         </h1>
                         <p class="hidden sm:block text-xs text-gray-500">Dashboard</p>
                     </div>

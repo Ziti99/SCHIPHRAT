@@ -11,7 +11,7 @@ if (isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinique Obstétrique SHIPHRAT - Accueil</title>
+    <title>Clinique Obstétrique - Accueil</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -39,7 +39,7 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div>
                         <h1 class="text-base sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                            Clinique Obstétrique SHIPHRAT
+                            Clinique Obstétrique
                         </h1>
                         <p class="hidden sm:block text-xs text-gray-500">Excellence en soins maternels</p>
                     </div>
@@ -287,7 +287,7 @@ if (isset($_SESSION['user_id'])) {
                         <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
                             <i class="fas fa-heartbeat text-white"></i>
                         </div>
-                        <h3 class="text-xl font-bold">Clinique Obstétrique SHIPHRAT</h3>
+                        <h3 class="text-xl font-bold">Clinique Obstétrique</h3>
                     </div>
                     <p class="text-gray-400">
                         Excellence en soins maternels et obstétricaux
@@ -324,7 +324,7 @@ if (isset($_SESSION['user_id'])) {
             </div>
             
             <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2024 Clinique Obstétrique SHIPHRAT. Tous droits réservés.</p>
+                <p>&copy; 2024 Clinique Obstétrique. Tous droits réservés.</p>
             </div>
         </div>
     </footer>
