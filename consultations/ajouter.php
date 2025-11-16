@@ -21,8 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // Validation des données - Convertir les chaînes vides en NULL pour les champs INT
         $patiente_id = $_POST['patiente_id'] ?? '';
-        $medecin_id = !empty($_POST['medecin_id']) ? $_POST['medecin_id'] : null;
-        $sagefemme_id = !empty($_POST['sagefemme_id']) ? $_POST['sagefemme_id'] : null;
+        // Simplification: plus de sélection praticien dans le formulaire
+        $medecin_id = null;
+        $sagefemme_id = null;
         $date_consultation = $_POST['date_consultation'] ?? '';
         $tension_arterielle = $_POST['tension_arterielle'] ?? null;
         $poids = !empty($_POST['poids']) ? $_POST['poids'] : null;
@@ -36,18 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Les champs obligatoires doivent être remplis');
         }
 
-        // Vérifier qu'un médecin OU une sage-femme est sélectionné (pas les deux)
-        if ($medecin_id === null && $sagefemme_id === null) {
-            throw new Exception('Veuillez sélectionner un médecin OU une sage-femme');
-        }
-
-        if ($medecin_id !== null && $sagefemme_id !== null) {
-            throw new Exception('Veuillez sélectionner soit un médecin soit une sage-femme, pas les deux');
-        }
-
-        // Déterminer qui est le praticien (médecin ou sage-femme)
-        $praticien_id = $medecin_id !== null ? $medecin_id : $sagefemme_id;
-        $praticien_type = $medecin_id !== null ? 'medecin' : 'sagefemme';
+        // Plus de contrainte de sélection de praticien (sera assigné plus tard ou par défaut)
 
         // Insertion de la consultation
         $db->query("
@@ -120,6 +110,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Pré-sélection éventuelle d'une patiente
+$prefill_patiente_id = isset($_GET['patiente_id']) ? intval($_GET['patiente_id']) : 0;
+
 // Récupérer la liste des patientes
 $patientes = $db->fetchAll("
     SELECT id, nom, prenom, date_naissance, telephone
@@ -127,21 +120,7 @@ $patientes = $db->fetchAll("
     ORDER BY nom, prenom
 ");
 
-// Récupérer la liste des médecins
-$medecins = $db->fetchAll("
-    SELECT id, nom, prenom, specialite
-    FROM users 
-    WHERE role = 'medecin'
-    ORDER BY nom, prenom
-");
-
-// Récupérer la liste des sages-femmes (accepte sage_femme ET sagefemme)
-$sagefemmes = $db->fetchAll("
-    SELECT id, nom, prenom, specialite
-    FROM users 
-    WHERE role IN ('sage_femme', 'sagefemme')
-    ORDER BY nom, prenom
-");
+// Suppression des sélections de praticiens sur ce flux simplifié
 
 // Récupérer la liste des actes médicaux actifs
 $actes = $db->fetchAll("
@@ -159,6 +138,23 @@ $actes = $db->fetchAll("
     <title>Nouvelle Consultation - Clinique Obstétrique</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Améliore la lisibilité et la superposition du sélecteur d'actes (Tom Select) */
+        .ts-control { min-height: 44px; font-size: 0.95rem; }
+        .ts-dropdown {
+            z-index: 2147483647 !important; /* top-most */
+            font-size: 0.95rem;
+            position: fixed !important;     /* escape stacking contexts */
+            background: #ffffff !important;  /* solid background */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15), 0 8px 10px rgba(0,0,0,0.1) !important;
+            border: 1px solid #E5E7EB !important; /* subtle border */
+        }
+        .ts-wrapper.multi.has-items .ts-control > div {
+            background: #F3E8FF; /* violet clair */
+            color: #6B21A8;
+            border: 1px solid #E9D5FF;
+        }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
     <div class="flex">
@@ -227,45 +223,11 @@ $actes = $db->fetchAll("
                                 <select id="patiente_id" name="patiente_id" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">Sélectionner une patiente</option>
                                     <?php foreach ($patientes as $patiente): ?>
-                                        <option value="<?php echo $patiente['id']; ?>">
+                                        <option value="<?php echo $patiente['id']; ?>" <?php echo ($prefill_patiente_id === intval($patiente['id'])) ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($patiente['prenom'] . ' ' . $patiente['nom']); ?>
                                             (<?php echo date('d/m/Y', strtotime($patiente['date_naissance'])); ?>)
                                             <?php if ($patiente['telephone']): ?>
                                                 - <?php echo htmlspecialchars($patiente['telephone']); ?>
-                                            <?php endif; ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="medecin_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Médecin
-                                </label>
-                                <select id="medecin_id" name="medecin_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">Sélectionner un médecin</option>
-                                    <?php foreach ($medecins as $medecin): ?>
-                                        <option value="<?php echo $medecin['id']; ?>" 
-                                                <?php echo ($_SESSION['user_role'] === 'medecin' && $_SESSION['user_id'] == $medecin['id']) ? 'selected' : ''; ?>>
-                                            Dr. <?php echo htmlspecialchars($medecin['prenom'] . ' ' . $medecin['nom']); ?>
-                                            <?php if ($medecin['specialite']): ?>
-                                                (<?php echo htmlspecialchars($medecin['specialite']); ?>)
-                                            <?php endif; ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="sagefemme_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Sage-femme
-                                </label>
-                                <select id="sagefemme_id" name="sagefemme_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">Sélectionner une sage-femme</option>
-                                    <?php foreach ($sagefemmes as $sagefemme): ?>
-                                        <option value="<?php echo $sagefemme['id']; ?>"
-                                                <?php echo (in_array($_SESSION['user_role'], ['sage_femme', 'sagefemme']) && $_SESSION['user_id'] == $sagefemme['id']) ? 'selected' : ''; ?>>
-                                            <?php echo htmlspecialchars($sagefemme['prenom'] . ' ' . $sagefemme['nom']); ?>
-                                            <?php if ($sagefemme['specialite']): ?>
-                                                (<?php echo htmlspecialchars($sagefemme['specialite']); ?>)
                                             <?php endif; ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -282,127 +244,49 @@ $actes = $db->fetchAll("
                         </div>
                     </div>
 
-                    <!-- Signes vitaux -->
-                    <div class="mb-8">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                            <i class="fas fa-heartbeat mr-2 text-red-600"></i>Signes Vitaux
-                        </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="tension_arterielle" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Tension artérielle
-                                </label>
-                                <input type="text" id="tension_arterielle" name="tension_arterielle" 
-                                       placeholder="ex: 120/80 mmHg"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label for="poids" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Poids (kg)
-                                </label>
-                                <input type="number" id="poids" name="poids" step="0.1" min="0"
-                                       placeholder="ex: 65.5"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Examen obstétrical -->
-                    <div class="mb-8">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                            <i class="fas fa-baby mr-2 text-pink-600"></i>Examen Obstétrical
-                        </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="hauteur_uterine" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Hauteur utérine (cm)
-                                </label>
-                                <input type="number" id="hauteur_uterine" name="hauteur_uterine" step="0.1" min="0"
-                                       placeholder="ex: 28.5"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label for="position_foetus" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Position du fœtus
-                                </label>
-                                <select id="position_foetus" name="position_foetus" 
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">Sélectionner</option>
-                                    <option value="céphalique">Céphalique</option>
-                                    <option value="siège">Siège</option>
-                                    <option value="transverse">Transverse</option>
-                                    <option value="oblique">Oblique</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="frequence_cardiaque_foetale" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Fréquence cardiaque fœtale (bpm)
-                                </label>
-                                <input type="number" id="frequence_cardiaque_foetale" name="frequence_cardiaque_foetale" 
-                                       min="0" max="300"
-                                       placeholder="ex: 140"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Sections cliniques spécifiques temporairement retirées -->
 
                     <!-- Actes médicaux -->
-                    <div class="mb-8">
+                    <div class="mb-10 relative z-50">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">
                             <i class="fas fa-stethoscope mr-2 text-purple-600"></i>Actes Médicaux Posés
                         </h3>
                         <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
                             <p class="text-sm text-purple-700 mb-3">
                                 <i class="fas fa-info-circle mr-2"></i>
-                                Sélectionnez les actes médicaux effectués durant cette consultation
+                                Recherchez et sélectionnez un ou plusieurs actes médicaux
                             </p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <?php if (empty($actes)): ?>
-                                    <p class="text-sm text-gray-600 col-span-2">
-                                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                                        Aucun acte disponible. 
-                                        <a href="../actes.php" class="text-purple-600 underline">Configurer les actes</a>
-                                    </p>
-                                <?php else: ?>
+                            <?php if (empty($actes)): ?>
+                                <p class="text-sm text-gray-600">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    Aucun acte disponible. 
+                                    <a href="../actes.php" class="text-purple-600 underline">Configurer les actes</a>
+                                </p>
+                            <?php else: ?>
+                                <select id="actes_select" name="actes[]" multiple class="w-full border border-purple-300 rounded-md bg-white" placeholder="Sélectionner les actes...">
                                     <?php foreach ($actes as $acte): ?>
-                                        <label class="flex items-start p-3 bg-white border border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 hover:shadow-md transition-all">
-                                            <input type="checkbox" 
-                                                   name="actes[]" 
-                                                   value="<?php echo $acte['id']; ?>" 
-                                                   data-montant="<?php echo $acte['montant']; ?>"
-                                                   data-nom="<?php echo htmlspecialchars($acte['nom_acte']); ?>"
-                                                   class="mt-1 mr-3 w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
-                                            <div class="flex-1">
-                                                <div class="font-medium text-gray-900"><?php echo htmlspecialchars($acte['nom_acte']); ?></div>
-                                                <div class="text-sm text-purple-600 font-semibold">
-                                                    <?php echo number_format($acte['montant'], 0, ',', ' '); ?> FCFA
-                                                </div>
-                                                <?php if ($acte['description']): ?>
-                                                    <div class="text-xs text-gray-500 mt-1">
-                                                        <?php echo htmlspecialchars($acte['description']); ?>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
-                                        </label>
+                                        <option value="<?php echo $acte['id']; ?>" data-montant="<?php echo $acte['montant']; ?>">
+                                            <?php echo htmlspecialchars($acte['nom_acte']); ?> — <?php echo number_format($acte['montant'], 0, ',', ' '); ?> FCFA
+                                        </option>
                                     <?php endforeach; ?>
-                                <?php endif; ?>
-                            </div>
-                            <!-- Résumé des actes sélectionnés -->
-                            <div id="actes-summary" class="mt-4 p-3 bg-white rounded-lg border border-purple-300 hidden">
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="font-semibold text-gray-900">
-                                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
-                                        Actes sélectionnés:
-                                    </span>
-                                    <span id="total-actes" class="text-lg font-bold text-purple-600">0 FCFA</span>
+                                </select>
+                                <!-- Résumé des actes sélectionnés -->
+                                <div id="actes-summary" class="mt-4 p-3 bg-white rounded-lg border border-purple-300 hidden">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-semibold text-gray-900">
+                                            <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                                            Actes sélectionnés:
+                                        </span>
+                                        <span id="total-actes" class="text-lg font-bold text-purple-600">0 FCFA</span>
+                                    </div>
+                                    <div id="actes-list" class="text-sm text-gray-700"></div>
                                 </div>
-                                <div id="actes-list" class="text-sm text-gray-700"></div>
-                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
 
                     <!-- Observations et recommandations -->
-                    <div class="mb-8">
+                    <div class="mb-12">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">
                             <i class="fas fa-notes-medical mr-2 text-green-600"></i>Observations et Recommandations
                         </h3>
@@ -445,36 +329,7 @@ $actes = $db->fetchAll("
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.querySelector('form');
             const patienteSelect = document.getElementById('patiente_id');
-            const medecinSelect = document.getElementById('medecin_id');
-            const sagefemmeSelect = document.getElementById('sagefemme_id');
             const dateInput = document.getElementById('date_consultation');
-
-            // Fonction pour gérer la sélection exclusive médecin/sage-femme
-            function handlePractitionerSelection(changedSelect, otherSelect) {
-                if (changedSelect.value) {
-                    otherSelect.value = '';
-                    otherSelect.disabled = true;
-                } else {
-                    otherSelect.disabled = false;
-                }
-            }
-
-            // Écouter les changements sur les sélections
-            medecinSelect.addEventListener('change', function() {
-                handlePractitionerSelection(this, sagefemmeSelect);
-            });
-
-            sagefemmeSelect.addEventListener('change', function() {
-                handlePractitionerSelection(this, medecinSelect);
-            });
-            
-            // Vérifier l'état initial au chargement (pré-sélection)
-            if (medecinSelect.value) {
-                handlePractitionerSelection(medecinSelect, sagefemmeSelect);
-            }
-            if (sagefemmeSelect.value) {
-                handlePractitionerSelection(sagefemmeSelect, medecinSelect);
-            }
 
             form.addEventListener('submit', function(e) {
                 let isValid = true;
@@ -483,16 +338,6 @@ $actes = $db->fetchAll("
                 // Validation des champs obligatoires
                 if (!patienteSelect.value) {
                     errorMessage += 'Veuillez sélectionner une patiente.\n';
-                    isValid = false;
-                }
-
-                if (!medecinSelect.value && !sagefemmeSelect.value) {
-                    errorMessage += 'Veuillez sélectionner un médecin OU une sage-femme.\n';
-                    isValid = false;
-                }
-
-                if (medecinSelect.value && sagefemmeSelect.value) {
-                    errorMessage += 'Veuillez sélectionner soit un médecin soit une sage-femme, pas les deux.\n';
                     isValid = false;
                 }
 
@@ -518,8 +363,8 @@ $actes = $db->fetchAll("
                 }
             });
             
-            // Gestion de la sélection des actes et calcul du total
-            const actesCheckboxes = document.querySelectorAll('input[name="actes[]"]');
+            // Gestion de la sélection des actes (multi-select) et calcul du total
+            const actesSelect = document.getElementById('actes_select');
             const actesSummary = document.getElementById('actes-summary');
             const totalActesSpan = document.getElementById('total-actes');
             const actesListDiv = document.getElementById('actes-list');
@@ -527,18 +372,15 @@ $actes = $db->fetchAll("
             function updateActesTotal() {
                 let total = 0;
                 let selectedActes = [];
-                
-                actesCheckboxes.forEach(function(checkbox) {
-                    if (checkbox.checked) {
-                        const montant = parseFloat(checkbox.dataset.montant);
-                        const nom = checkbox.dataset.nom;
+
+                if (actesSelect) {
+                    Array.from(actesSelect.selectedOptions).forEach(function(opt) {
+                        const montant = parseFloat(opt.getAttribute('data-montant')) || 0;
+                        const nom = opt.textContent;
                         total += montant;
-                        selectedActes.push({
-                            nom: nom,
-                            montant: montant
-                        });
-                    }
-                });
+                        selectedActes.push({ nom, montant });
+                    });
+                }
                 
                 if (selectedActes.length > 0) {
                     actesSummary.classList.remove('hidden');
@@ -558,9 +400,63 @@ $actes = $db->fetchAll("
                 }
             }
             
-            actesCheckboxes.forEach(function(checkbox) {
-                checkbox.addEventListener('change', updateActesTotal);
-            });
+            if (actesSelect) {
+                actesSelect.addEventListener('change', updateActesTotal);
+            }
+
+            // Initialiser Tom Select pour la multi-sélection avec recherche si disponible
+            try {
+                const linkCss = document.createElement('link');
+                linkCss.rel = 'stylesheet';
+                linkCss.href = 'https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.min.css';
+                document.head.appendChild(linkCss);
+
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js';
+                script.onload = function() {
+                    if (window.TomSelect && actesSelect) {
+                        const ts = new TomSelect('#actes_select', {
+                            plugins: ['remove_button'],
+                            create: false,
+                            maxItems: null,
+                            placeholder: 'Sélectionner les actes...',
+                            dropdownParent: 'body',
+                            onChange: updateActesTotal,
+                            render: {
+                                option: function(data, escape) {
+                                    return '<div>' + escape(data.text) + '</div>';
+                                }
+                            }
+                        });
+
+                        // Positionner le dropdown juste sous l'input et le contraindre à la fenêtre
+                        function positionDropdown() {
+                            try {
+                                const wrapper = ts.wrapper;
+                                const dropdown = document.querySelector('.ts-dropdown');
+                                if (!wrapper || !dropdown || dropdown.style.display === 'none') return;
+                                const rect = wrapper.getBoundingClientRect();
+                                const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+                                const margin = 12; // espace visuel
+                                dropdown.style.left = rect.left + 'px';
+                                dropdown.style.top = (rect.bottom + 6) + 'px';
+                                dropdown.style.width = rect.width + 'px';
+                                const maxH = Math.max(160, viewportHeight - rect.bottom - margin);
+                                dropdown.style.maxHeight = maxH + 'px';
+                                dropdown.style.overflowY = 'auto';
+                            } catch (e) {
+                                // no-op
+                            }
+                        }
+                        ts.on('dropdown_open', positionDropdown);
+                        window.addEventListener('scroll', positionDropdown, true);
+                        window.addEventListener('resize', positionDropdown);
+                    }
+                };
+                document.body.appendChild(script);
+            } catch (e) {
+                console.warn('Tom Select non chargé, multi-sélection native utilisée.', e);
+            }
         });
     </script>
 </body>

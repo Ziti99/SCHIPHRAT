@@ -82,6 +82,10 @@ $html = '
         .signature-line { border-top: 1px solid #000; width: 200px; margin: 30px auto 5px; }
         .statut-paye { background: #10B981; color: white; padding: 5px 10px; border-radius: 5px; display: inline-block; }
         .statut-partiel { background: #F59E0B; color: white; padding: 5px 10px; border-radius: 5px; display: inline-block; }
+        .amount-badges { display: flex; gap: 10px; margin: 10px 0 0 0; }
+        .amount-badge { padding: 8px 12px; border-radius: 6px; font-weight: bold; font-size: 14px; }
+        .amount-paid { background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0; }
+        .amount-remaining { background:#FEF2F2; color:#991B1B; border:1px solid #FECACA; }
     </style>
 </head>
 <body>
@@ -159,11 +163,15 @@ $html .= '
             </div>
             <div class="info-row">
                 <div class="info-label">Montant payé:</div>
-                <div class="info-value" style="color: #10B981;">' . number_format($paiement['montant_paye'], 0, ',', ' ') . ' FCFA</div>
+                <div class="info-value">' . number_format($paiement['montant_paye'], 0, ',', ' ') . ' FCFA</div>
             </div>
             <div class="info-row">
                 <div class="info-label">Montant restant:</div>
-                <div class="info-value" style="color: #EF4444;">' . number_format($paiement['montant_restant'], 0, ',', ' ') . ' FCFA</div>
+                <div class="info-value">' . number_format($paiement['montant_restant'], 0, ',', ' ') . ' FCFA</div>
+            </div>
+            <div class="amount-badges">
+                <div class="amount-badge amount-paid">Payé: ' . number_format($paiement['montant_paye'], 0, ',', ' ') . ' FCFA</div>
+                <div class="amount-badge amount-remaining">Reste: ' . number_format($paiement['montant_restant'], 0, ',', ' ') . ' FCFA</div>
             </div>
             <div class="info-row">
                 <div class="info-label">Mode de paiement:</div>

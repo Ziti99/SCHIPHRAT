@@ -163,30 +163,66 @@ $recent_accouchements = $pdo->query("
                 </div>
             </div>
 
-            <!-- Actions rapides -->
+            <!-- Actions rapides (adaptées par rôle) -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 <div class="bg-white rounded-xl shadow-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                         <i class="fas fa-plus-circle text-purple-500 mr-2"></i>
                         Actions rapides
                     </h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <a href="/patientes_create.php" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-lg text-center hover:shadow-lg transition-all duration-200">
-                            <i class="fas fa-user-plus text-2xl mb-2"></i>
-                            <p class="font-semibold">Nouvelle patiente</p>
-                        </a>
-                        <a href="/consultations/ajouter.php" class="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-4 rounded-lg text-center hover:shadow-lg transition-all duration-200">
-                            <i class="fas fa-calendar-plus text-2xl mb-2"></i>
-                            <p class="font-semibold">Nouvelle consultation</p>
-                        </a>
-                        <a href="/accouchements/ajouter.php" class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-4 rounded-lg text-center hover:shadow-lg transition-all duration-200">
-                            <i class="fas fa-baby text-2xl mb-2"></i>
-                            <p class="font-semibold">Nouvel accouchement</p>
-                        </a>
-                        <a href="/statistiques.php" class="bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 rounded-lg text-center hover:shadow-lg transition-all duration-200">
-                            <i class="fas fa-chart-bar text-2xl mb-2"></i>
-                            <p class="font-semibold">Voir statistiques</p>
-                        </a>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+                        <?php if (in_array($_SESSION['user_role'], ['secretaire'])): ?>
+                            <a href="/patientes.php?action=creer" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-5 rounded-xl text-center hover:shadow-lg transition-all duration-200">
+                                <i class="fas fa-user-plus text-3xl mb-2"></i>
+                                <p class="font-bold text-base">Nouvelle patiente</p>
+                            </a>
+                            <a href="/consultations.php?action=ajouter" class="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-5 rounded-xl text-center hover:shadow-lg transition-all duration-200">
+                                <i class="fas fa-calendar-plus text-3xl mb-2"></i>
+                                <p class="font-bold text-base">Nouvelle consultation</p>
+                            </a>
+                            <a href="/accouchements.php?action=ajouter" class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-5 rounded-xl text-center hover:shadow-lg transition-all duration-200">
+                                <i class="fas fa-baby text-3xl mb-2"></i>
+                                <p class="font-bold text-base">Nouvel accouchement</p>
+                            </a>
+                            <a href="/deces.php?action=ajouter" class="bg-gradient-to-r from-red-500 to-rose-500 text-white p-5 rounded-xl text-center hover:shadow-lg transition-all duration-200">
+                                <i class="fas fa-cross text-3xl mb-2"></i>
+                                <p class="font-bold text-base">Déclarer un décès</p>
+                            </a>
+                            <a href="/suivi-postnatal.php" class="bg-gradient-to-r from-fuchsia-500 to-purple-500 text-white p-5 rounded-xl text-center hover:shadow-lg transition-all duration-200">
+                                <i class="fas fa-heartbeat text-3xl mb-2"></i>
+                                <p class="font-bold text-base">Suivi post-natal</p>
+                            </a>
+                            <a href="/registres.php" class="bg-gradient-to-r from-slate-600 to-slate-800 text-white p-5 rounded-xl text-center hover:shadow-lg transition-all duration-200">
+                                <i class="fas fa-book-medical text-3xl mb-2"></i>
+                                <p class="font-bold text-base">Registres</p>
+                            </a>
+                            <a href="/statistiques.php" class="bg-gradient-to-r from-orange-500 to-red-500 text-white p-5 rounded-xl text-center hover:shadow-lg transition-all duration-200 col-span-2">
+                                <i class="fas fa-chart-bar text-3xl mb-2"></i>
+                                <p class="font-bold text-base">Voir statistiques</p>
+                            </a>
+                        <?php elseif (in_array($_SESSION['user_role'], ['caissiere'])): ?>
+                            <a href="/caissiere_consultations.php?statut=en_attente" class="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-6 rounded-2xl text-center hover:shadow-lg transition-all duration-200">
+                                <i class="fas fa-cash-register text-3xl mb-2"></i>
+                                <p class="font-extrabold text-lg">Encaisser</p>
+                                <p class="text-white/80 text-sm">Consultations en attente</p>
+                            </a>
+                            <a href="/caissiere_recherche.php" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-2xl text-center hover:shadow-lg transition-all duration-200">
+                                <i class="fas fa-search text-3xl mb-2"></i>
+                                <p class="font-extrabold text-lg">Rechercher</p>
+                                <p class="text-white/80 text-sm">Patiente / consultation</p>
+                            </a>
+                            <a href="/caissiere_statistiques.php" class="bg-gradient-to-r from-amber-500 to-orange-600 text-white p-6 rounded-2xl text-center hover:shadow-lg transition-all duration-200 col-span-2">
+                                <i class="fas fa-chart-bar text-3xl mb-2"></i>
+                                <p class="font-extrabold text-lg">Statistiques caisse</p>
+                                <p class="text-white/90 text-sm">Reçus, totaux, modes</p>
+                            </a>
+                        <?php else: ?>
+                            <!-- Rôles non concernés: conserver un minimum d'actions génériques -->
+                            <a href="/statistiques.php" class="bg-gradient-to-r from-orange-500 to-red-500 text-white p-5 rounded-xl text-center hover:shadow-lg transition-all duration-200">
+                                <i class="fas fa-chart-bar text-2xl mb-2"></i>
+                                <p class="font-semibold">Voir statistiques</p>
+                            </a>
+                        <?php endif; ?>
                     </div>
                 </div>
 

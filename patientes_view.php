@@ -179,10 +179,20 @@ try {
                                 <h3 class="text-xl font-bold text-gray-900">
                                     <i class="fas fa-baby mr-2 text-purple-600"></i>Grossesses (<?php echo count($grossesses); ?>)
                                 </h3>
-                                <a href="ajouter.php?patiente_id=<?php echo $patiente['id']; ?>" 
-                                   class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                                    <i class="fas fa-plus mr-2"></i>Nouvelle Grossesse
-                                </a>
+                                <div class="flex flex-wrap gap-2">
+                                    <a href="ajouter.php?patiente_id=<?php echo $patiente['id']; ?>" 
+                                       class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                        <i class="fas fa-plus mr-2"></i>Nouvelle Grossesse
+                                    </a>
+                                    <a href="consultations/ajouter.php?patiente_id=<?php echo $patiente['id']; ?>" 
+                                       class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                        <i class="fas fa-stethoscope mr-2"></i>Nouvelle Consultation
+                                    </a>
+                                    <a href="accouchements/ajouter.php?patiente_id=<?php echo $patiente['id']; ?>" 
+                                       class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                        <i class="fas fa-baby mr-2"></i>Nouvel Accouchement
+                                    </a>
+                                </div>
                             </div>
                             
                             <?php if (empty($grossesses)): ?>

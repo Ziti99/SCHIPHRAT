@@ -206,7 +206,7 @@ $stats = $db->fetch("
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($consultations as $c): ?>
-                                        <tr class="hover:bg-gray-50">
+                                        <tr class="hover:bg-gray-50 <?php echo $c['statut'] === 'en_attente' ? 'bg-yellow-50/60' : ''; ?> <?php echo $c['statut'] === 'en_attente' ? 'border-l-4 border-yellow-400' : ''; ?>">
                                             <td class="px-6 py-4">
                                                 <div>
                                                     <p class="font-semibold text-gray-900">
@@ -251,22 +251,29 @@ $stats = $db->fetch("
                                                     <?php echo $badge_labels[$c['statut']] ?? $c['statut']; ?>
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 text-sm space-x-2">
-                                                <a href="caissiere_patiente_detail.php?id=<?php echo $c['patiente_id']; ?>" 
-                                                   class="text-blue-600 hover:text-blue-800" title="Voir détails patiente">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <?php if ($c['statut'] !== 'paye_total'): ?>
-                                                    <a href="caissiere_valider_paiement.php?id=<?php echo $c['paiement_id']; ?>" 
-                                                       class="text-green-600 hover:text-green-800" title="Valider paiement">
-                                                        <i class="fas fa-check-circle"></i>
+                                            <td class="px-6 py-4">
+                                                <div class="flex flex-wrap gap-2">
+                                                    <a href="caissiere_patiente_detail.php?id=<?php echo $c['patiente_id']; ?>" 
+                                                       class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 text-sm font-medium"
+                                                       title="Voir détails patiente" aria-label="Voir détails patiente">
+                                                        <i class="fas fa-eye"></i><span class="hidden sm:inline">Détails</span>
                                                     </a>
-                                                <?php else: ?>
-                                                    <a href="caissiere_recu.php?id=<?php echo $c['paiement_id']; ?>" 
-                                                       class="text-purple-600 hover:text-purple-800" title="Imprimer reçu">
-                                                        <i class="fas fa-file-pdf"></i>
-                                                    </a>
-                                                <?php endif; ?>
+                                                    <?php if ($c['statut'] !== 'paye_total'): ?>
+                                                        <a href="caissiere_valider_paiement.php?id=<?php echo $c['paiement_id']; ?>" 
+                                                           class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 text-sm font-semibold"
+                                                           title="Valider paiement"
+                                                           aria-label="Valider paiement"
+                                                           onclick="return confirm('Encaisser <?php echo number_format($c['montant_restant'], 0, ',', ' '); ?> FCFA pour <?php echo htmlspecialchars($c['prenom'] . ' ' . $c['nom']); ?> ?');">
+                                                            <i class="fas fa-check-circle"></i><span class="hidden sm:inline">Encaisser</span>
+                                                        </a>
+                                                    <?php else: ?>
+                                                        <a href="caissiere_recu.php?id=<?php echo $c['paiement_id']; ?>" 
+                                                           class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-purple-600 text-white hover:bg-purple-700 text-sm font-semibold"
+                                                           title="Imprimer reçu" aria-label="Imprimer reçu">
+                                                            <i class="fas fa-file-pdf"></i><span class="hidden sm:inline">Reçu</span>
+                                                        </a>
+                                                    <?php endif; ?>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -294,5 +301,41 @@ $stats = $db->fetch("
         </div>
     </div>
 </body>
+<script>
+// Raccourcis clavier pour accélérer l'encaissement (page caissière uniquement)
+(function() {
+    try {
+        const form = document.querySelector('form[method="GET"]');
+        const searchInput = document.querySelector('input[name="search"]');
+        const statutSelect = document.querySelector('select[name="statut"]');
+
+        document.addEventListener('keydown', function(e) {
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) {
+                return;
+            }
+            // '/' pour rechercher
+            if (e.key === '/') {
+                e.preventDefault();
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }
+            // 'f' => filtrer "en_attente"
+            if (e.key.toLowerCase() === 'f' && form && statutSelect) {
+                e.preventDefault();
+                statutSelect.value = 'en_attente';
+                form.submit();
+            }
+            // 'r' => recharger
+            if (e.key.toLowerCase() === 'r') {
+                e.preventDefault();
+                window.location.reload();
+            }
+        });
+    } catch (err) {
+        console.warn('Raccourcis caissière non initialisés', err);
+    }
+})();
+</script>
 </html>
 

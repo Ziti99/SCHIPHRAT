@@ -174,11 +174,33 @@ error_log("📊 DEBUG: Found " . count($patientes) . " patientes");
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <!-- Messages -->
                 <?php if (isset($_GET['message'])): ?>
-                    <div id="message-success" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 relative">
-                        <i class="fas fa-check-circle mr-2"></i><?php echo htmlspecialchars($_GET['message']); ?>
-                        <button onclick="closeMessage('message-success')" class="absolute top-0 right-0 mt-2 mr-2 text-green-600 hover:text-green-800">
-                            <i class="fas fa-times"></i>
-                        </button>
+                    <div id="message-success" class="bg-green-50 border border-green-200 text-green-800 px-4 py-4 rounded-lg mb-6 relative">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div class="flex items-start gap-2">
+                                <i class="fas fa-check-circle mt-1 text-green-600"></i>
+                                <div>
+                                    <p class="font-semibold"><?php echo htmlspecialchars($_GET['message']); ?></p>
+                                    <?php if (!empty($_GET['new_patiente_id'])): ?>
+                                        <p class="text-sm text-green-700 mt-1">Vous pouvez maintenant créer sa première consultation.</p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <?php if (!empty($_GET['new_patiente_id'])): ?>
+                                    <a href="/consultations/ajouter.php?patiente_id=<?php echo intval($_GET['new_patiente_id']); ?>"
+                                       class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm">
+                                        <i class="fas fa-calendar-plus"></i> Nouvelle consultation
+                                    </a>
+                                    <a href="/patientes_view.php?id=<?php echo intval($_GET['new_patiente_id']); ?>"
+                                       class="inline-flex items-center gap-2 bg-white text-green-700 border border-green-300 px-4 py-2 rounded-md hover:bg-green-50 text-sm">
+                                        <i class="fas fa-user"></i> Voir la patiente
+                                    </a>
+                                <?php endif; ?>
+                                <button onclick="closeMessage('message-success')" class="text-green-700 hover:text-green-900">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 <?php endif; ?>
                 

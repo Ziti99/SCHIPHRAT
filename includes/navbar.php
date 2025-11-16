@@ -40,3 +40,31 @@ if (session_status() === PHP_SESSION_NONE) {
         </div>
     </div>
 </nav> 
+<?php if (in_array($_SESSION['user_role'] ?? '', ['secretaire', 'caissiere'])): ?>
+<div id="networkStatusBanner" class="hidden text-white text-sm px-4 py-2 text-center" style="background:#991B1B;">
+    Vous êtes hors‑ligne. Les actions seront envoyées dès le rétablissement de la connexion.
+    <button id="retryNetworkBtn" class="ml-3 underline font-semibold">Réessayer</button>
+    <span id="networkDot" class="ml-2 inline-block w-2 h-2 rounded-full align-middle" style="background:#EF4444;"></span>
+</div>
+<script>
+(function() {
+    const banner = document.getElementById('networkStatusBanner');
+    const dot = document.getElementById('networkDot');
+    const retry = document.getElementById('retryNetworkBtn');
+
+    function update() {
+        if (navigator.onLine) {
+            if (banner) banner.classList.add('hidden');
+        } else {
+            if (banner) banner.classList.remove('hidden');
+        }
+        if (dot) dot.style.background = navigator.onLine ? '#10B981' : '#EF4444';
+    }
+
+    window.addEventListener('online', update);
+    window.addEventListener('offline', update);
+    if (retry) retry.addEventListener('click', update);
+    update();
+})();
+</script>
+<?php endif; ?>

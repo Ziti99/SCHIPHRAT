@@ -22,6 +22,7 @@ if (!isset($_SESSION['user_id'])) {
                 <i class="fas fa-tachometer-alt mr-3"></i>
                 Dashboard
             </a>
+            <?php if (($_SESSION['user_role'] ?? '') !== 'caissiere'): ?>
             <a href="/patientes.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" id="sidebar-patientes-link">
                 <i class="fas fa-user-injured mr-3"></i>
                 Patientes
@@ -50,6 +51,17 @@ if (!isset($_SESSION['user_id'])) {
                 <i class="fas fa-chart-line mr-3"></i>
                 Statistiques
             </a>
+            <?php else: ?>
+            <!-- Pour la caissière: n'afficher que Patientes et Consultations (généraux) -->
+            <a href="/patientes.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" id="sidebar-patientes-link">
+                <i class="fas fa-user-injured mr-3"></i>
+                Patientes
+            </a>
+            <a href="/consultations.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+                <i class="fas fa-calendar-check mr-3"></i>
+                Consultations
+            </a>
+            <?php endif; ?>
             <?php if ($_SESSION['user_role'] === 'admin'): ?>
             <div class="border-t border-gray-200 pt-4 mt-4">
                 <p class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Administration</p>

@@ -56,8 +56,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             $message = "Patiente créée avec succès !";
             
-            // Rediriger vers la liste des patientes (avant tout include)
-            header('Location: patientes.php?message=' . urlencode($message));
+            // Récupérer l'ID créé pour proposer une consultation directe
+            $nouvelle_patiente_id = $db->lastInsertId();
+            
+            // Rediriger vers la liste des patientes avec un CTA "Nouvelle consultation"
+            header('Location: patientes.php?message=' . urlencode($message) . '&new_patiente_id=' . urlencode($nouvelle_patiente_id));
             exit();
         }
     } catch (Exception $e) {
@@ -75,6 +78,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Tom Select CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+    <style>
+        .voice-indicator {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+        }
+        .voice-btn i {
+            font-size: 1rem; /* taille cohérente avec l’icône calendrier natif */
+            line-height: 1;
+        }
+        /* Assure que les listes déroulantes (Tom Select) passent au-dessus des zones de texte en dessous */
+        .ts-dropdown {
+            z-index: 2147483647 !important;
+            position: fixed !important;
+            background: #ffffff !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15), 0 8px 10px rgba(0,0,0,0.1) !important;
+            border: 1px solid #E5E7EB !important;
+        }
+        /* Ajuste légèrement le micro du champ date vers le bas */
+        .align-date-micro {
+            transform: translateY(calc(-50% + 3px)) !important;
+        }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-purple-50 via-pink-50 to-cyan-50 min-h-screen">
     <div class="flex">
@@ -149,30 +175,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
+                            <div class="relative">
                                 <label for="date_naissance" class="block text-sm font-medium text-gray-700 mb-2">
                                     Date de naissance <span class="text-red-500">*</span>
                                 </label>
                                 <input type="date" id="date_naissance" name="date_naissance" required
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                       class="w-full px-3 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <button type="button" class="voice-btn align-date-micro absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-purple-600 hover:text-purple-800 z-10" data-target="date_naissance" aria-label="Saisie vocale date de naissance">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
                             </div>
                             
-                            <div>
+                            <div class="relative">
                                 <label for="telephone" class="block text-sm font-medium text-gray-700 mb-2">
                                     Téléphone <span class="text-red-500">*</span>
                                 </label>
                                 <input type="tel" id="telephone" name="telephone" required
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                       class="w-full px-3 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <button type="button" class="voice-btn absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-purple-600 hover:text-purple-800 z-10" data-target="telephone" aria-label="Saisie vocale téléphone">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
+                            <div class="relative">
                                 <label for="nationalite" class="block text-sm font-medium text-gray-700 mb-2">
                                     Nationalité
                                 </label>
                                 <select id="nationalite" name="nationalite"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                        class="w-full px-3 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
                                     <option value="">Sélectionner une nationalité</option>
                                     <optgroup label="Afrique">
                                         <option value="Algérie">Algérie</option>
@@ -249,29 +281,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <option value="Nouvelle-Zélande">Nouvelle-Zélande</option>
                                     </optgroup>
                                 </select>
+                                <button type="button" class="voice-btn absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-purple-600 hover:text-purple-800 z-10" data-target="nationalite" aria-label="Saisie vocale nationalité">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
                             </div>
                         </div>
 
-                        <div>
+                        <div class="relative">
                             <label for="adresse" class="block text-sm font-medium text-gray-700 mb-2">
                                 Adresse
                             </label>
                             <textarea id="adresse" name="adresse" rows="3"
-                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                      class="w-full px-3 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                                       placeholder="Adresse de la patiente (optionnel)"></textarea>
+                            <button type="button" class="voice-btn absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-purple-600 hover:text-purple-800 z-10" data-target="adresse" aria-label="Saisie vocale adresse">
+                                <i class="fas fa-microphone"></i>
+                            </button>
                         </div>
 
                         <!-- Informations médicales -->
                         <div class="border-t border-gray-200 pt-6">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">Informations médicales</h3>
                             
-                            <div>
+                            <div class="relative">
                                 <label for="antecedents_medicaux" class="block text-sm font-medium text-gray-700 mb-2">
                                     Antécédents médicaux
                                 </label>
                                 <textarea id="antecedents_medicaux" name="antecedents_medicaux" rows="4"
-                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                          class="w-full px-3 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                                           placeholder="Décrivez les antécédents médicaux de la patiente..."></textarea>
+                                <button type="button" class="voice-btn absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-purple-600 hover:text-purple-800 z-10" data-target="antecedents_medicaux" aria-label="Saisie vocale antécédents médicaux">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -294,13 +335,192 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            new TomSelect("#nationalite", {
+            // Tom Select Nationalité avec dropdown détaché et positionnement contrôlé
+            const natSelect = new TomSelect("#nationalite", {
                 create: false,
-                sortField: {
-                    field: "text",
-                    direction: "asc"
+                dropdownParent: 'body',
+                sortField: { field: "text", direction: "asc" }
+            });
+            function positionNatDropdown() {
+                try {
+                    const wrapper = natSelect.wrapper;
+                    const dropdown = document.querySelector('.ts-dropdown');
+                    if (!wrapper || !dropdown || dropdown.style.display === 'none') return;
+                    const rect = wrapper.getBoundingClientRect();
+                    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+                    const margin = 12;
+                    dropdown.style.left = rect.left + 'px';
+                    dropdown.style.top = (rect.bottom + 6) + 'px';
+                    dropdown.style.width = rect.width + 'px';
+                    const maxH = Math.max(160, viewportHeight - rect.bottom - margin);
+                    dropdown.style.maxHeight = maxH + 'px';
+                    dropdown.style.overflowY = 'auto';
+                } catch (e) {}
+            }
+            natSelect.on('dropdown_open', positionNatDropdown);
+            window.addEventListener('scroll', positionNatDropdown, true);
+            window.addEventListener('resize', positionNatDropdown);
+
+            // Saisie vocale (Web Speech API) - sans bloquer la saisie manuelle
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const speechSupported = !!SpeechRecognition;
+
+            function normalizePhone(raw) {
+                const digits = (raw || '').replace(/\D+/g, '').slice(0, 15);
+                return digits.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+            }
+
+            function parseFrenchDateToISO(raw) {
+                if (!raw) return '';
+                const mapMonths = {
+                    'janvier': 1, 'fevrier': 2, 'février': 2, 'mars': 3, 'avril': 4, 'mai': 5, 'juin': 6,
+                    'juillet': 7, 'aout': 8, 'août': 8, 'septembre': 9, 'octobre': 10, 'novembre': 11, 'decembre': 12, 'décembre': 12
+                };
+                let s = raw.toLowerCase().trim();
+                // ex: 15/03/92 or 15-03-1992
+                const m1 = s.match(/(\d{1,2})[\/\-\. ](\d{1,2})[\/\-\. ](\d{2,4})/);
+                if (m1) {
+                    let d = parseInt(m1[1], 10);
+                    let mo = parseInt(m1[2], 10);
+                    let y = parseInt(m1[3], 10);
+                    if (y < 100) y += 1900; // heuristique
+                    return `${y.toString().padStart(4,'0')}-${mo.toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+                }
+                // ex: 15 mars 1992
+                const m2 = s.match(/(\d{1,2})\s+([a-zéûôîàèù]+)\s+(\d{2,4})/i);
+                if (m2) {
+                    let d = parseInt(m2[1], 10);
+                    let mo = mapMonths[m2[2]] || 0;
+                    let y = parseInt(m2[3], 10);
+                    if (y < 100) y += 1900;
+                    if (mo) return `${y.toString().padStart(4,'0')}-${mo.toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+                }
+                // fallback: essayer Date.parse
+                const dd = new Date(raw);
+                if (!isNaN(dd.getTime())) {
+                    const y = dd.getFullYear();
+                    const mo = dd.getMonth() + 1;
+                    const d = dd.getDate();
+                    return `${y.toString().padStart(4,'0')}-${mo.toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+                }
+                return '';
+            }
+
+            function pickNationaliteFromTranscript(text) {
+                const ts = document.querySelector('#nationalite');
+                if (!ts) return;
+                const val = (text || '').toLowerCase();
+                let best = '';
+                let bestLen = 0;
+                Array.from(ts.options).forEach(opt => {
+                    const t = (opt.text || '').toLowerCase();
+                    if (t.includes(val) && t.length > bestLen) {
+                        best = opt.value;
+                        bestLen = t.length;
+                    }
+                });
+                if (best) ts.value = best;
+                ts.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            // Petit indicateur global d'état d'écoute
+            let indicator = document.getElementById('voiceIndicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'voiceIndicator';
+                indicator.className = 'voice-indicator hidden bg-purple-600 text-white text-sm px-3 py-2 rounded-lg shadow-lg z-50';
+                indicator.setAttribute('role', 'status');
+                indicator.setAttribute('aria-live', 'polite');
+                indicator.textContent = '🎤 Écoute en cours… Parlez';
+                document.body.appendChild(indicator);
+            }
+
+            function showIndicator() { indicator.classList.remove('hidden'); }
+            function hideIndicator() { indicator.classList.add('hidden'); }
+
+            function startDictation(targetId, btnEl) {
+                const el = document.getElementById(targetId);
+                if (!el || !speechSupported) return;
+                const rec = new SpeechRecognition();
+                rec.lang = 'fr-FR';
+                rec.interimResults = false;
+                rec.maxAlternatives = 1;
+                rec.onstart = () => {
+                    showIndicator();
+                    if (btnEl) {
+                        btnEl.classList.add('animate-pulse');
+                    }
+                };
+                rec.onresult = (ev) => {
+                    const transcript = ev.results[0][0].transcript || '';
+                    if (targetId === 'date_naissance') {
+                        const iso = parseFrenchDateToISO(transcript);
+                        if (iso) el.value = iso;
+                    } else if (targetId === 'telephone') {
+                        el.value = normalizePhone(transcript);
+                    } else if (targetId === 'nationalite') {
+                        pickNationaliteFromTranscript(transcript);
+                        return;
+                    } else {
+                        el.value = transcript;
+                    }
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                };
+                rec.onend = () => {
+                    hideIndicator();
+                    if (btnEl) {
+                        btnEl.classList.remove('animate-pulse');
+                    }
+                };
+                rec.onerror = () => {
+                    hideIndicator();
+                    if (btnEl) {
+                        btnEl.classList.remove('animate-pulse');
+                    }
+                };
+                rec.start();
+            }
+
+            // brancher les boutons micro
+            document.querySelectorAll('.voice-btn').forEach(btn => {
+                if (!speechSupported) {
+                    btn.disabled = true;
+                    btn.title = 'Saisie vocale non disponible sur cet appareil';
+                } else {
+                    btn.addEventListener('click', () => {
+                        const id = btn.getAttribute('data-target');
+                        startDictation(id, btn);
+                    });
                 }
             });
+
+            // Logs et réalignement défensif (diagnostic)
+            function logAndAlign(btn) {
+                try {
+                    const targetId = btn.getAttribute('data-target');
+                    const input = document.getElementById(targetId);
+                    if (!input) return;
+                    const r = input.getBoundingClientRect();
+                    const rb = btn.getBoundingClientRect();
+                    console.log('[VOICE-ALIGN]', targetId, {
+                        input: { top: r.top, height: r.height, center: r.top + r.height / 2 },
+                        button: { top: rb.top, height: rb.height, center: rb.top + rb.height / 2 }
+                    });
+                    // Force position centrée si décalage > 2px
+                    const parent = btn.parentElement;
+                    const pr = parent.getBoundingClientRect();
+                    const expectedTop = (r.top - pr.top) + r.height / 2;
+                    const btnCenter = rb.top - pr.top + rb.height / 2;
+                    if (Math.abs(btnCenter - expectedTop) > 2) {
+                        btn.style.top = '50%';
+                        btn.style.transform = 'translateY(-50%)';
+                    }
+                } catch (e) {}
+            }
+            const voiceButtons = document.querySelectorAll('.voice-btn');
+            voiceButtons.forEach(logAndAlign);
+            window.addEventListener('resize', () => voiceButtons.forEach(logAndAlign));
+            window.addEventListener('orientationchange', () => voiceButtons.forEach(logAndAlign));
         });
         
         // Fonction pour fermer les messages
