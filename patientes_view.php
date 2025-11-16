@@ -156,7 +156,7 @@ try {
                             
                             <!-- Actions -->
                             <div class="mt-6 pt-4 border-t border-gray-200">
-                                <div class="flex space-x-2">
+                                <div class="flex flex-wrap gap-2">
                                     <a href="patientes_edit.php?id=<?php echo $patiente['id']; ?>" 
                                        class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-center">
                                         <i class="fas fa-edit mr-2"></i>Modifier
@@ -173,26 +173,53 @@ try {
 
                     <!-- Historique médical -->
                     <div class="lg:col-span-2">
+                        <!-- Consultations récentes (en premier) -->
+                        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-bold text-gray-900">
+                                    <i class="fas fa-stethoscope mr-2 text-blue-600"></i>Consultations récentes (<?php echo count($consultations); ?>)
+                                </h3>
+                                <a href="consultations/ajouter.php?patiente_id=<?php echo $patiente['id']; ?>" 
+                                   class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>Nouvelle Consultation
+                                </a>
+                            </div>
+                            
+                            <?php if (empty($consultations)): ?>
+                                <p class="text-gray-500 text-center py-4">Aucune consultation enregistrée</p>
+                            <?php else: ?>
+                                <div class="space-y-3">
+                                    <?php foreach (array_slice($consultations, 0, 5) as $consultation): ?>
+                                        <div class="border border-gray-200 rounded-lg p-4">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <h4 class="font-semibold text-gray-900">
+                                                        Consultation du <?php echo date('d/m/Y', strtotime($consultation['date_consultation'])); ?>
+                                                    </h4>
+                                                    <?php if ($consultation['observations']): ?>
+                                                        <p class="text-sm text-gray-700 mt-2">
+                                                            <?php echo htmlspecialchars(substr($consultation['observations'], 0, 100)); ?>
+                                                            <?php if (strlen($consultation['observations']) > 100): ?>...<?php endif; ?>
+                                                        </p>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
                         <!-- Grossesses -->
                         <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="text-xl font-bold text-gray-900">
                                     <i class="fas fa-baby mr-2 text-purple-600"></i>Grossesses (<?php echo count($grossesses); ?>)
                                 </h3>
-                                <div class="flex flex-wrap gap-2">
-                                    <a href="ajouter.php?patiente_id=<?php echo $patiente['id']; ?>" 
-                                       class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                                        <i class="fas fa-plus mr-2"></i>Nouvelle Grossesse
-                                    </a>
-                                    <a href="consultations/ajouter.php?patiente_id=<?php echo $patiente['id']; ?>" 
-                                       class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                                        <i class="fas fa-stethoscope mr-2"></i>Nouvelle Consultation
-                                    </a>
-                                    <a href="accouchements/ajouter.php?patiente_id=<?php echo $patiente['id']; ?>" 
-                                       class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                                        <i class="fas fa-baby mr-2"></i>Nouvel Accouchement
-                                    </a>
-                                </div>
+                                <a href="ajouter.php?patiente_id=<?php echo $patiente['id']; ?>" 
+                                   class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>Nouvelle Grossesse
+                                </a>
                             </div>
                             
                             <?php if (empty($grossesses)): ?>
@@ -237,45 +264,17 @@ try {
                             <?php endif; ?>
                         </div>
 
-                        <!-- Consultations récentes -->
-                        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-                            <h3 class="text-xl font-bold text-gray-900 mb-4">
-                                <i class="fas fa-stethoscope mr-2 text-blue-600"></i>Consultations récentes (<?php echo count($consultations); ?>)
-                            </h3>
-                            
-                            <?php if (empty($consultations)): ?>
-                                <p class="text-gray-500 text-center py-4">Aucune consultation enregistrée</p>
-                            <?php else: ?>
-                                <div class="space-y-3">
-                                    <?php foreach (array_slice($consultations, 0, 5) as $consultation): ?>
-                                        <div class="border border-gray-200 rounded-lg p-4">
-                                            <div class="flex justify-between items-start">
-                                                <div>
-                                                    <h4 class="font-semibold text-gray-900">
-                                                        Consultation du <?php echo date('d/m/Y', strtotime($consultation['date_consultation'])); ?>
-                                                    </h4>
-                                                    <p class="text-sm text-gray-600">
-                                                        Grossesse #<?php echo $consultation['grossesse_id']; ?>
-                                                    </p>
-                                                    <?php if ($consultation['observations']): ?>
-                                                        <p class="text-sm text-gray-700 mt-2">
-                                                            <?php echo htmlspecialchars(substr($consultation['observations'], 0, 100)); ?>
-                                                            <?php if (strlen($consultation['observations']) > 100): ?>...<?php endif; ?>
-                                                        </p>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-
                         <!-- Accouchements -->
                         <div class="bg-white rounded-xl shadow-lg p-6">
-                            <h3 class="text-xl font-bold text-gray-900 mb-4">
-                                <i class="fas fa-baby mr-2 text-green-600"></i>Accouchements (<?php echo count($accouchements); ?>)
-                            </h3>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-bold text-gray-900">
+                                    <i class="fas fa-baby mr-2 text-green-600"></i>Accouchements (<?php echo count($accouchements); ?>)
+                                </h3>
+                                <a href="accouchements/ajouter.php?patiente_id=<?php echo $patiente['id']; ?>" 
+                                   class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>Nouvel Accouchement
+                                </a>
+                            </div>
                             
                             <?php if (empty($accouchements)): ?>
                                 <p class="text-gray-500 text-center py-4">Aucun accouchement enregistré</p>
