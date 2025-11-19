@@ -7,42 +7,45 @@ if (!isset($_SESSION['user_id'])) {
 }
 ?>
 <!-- Overlay pour fermer le menu sur mobile - Plus visible -->
-<div id="mobileMenuOverlay" class="hidden lg:hidden fixed inset-0 bg-black bg-opacity-60 z-40 backdrop-blur-sm transition-opacity duration-300" style="display: none !important;"></div>
+<div id="mobileMenuOverlay" class="hidden lg:hidden fixed inset-0 bg-black bg-opacity-60 z-40 backdrop-blur-sm transition-opacity duration-300"></div>
 
-<!-- Script IMMÉDIAT pour forcer la fermeture du menu avant tout -->
+<!-- Script IMMÉDIAT pour forcer la fermeture du menu au chargement uniquement -->
 <script>
 (function() {
     'use strict';
-    // Fermer le menu IMMÉDIATEMENT dès que possible
-    function forceCloseMenu() {
+    // Fermer le menu au chargement uniquement (pas de !important pour permettre l'ouverture)
+    function forceCloseMenuOnLoad() {
         var sidebar = document.getElementById('sidebar');
         var overlay = document.getElementById('mobileMenuOverlay');
         if (sidebar) {
             sidebar.classList.add('-translate-x-full');
             sidebar.setAttribute('data-menu-state', 'closed');
-            sidebar.style.cssText += 'transform: translateX(-100%) !important; left: -100% !important;';
+            // Pas de !important ici pour permettre l'ouverture
+            if (window.innerWidth < 1024) {
+                sidebar.style.transform = 'translateX(-100%)';
+            }
         }
         if (overlay) {
             overlay.classList.add('hidden');
-            overlay.style.cssText += 'display: none !important;';
+            if (window.innerWidth < 1024) {
+                overlay.style.display = 'none';
+            }
         }
         if (document.body) {
             document.body.style.overflow = 'auto';
         }
     }
-    // Exécuter immédiatement
-    forceCloseMenu();
-    // Et aussi dès que possible
+    // Exécuter au chargement seulement
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', forceCloseMenu);
+        document.addEventListener('DOMContentLoaded', forceCloseMenuOnLoad);
     } else {
-        forceCloseMenu();
+        forceCloseMenuOnLoad();
     }
 })();
 </script>
 
 <!-- Sidebar responsive avec scroll - Toujours fermé par défaut sur mobile -->
-<aside id="sidebar" class="w-64 bg-white shadow-lg h-screen fixed lg:static transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-50 top-0 lg:top-auto overflow-y-auto" data-menu-state="closed" style="transform: translateX(-100%) !important; left: -100% !important;">
+<aside id="sidebar" class="w-64 bg-white shadow-lg h-screen fixed lg:static transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-50 top-0 lg:top-auto overflow-y-auto" data-menu-state="closed">
     <!-- Bouton fermer (mobile uniquement) - Design amélioré -->
     <button id="closeSidebarButton" class="lg:hidden absolute top-4 right-4 bg-red-500 text-white hover:bg-red-600 w-10 h-10 rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-all z-50">
         <i class="fas fa-times text-lg"></i>
@@ -140,10 +143,11 @@ if (!isset($_SESSION['user_id'])) {
     function closeSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('mobileMenuOverlay');
-        if (sidebar) {
+        if (sidebar && window.innerWidth < 1024) {
             sidebar.classList.add('-translate-x-full');
             sidebar.setAttribute('data-menu-state', 'closed');
             sidebar.style.transform = 'translateX(-100%)';
+            sidebar.style.left = '';
             if (overlay) {
                 overlay.classList.add('hidden');
                 overlay.style.display = 'none';
@@ -156,10 +160,11 @@ if (!isset($_SESSION['user_id'])) {
     function openSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('mobileMenuOverlay');
-        if (sidebar) {
+        if (sidebar && window.innerWidth < 1024) {
             sidebar.classList.remove('-translate-x-full');
             sidebar.setAttribute('data-menu-state', 'open');
             sidebar.style.transform = 'translateX(0)';
+            sidebar.style.left = '';
             if (overlay) {
                 overlay.classList.remove('hidden');
                 overlay.style.display = 'block';
@@ -168,16 +173,16 @@ if (!isset($_SESSION['user_id'])) {
         }
     }
     
-    // S'assurer que le menu est fermé au chargement
+    // S'assurer que le menu est fermé au chargement (uniquement sur mobile)
     function ensureMenuClosed() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('mobileMenuOverlay');
-        if (sidebar) {
-            // Forcer la fermeture au chargement avec plusieurs méthodes
+        if (sidebar && window.innerWidth < 1024) {
+            // Forcer la fermeture au chargement (sans !important pour permettre l'ouverture)
             sidebar.classList.add('-translate-x-full');
             sidebar.setAttribute('data-menu-state', 'closed');
             sidebar.style.transform = 'translateX(-100%)';
-            sidebar.style.left = '-100%';
+            sidebar.style.left = '';
             if (overlay) {
                 overlay.classList.add('hidden');
                 overlay.style.display = 'none';
