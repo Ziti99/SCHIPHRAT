@@ -111,19 +111,19 @@ $stats = $db->fetch("
             <!-- Navigation -->
             <?php include 'includes/navbar.php'; ?>
 
-            <div class="p-8">
+            <div class="p-4 sm:p-6 lg:p-8">
                 <!-- En-tête -->
                 <div class="mb-6">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">
-                        <i class="fas fa-list-alt text-green-600 mr-3"></i>
-                        Consultations et Paiements
-                    </h1>
-                    <p class="text-gray-600">Gérer les paiements des consultations et actes médicaux</p>
+                            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                                <i class="fas fa-list-alt text-green-600 mr-3"></i>
+                                Consultations et Paiements
+                            </h1>
+                            <p class="text-gray-600 text-sm sm:text-base">Gérer les paiements des consultations et actes médicaux</p>
                         </div>
                         <!-- Indicateur de connexion en temps réel -->
-                        <div id="realtime-indicator" class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
+                        <div id="realtime-indicator" class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg self-start sm:self-auto">
                             <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span>
                             <span class="text-sm text-gray-600">Connexion...</span>
                         </div>
@@ -131,31 +131,49 @@ $stats = $db->fetch("
                 </div>
 
                 <!-- Statistiques rapides -->
-                <div class="grid md:grid-cols-4 gap-4 mb-6" id="stats-container">
-                    <div class="bg-white rounded-lg shadow p-4">
-                        <p class="text-sm text-gray-600">Total</p>
-                        <p class="text-2xl font-bold text-gray-900" id="stat-total"><?php echo $stats['total']; ?></p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6" id="stats-container">
+                    <div class="bg-gradient-to-br from-gray-50 to-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-4 border border-gray-100">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-xs sm:text-sm text-gray-600 font-medium">Total</p>
+                            <i class="fas fa-list text-gray-400 text-sm"></i>
+                        </div>
+                        <p class="text-xl sm:text-2xl font-bold text-gray-900" id="stat-total"><?php echo $stats['total']; ?></p>
                     </div>
-                    <div class="bg-red-50 rounded-lg shadow p-4">
-                        <p class="text-sm text-red-600">En Attente</p>
-                        <p class="text-2xl font-bold text-red-700" id="stat-en-attente"><?php echo $stats['en_attente']; ?></p>
+                    <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl shadow-md hover:shadow-lg transition-shadow p-4 border border-red-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-xs sm:text-sm text-red-700 font-medium">En Attente</p>
+                            <i class="fas fa-clock text-red-400 text-sm"></i>
+                        </div>
+                        <p class="text-xl sm:text-2xl font-bold text-red-800" id="stat-en-attente"><?php echo $stats['en_attente']; ?></p>
                     </div>
-                    <div class="bg-yellow-50 rounded-lg shadow p-4">
-                        <p class="text-sm text-yellow-600">Paiement Partiel</p>
-                        <p class="text-2xl font-bold text-yellow-700" id="stat-partiel"><?php echo $stats['partiel']; ?></p>
+                    <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl shadow-md hover:shadow-lg transition-shadow p-4 border border-yellow-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-xs sm:text-sm text-yellow-700 font-medium">Partiel</p>
+                            <i class="fas fa-percent text-yellow-400 text-sm"></i>
+                        </div>
+                        <p class="text-xl sm:text-2xl font-bold text-yellow-800" id="stat-partiel"><?php echo $stats['partiel']; ?></p>
                     </div>
-                    <div class="bg-green-50 rounded-lg shadow p-4">
-                        <p class="text-sm text-green-600">Payé Complet</p>
-                        <p class="text-2xl font-bold text-green-700" id="stat-complet"><?php echo $stats['complet']; ?></p>
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-md hover:shadow-lg transition-shadow p-4 border border-green-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-xs sm:text-sm text-green-700 font-medium">Payé</p>
+                            <i class="fas fa-check-circle text-green-400 text-sm"></i>
+                        </div>
+                        <p class="text-xl sm:text-2xl font-bold text-green-800" id="stat-complet"><?php echo $stats['complet']; ?></p>
                     </div>
                 </div>
 
                 <!-- Filtres -->
-                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                    <form method="GET" class="grid md:grid-cols-5 gap-4">
+                <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6 border border-gray-100">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="fas fa-filter text-purple-600"></i>
+                        <h2 class="text-lg font-semibold text-gray-900">Filtres de recherche</h2>
+                    </div>
+                    <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
-                            <select name="statut" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
+                                <i class="fas fa-tag mr-1 text-gray-400"></i>Statut
+                            </label>
+                            <select name="statut" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-sm">
                                 <option value="tous" <?php echo $statut_filtre === 'tous' ? 'selected' : ''; ?>>Tous</option>
                                 <option value="en_attente" <?php echo $statut_filtre === 'en_attente' ? 'selected' : ''; ?>>En attente</option>
                                 <option value="paye_partiel" <?php echo $statut_filtre === 'paye_partiel' ? 'selected' : ''; ?>>Partiel</option>
@@ -163,26 +181,32 @@ $stats = $db->fetch("
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Date Début</label>
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
+                                <i class="fas fa-calendar-alt mr-1 text-gray-400"></i>Date Début
+                            </label>
                             <input type="date" name="date_debut" value="<?php echo htmlspecialchars($date_debut); ?>" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                   class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Date Fin</label>
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
+                                <i class="fas fa-calendar-check mr-1 text-gray-400"></i>Date Fin
+                            </label>
                             <input type="date" name="date_fin" value="<?php echo htmlspecialchars($date_fin); ?>" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                   class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Rechercher</label>
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
+                                <i class="fas fa-search mr-1 text-gray-400"></i>Rechercher
+                            </label>
                             <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" 
                                    placeholder="Nom, téléphone..." 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                   class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-sm">
                         </div>
-                        <div class="flex items-end gap-2">
-                            <button type="submit" class="flex-1 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
-                                <i class="fas fa-search mr-2"></i>Filtrer
+                        <div class="flex items-end gap-2 sm:flex-col lg:flex-row">
+                            <button type="submit" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2.5 rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg font-medium text-sm">
+                                <i class="fas fa-search mr-2"></i><span class="hidden sm:inline">Filtrer</span><span class="sm:hidden">Rechercher</span>
                             </button>
-                            <a href="caissiere_consultations.php" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
+                            <a href="caissiere_consultations.php" class="bg-gray-500 text-white px-4 py-2.5 rounded-lg hover:bg-gray-600 transition-colors shadow-md hover:shadow-lg" title="Réinitialiser">
                                 <i class="fas fa-redo"></i>
                             </a>
                         </div>
@@ -190,65 +214,96 @@ $stats = $db->fetch("
                 </div>
 
                 <!-- Liste des consultations -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                            <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patiente</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date Consultation</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actes</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Montant Total</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payé</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reste</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        <i class="fas fa-user mr-1 text-gray-400"></i>Patiente
+                                    </th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden md:table-cell">
+                                        <i class="fas fa-calendar mr-1 text-gray-400"></i>Date
+                                    </th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden lg:table-cell">
+                                        <i class="fas fa-stethoscope mr-1 text-gray-400"></i>Actes
+                                    </th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        <i class="fas fa-money-bill-wave mr-1 text-gray-400"></i>Total
+                                    </th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider hidden sm:table-cell">
+                                        <i class="fas fa-check-circle mr-1 text-gray-400"></i>Payé
+                                    </th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        <i class="fas fa-exclamation-circle mr-1 text-gray-400"></i>Reste
+                                    </th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        <i class="fas fa-info-circle mr-1 text-gray-400"></i>Statut
+                                    </th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        <i class="fas fa-cog mr-1 text-gray-400"></i>Actions
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody id="consultations-tbody" class="bg-white divide-y divide-gray-200">
                                 <?php if (empty($consultations)): ?>
                                     <tr>
-                                        <td colspan="8" class="px-6 py-8 text-center text-gray-500">
-                                            <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
-                                            <p>Aucune consultation trouvée</p>
+                                        <td colspan="8" class="px-6 py-12 text-center">
+                                            <div class="flex flex-col items-center justify-center">
+                                                <div class="bg-gray-100 rounded-full p-6 mb-4">
+                                                    <i class="fas fa-inbox text-5xl text-gray-400"></i>
+                                                </div>
+                                                <p class="text-lg font-semibold text-gray-700 mb-1">Aucune consultation trouvée</p>
+                                                <p class="text-sm text-gray-500">Essayez de modifier vos filtres de recherche</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($consultations as $c): ?>
-                                        <tr class="hover:bg-gray-50 <?php echo $c['statut'] === 'en_attente' ? 'bg-yellow-50/60' : ''; ?> <?php echo $c['statut'] === 'en_attente' ? 'border-l-4 border-yellow-400' : ''; ?>">
-                                            <td class="px-6 py-4">
+                                        <tr class="hover:bg-gray-50 transition-colors <?php echo $c['statut'] === 'en_attente' ? 'bg-yellow-50/60' : ''; ?> <?php echo $c['statut'] === 'en_attente' ? 'border-l-4 border-yellow-400' : ''; ?>">
+                                            <td class="px-4 sm:px-6 py-4">
                                                 <div>
-                                                    <p class="font-semibold text-gray-900">
+                                                    <p class="font-semibold text-gray-900 text-sm sm:text-base">
                                                         <?php echo htmlspecialchars($c['prenom'] . ' ' . $c['nom']); ?>
                                                     </p>
-                                                    <p class="text-xs text-gray-500">
+                                                    <p class="text-xs text-gray-500 mt-1">
                                                         <i class="fas fa-phone mr-1"></i><?php echo htmlspecialchars($c['telephone'] ?? '-'); ?>
+                                                    </p>
+                                                    <p class="text-xs text-gray-400 mt-1 md:hidden">
+                                                        <i class="fas fa-calendar mr-1"></i><?php echo date('d/m/Y', strtotime($c['date_consultation'])); ?>
                                                     </p>
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 text-sm text-gray-600">
-                                                <?php echo date('d/m/Y H:i', strtotime($c['date_consultation'])); ?>
+                                            <td class="px-4 sm:px-6 py-4 text-sm text-gray-600 hidden md:table-cell">
+                                                <div>
+                                                    <p><?php echo date('d/m/Y', strtotime($c['date_consultation'])); ?></p>
+                                                    <p class="text-xs text-gray-400"><?php echo date('H:i', strtotime($c['date_consultation'])); ?></p>
+                                                </div>
                                             </td>
-                                            <td class="px-6 py-4">
-                                                <span class="text-sm text-gray-600" title="<?php echo htmlspecialchars($c['actes_liste'] ?? 'Aucun'); ?>">
-                                                    <i class="fas fa-stethoscope mr-1"></i><?php echo $c['nb_actes']; ?> acte(s)
+                                            <td class="px-4 sm:px-6 py-4 hidden lg:table-cell">
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700" title="<?php echo htmlspecialchars($c['actes_liste'] ?? 'Aucun'); ?>">
+                                                    <i class="fas fa-stethoscope mr-1.5"></i><?php echo $c['nb_actes']; ?> acte(s)
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 text-sm font-semibold text-gray-900">
-                                                <?php echo number_format($c['montant_total'], 0, ',', ' '); ?> FCFA
+                                            <td class="px-4 sm:px-6 py-4">
+                                                <p class="text-sm sm:text-base font-bold text-gray-900">
+                                                    <?php echo number_format($c['montant_total'], 0, ',', ' '); ?> <span class="text-xs font-normal text-gray-500">FCFA</span>
+                                                </p>
                                             </td>
-                                            <td class="px-6 py-4 text-sm font-semibold text-green-600">
-                                                <?php echo number_format($c['montant_paye'], 0, ',', ' '); ?> FCFA
+                                            <td class="px-4 sm:px-6 py-4 text-sm font-semibold text-green-600 hidden sm:table-cell">
+                                                <?php echo number_format($c['montant_paye'], 0, ',', ' '); ?> <span class="text-xs font-normal">FCFA</span>
                                             </td>
-                                            <td class="px-6 py-4 text-sm font-semibold text-red-600">
-                                                <?php echo number_format($c['montant_restant'], 0, ',', ' '); ?> FCFA
+                                            <td class="px-4 sm:px-6 py-4">
+                                                <p class="text-sm sm:text-base font-bold text-red-600">
+                                                    <?php echo number_format($c['montant_restant'], 0, ',', ' '); ?> <span class="text-xs font-normal text-gray-500">FCFA</span>
+                                                </p>
                                             </td>
-                                            <td class="px-6 py-4">
+                                            <td class="px-4 sm:px-6 py-4">
                                                 <?php
                                                 $badge_colors = [
-                                                    'en_attente' => 'bg-red-100 text-red-800',
-                                                    'paye_partiel' => 'bg-yellow-100 text-yellow-800',
-                                                    'paye_total' => 'bg-green-100 text-green-800'
+                                                    'en_attente' => 'bg-red-100 text-red-800 border-red-200',
+                                                    'paye_partiel' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                                                    'paye_total' => 'bg-green-100 text-green-800 border-green-200'
                                                 ];
                                                 $badge_labels = [
                                                     'en_attente' => 'Non payé',
@@ -256,20 +311,20 @@ $stats = $db->fetch("
                                                     'paye_total' => 'Payé'
                                                 ];
                                                 ?>
-                                                <span class="px-2 py-1 text-xs rounded-full <?php echo $badge_colors[$c['statut']] ?? 'bg-gray-100 text-gray-800'; ?>">
+                                                <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full border <?php echo $badge_colors[$c['statut']] ?? 'bg-gray-100 text-gray-800 border-gray-200'; ?>">
                                                     <?php echo $badge_labels[$c['statut']] ?? $c['statut']; ?>
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4">
-                                                <div class="flex flex-wrap gap-2">
+                                            <td class="px-4 sm:px-6 py-4">
+                                                <div class="flex flex-wrap gap-1.5 sm:gap-2">
                                                     <a href="caissiere_patiente_detail.php?id=<?php echo $c['patiente_id']; ?>" 
-                                                       class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 text-sm font-medium"
+                                                       class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-xs sm:text-sm font-medium shadow-sm hover:shadow"
                                                        title="Voir détails patiente" aria-label="Voir détails patiente">
                                                         <i class="fas fa-eye"></i><span class="hidden sm:inline">Détails</span>
                                                     </a>
                                                     <?php if ($c['statut'] !== 'paye_total'): ?>
                                                         <a href="caissiere_valider_paiement.php?id=<?php echo $c['paiement_id']; ?>" 
-                                                           class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 text-sm font-semibold"
+                                                           class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 transition-all text-xs sm:text-sm font-semibold shadow-md hover:shadow-lg"
                                                            title="Valider paiement"
                                                            aria-label="Valider paiement"
                                                            onclick="return confirm('Encaisser <?php echo number_format($c['montant_restant'], 0, ',', ' '); ?> FCFA pour <?php echo htmlspecialchars($c['prenom'] . ' ' . $c['nom']); ?> ?');">
@@ -277,7 +332,7 @@ $stats = $db->fetch("
                                                         </a>
                                                     <?php else: ?>
                                                         <a href="caissiere_recu.php?id=<?php echo $c['paiement_id']; ?>" 
-                                                           class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-purple-600 text-white hover:bg-purple-700 text-sm font-semibold"
+                                                           class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800 transition-all text-xs sm:text-sm font-semibold shadow-md hover:shadow-lg"
                                                            title="Imprimer reçu" aria-label="Imprimer reçu">
                                                             <i class="fas fa-file-pdf"></i><span class="hidden sm:inline">Reçu</span>
                                                         </a>
@@ -293,15 +348,19 @@ $stats = $db->fetch("
                 </div>
 
                 <!-- Résumé montant restant -->
-                <div id="montant-restant-container" class="mt-6 <?php echo $stats['montant_restant_total'] > 0 ? '' : 'hidden'; ?> bg-orange-50 border border-orange-200 rounded-lg p-6">
-                    <div class="flex items-center justify-between">
+                <div id="montant-restant-container" class="mt-6 <?php echo $stats['montant_restant_total'] > 0 ? '' : 'hidden'; ?> bg-gradient-to-r from-orange-50 to-orange-100 border-2 border-orange-300 rounded-xl p-4 sm:p-6 shadow-lg">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div>
-                            <p class="text-sm text-orange-700 font-medium">Montant Total Restant à Encaisser</p>
-                            <p class="text-3xl font-bold text-orange-900 mt-1" id="montant-restant-total">
-                                <?php echo number_format($stats['montant_restant_total'], 0, ',', ' '); ?> FCFA
+                            <p class="text-sm sm:text-base text-orange-800 font-semibold mb-1">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>Montant Total Restant à Encaisser
+                            </p>
+                            <p class="text-2xl sm:text-3xl font-bold text-orange-900" id="montant-restant-total">
+                                <?php echo number_format($stats['montant_restant_total'], 0, ',', ' '); ?> <span class="text-lg sm:text-xl font-normal">FCFA</span>
                             </p>
                         </div>
-                        <i class="fas fa-exclamation-triangle text-5xl text-orange-300"></i>
+                        <div class="bg-orange-200 rounded-full p-4 sm:p-6">
+                            <i class="fas fa-exclamation-triangle text-3xl sm:text-5xl text-orange-600"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -677,15 +736,15 @@ $stats = $db->fetch("
         if (connected) {
             realtimeIndicator.innerHTML = `
                 <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <span class="text-sm text-green-600">En temps réel</span>
+                <span class="text-sm text-green-700 font-medium">En temps réel</span>
             `;
-            realtimeIndicator.className = 'flex items-center gap-2 px-4 py-2 bg-green-50 rounded-lg';
+            realtimeIndicator.className = 'flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-lg self-start sm:self-auto';
         } else {
             realtimeIndicator.innerHTML = `
                 <span class="w-2 h-2 bg-red-500 rounded-full"></span>
-                <span class="text-sm text-red-600">Déconnecté</span>
+                <span class="text-sm text-red-700 font-medium">Déconnecté</span>
             `;
-            realtimeIndicator.className = 'flex items-center gap-2 px-4 py-2 bg-red-50 rounded-lg';
+            realtimeIndicator.className = 'flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-lg self-start sm:self-auto';
         }
     }
     
@@ -837,9 +896,14 @@ $stats = $db->fetch("
                     if (tbody) {
                         tbody.innerHTML = `
                             <tr>
-                                <td colspan="8" class="px-6 py-8 text-center text-gray-500">
-                                    <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
-                                    <p>Aucune consultation trouvée</p>
+                                <td colspan="8" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <div class="bg-gray-100 rounded-full p-6 mb-4">
+                                            <i class="fas fa-inbox text-5xl text-gray-400"></i>
+                                        </div>
+                                        <p class="text-lg font-semibold text-gray-700 mb-1">Aucune consultation trouvée</p>
+                                        <p class="text-sm text-gray-500">Essayez de modifier vos filtres de recherche</p>
+                                    </div>
                                 </td>
                             </tr>
                         `;
