@@ -33,6 +33,30 @@ if (session_status() === PHP_SESSION_NONE) {
                     <p class="text-xs sm:text-sm font-medium text-gray-900"><?php echo htmlspecialchars($_SESSION['username'] ?? 'Utilisateur'); ?></p>
                     <p class="text-xs text-gray-500 capitalize"><?php echo str_replace('_', ' ', $_SESSION['user_role'] ?? 'utilisateur'); ?></p>
                 </div>
+                <?php if (in_array($_SESSION['user_role'] ?? '', ['admin', 'caissiere'])): ?>
+                <!-- Icône de notification pour la caissière -->
+                <div id="notification-bell-container" class="relative">
+                    <button id="notification-bell" class="relative text-gray-600 hover:text-purple-600 transition-colors p-2 focus:outline-none" title="Notifications">
+                        <i class="fas fa-bell text-lg sm:text-xl"></i>
+                        <span id="notification-badge" class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">
+                            <span id="notification-count">0</span>
+                        </span>
+                    </button>
+                    <!-- Dropdown des notifications -->
+                    <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
+                        <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-900">Notifications</h3>
+                            <button id="mark-all-read" class="text-sm text-purple-600 hover:text-purple-800">Tout marquer lu</button>
+                        </div>
+                        <div id="notification-list" class="divide-y divide-gray-100">
+                            <div class="p-4 text-center text-gray-500 text-sm">
+                                <i class="fas fa-bell-slash text-2xl mb-2 text-gray-300"></i>
+                                <p>Aucune notification</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
                 <a href="/logout.php" class="text-gray-600 hover:text-red-600 transition-colors p-2" title="Déconnexion">
                     <i class="fas fa-sign-out-alt text-lg"></i>
                 </a>
