@@ -207,6 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         class="w-full px-3 pr-12 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
                                     <option value="">Sélectionner une nationalité</option>
                                     <optgroup label="Afrique">
+                                        <option value="Gabon" selected>Gabon</option>
                                         <option value="Algérie">Algérie</option>
                                         <option value="Angola">Angola</option>
                                         <option value="Bénin">Bénin</option>
@@ -223,7 +224,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <option value="Érythrée">Érythrée</option>
                                         <option value="Eswatini">Eswatini</option>
                                         <option value="Éthiopie">Éthiopie</option>
-                                        <option value="Gabon">Gabon</option>
                                         <option value="Gambie">Gambie</option>
                                         <option value="Ghana">Ghana</option>
                                         <option value="Guinée">Guinée</option>
@@ -341,6 +341,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 dropdownParent: 'body',
                 sortField: { field: "text", direction: "asc" }
             });
+            
+            // Définir Gabon comme valeur par défaut
+            if (natSelect.getValue() === '') {
+                natSelect.setValue('Gabon', true);
+            }
             function positionNatDropdown() {
                 try {
                     const wrapper = natSelect.wrapper;
@@ -407,20 +412,129 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             function pickNationaliteFromTranscript(text) {
-                const ts = document.querySelector('#nationalite');
-                if (!ts) return;
-                const val = (text || '').toLowerCase();
+                if (!natSelect) return;
+                const val = (text || '').toLowerCase().trim();
                 let best = '';
-                let bestLen = 0;
-                Array.from(ts.options).forEach(opt => {
-                    const t = (opt.text || '').toLowerCase();
-                    if (t.includes(val) && t.length > bestLen) {
-                        best = opt.value;
-                        bestLen = t.length;
+                let bestScore = 0;
+                let bestText = '';
+                
+                // Récupérer toutes les options depuis le select HTML original
+                const selectElement = document.querySelector('#nationalite');
+                if (!selectElement) return;
+                
+                // Normaliser le texte (enlever accents, espaces multiples, etc.)
+                function normalize(str) {
+                    return str.toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '') // Enlever accents
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                }
+                
+                const normalizedVal = normalize(val);
+                console.log('[VOICE] Recherche pour:', normalizedVal);
+                
+                // Liste des candidats avec leurs scores
+                const candidates = [];
+                
+                // Parcourir toutes les options du select
+                Array.from(selectElement.options).forEach(opt => {
+                    if (!opt.value) return; // Ignorer l'option vide
+                    const optText = normalize(opt.text || '');
+                    const optValue = opt.value;
+                    let score = 0;
+                    let reason = '';
+                    
+                    // 1. Correspondance exacte (score le plus élevé)
+                    if (optText === normalizedVal) {
+                        score = 1000;
+                        reason = 'exact';
+                    }
+                    // 2. Commence par (très bon score) - ex: "mali" match "Mali"
+                    else if (optText.startsWith(normalizedVal)) {
+                        score = 500;
+                        reason = 'starts';
+                    }
+                    // 3. Se termine par (bon score)
+                    else if (optText.endsWith(normalizedVal)) {
+                        score = 400;
+                        reason = 'ends';
+                    }
+                    // 4. Correspondance exacte d'un mot (bon score)
+                    else {
+                        const optWords = optText.split(/\s+/);
+                        const valWords = normalizedVal.split(/\s+/);
+                        
+                        // Vérifier si tous les mots de val sont dans optText
+                        let allWordsMatch = true;
+                        valWords.forEach(valWord => {
+                            if (valWord.length > 2 && !optText.includes(valWord)) {
+                                allWordsMatch = false;
+                            }
+                        });
+                        
+                        if (allWordsMatch && valWords.length > 0) {
+                            // Vérifier si c'est un mot complet (pas juste une partie)
+                            const isCompleteWord = optWords.some(optWord => {
+                                return valWords.some(valWord => {
+                                    return optWord === valWord || optWord.startsWith(valWord + ' ') || optWord.endsWith(' ' + valWord);
+                                });
+                            });
+                            
+                            if (isCompleteWord) {
+                                score = 300;
+                                reason = 'word';
+                            } else {
+                                // Vérifier si c'est au milieu d'un autre mot
+                                // Ex: "mali" dans "Somalie" = REJETÉ
+                                const index = optText.indexOf(normalizedVal);
+                                const isInMiddle = index > 0 && 
+                                                  index < optText.length - normalizedVal.length &&
+                                                  optText[index - 1] !== ' ' &&
+                                                  optText[index + normalizedVal.length] !== ' ';
+                                
+                                if (!isInMiddle) {
+                                    score = 200;
+                                    reason = 'partial';
+                                } else {
+                                    // Correspondance au milieu = REJETÉ
+                                    score = 0;
+                                    reason = 'middle-rejected';
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (score > 0) {
+                        candidates.push({
+                            value: optValue,
+                            text: optText,
+                            score: score,
+                            reason: reason,
+                            length: optText.length
+                        });
                     }
                 });
-                if (best) ts.value = best;
-                ts.dispatchEvent(new Event('change', { bubbles: true }));
+                
+                // Trier par score décroissant, puis par longueur croissante
+                candidates.sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    return a.length - b.length;
+                });
+                
+                console.log('[VOICE] Candidats trouvés:', candidates);
+                
+                // Prendre le meilleur candidat avec score >= 200
+                const winner = candidates.find(c => c.score >= 200);
+                
+                if (winner) {
+                    console.log('[VOICE] Sélectionné:', winner.text, 'score:', winner.score, 'raison:', winner.reason);
+                    natSelect.setValue(winner.value, true);
+                } else if (candidates.length > 0) {
+                    console.log('[VOICE] Aucun candidat fiable (score < 200), meilleur:', candidates[0]);
+                } else {
+                    console.log('[VOICE] Aucun candidat trouvé');
+                }
             }
 
             // Petit indicateur global d'état d'écoute
