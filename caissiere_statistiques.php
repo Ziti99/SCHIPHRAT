@@ -20,6 +20,15 @@ try {
 $periode = $_GET['periode'] ?? 'mois_courant';
 $date_debut = $_GET['date_debut'] ?? date('Y-m-01');
 $date_fin = $_GET['date_fin'] ?? date('Y-m-t');
+$acte_filtre = $_GET['acte_id'] ?? 'tous'; // Filtre par acte
+
+// Récupérer la liste des actes pour le filtre
+$actes_liste = $db->fetchAll("
+    SELECT id, nom_acte, montant 
+    FROM actes_poses 
+    WHERE is_active = 1 
+    ORDER BY nom_acte
+");
 
 // Définir les dates selon la période
 switch ($periode) {
@@ -45,74 +54,153 @@ switch ($periode) {
         break;
 }
 
+// Construire la condition pour le filtre acte
+$acte_where = "";
+$acte_params = [$date_debut, $date_fin];
+$acte_join = "";
+
+if ($acte_filtre !== 'tous' && is_numeric($acte_filtre)) {
+    $acte_join = "INNER JOIN consultations_prenatales cp ON p.consultation_id = cp.id
+                  INNER JOIN consultation_actes ca ON cp.id = ca.consultation_id";
+    $acte_where = "AND ca.acte_id = ?";
+    $acte_params[] = $acte_filtre;
+}
+
 // Statistiques globales de la période
 $stats_globales = $db->fetch("
     SELECT 
-        COUNT(*) as nb_paiements,
-        COUNT(DISTINCT patiente_id) as nb_patientes,
-        COALESCE(SUM(montant_total), 0) as total_facture,
-        COALESCE(SUM(montant_paye), 0) as total_collecte,
-        COALESCE(SUM(montant_restant), 0) as total_restant,
-        SUM(CASE WHEN statut = 'paye_total' THEN 1 ELSE 0 END) as nb_complets,
-        SUM(CASE WHEN statut = 'paye_partiel' THEN 1 ELSE 0 END) as nb_partiels,
-        SUM(CASE WHEN statut = 'en_attente' THEN 1 ELSE 0 END) as nb_attente
-    FROM paiements
-    WHERE DATE(COALESCE(date_paiement, created_at)) BETWEEN ? AND ?
-", [$date_debut, $date_fin]);
+        COUNT(DISTINCT p.id) as nb_paiements,
+        COUNT(DISTINCT p.patiente_id) as nb_patientes,
+        COALESCE(SUM(p.montant_total), 0) as total_facture,
+        COALESCE(SUM(p.montant_paye), 0) as total_collecte,
+        COALESCE(SUM(p.montant_restant), 0) as total_restant,
+        SUM(CASE WHEN p.statut = 'paye_total' THEN 1 ELSE 0 END) as nb_complets,
+        SUM(CASE WHEN p.statut = 'paye_partiel' THEN 1 ELSE 0 END) as nb_partiels,
+        SUM(CASE WHEN p.statut = 'en_attente' THEN 1 ELSE 0 END) as nb_attente
+    FROM paiements p
+    $acte_join
+    WHERE DATE(COALESCE(p.date_paiement, p.created_at)) BETWEEN ? AND ?
+    $acte_where
+", $acte_params);
+
+// Statistiques par acte si un acte est sélectionné
+$stats_acte = null;
+$acte_nom = 'Tous les actes';
+if ($acte_filtre !== 'tous' && is_numeric($acte_filtre)) {
+    $stats_acte = $db->fetch("
+        SELECT 
+            ap.id,
+            ap.nom_acte,
+            COUNT(DISTINCT ca.consultation_id) as nb_consultations,
+            COUNT(ca.id) as nb_fois,
+            SUM(ca.montant * ca.quantite) as total_montant_acte,
+            SUM(CASE WHEN p.statut = 'paye_total' THEN ca.montant * ca.quantite ELSE 0 END) as total_collecte_acte
+        FROM consultation_actes ca
+        INNER JOIN actes_poses ap ON ca.acte_id = ap.id
+        INNER JOIN consultations_prenatales cp ON ca.consultation_id = cp.id
+        INNER JOIN paiements p ON cp.id = p.consultation_id
+        WHERE ca.acte_id = ?
+        AND DATE(COALESCE(p.date_paiement, p.created_at)) BETWEEN ? AND ?
+        GROUP BY ap.id, ap.nom_acte
+    ", [$acte_filtre, $date_debut, $date_fin]);
+    
+    if ($stats_acte) {
+        $acte_nom = $stats_acte['nom_acte'];
+    }
+}
 
 // Répartition par mode de paiement
+$modes_paiement_params = [$date_debut, $date_fin];
+$modes_paiement_join = "";
+$modes_paiement_where = "WHERE p.mode_paiement IS NOT NULL AND DATE(p.date_paiement) BETWEEN ? AND ?";
+
+if ($acte_filtre !== 'tous' && is_numeric($acte_filtre)) {
+    $modes_paiement_join = "INNER JOIN consultations_prenatales cp ON p.consultation_id = cp.id
+                            INNER JOIN consultation_actes ca ON cp.id = ca.consultation_id";
+    $modes_paiement_where .= " AND ca.acte_id = ?";
+    $modes_paiement_params[] = $acte_filtre;
+}
+
 $modes_paiement = $db->fetchAll("
     SELECT 
-        mode_paiement,
-        COUNT(*) as nombre,
-        SUM(montant_paye) as total
-    FROM paiements
-    WHERE mode_paiement IS NOT NULL
-    AND DATE(date_paiement) BETWEEN ? AND ?
-    GROUP BY mode_paiement
+        p.mode_paiement,
+        COUNT(DISTINCT p.id) as nombre,
+        SUM(p.montant_paye) as total
+    FROM paiements p
+    $modes_paiement_join
+    $modes_paiement_where
+    GROUP BY p.mode_paiement
     ORDER BY total DESC
-", [$date_debut, $date_fin]);
+", $modes_paiement_params);
 
 // Évolution quotidienne
+$evolution_params = [$date_debut, $date_fin];
+$evolution_join = "";
+$evolution_where = "WHERE DATE(COALESCE(p.date_paiement, p.created_at)) BETWEEN ? AND ?";
+
+if ($acte_filtre !== 'tous' && is_numeric($acte_filtre)) {
+    $evolution_join = "INNER JOIN consultations_prenatales cp ON p.consultation_id = cp.id
+                       INNER JOIN consultation_actes ca ON cp.id = ca.consultation_id";
+    $evolution_where .= " AND ca.acte_id = ?";
+    $evolution_params[] = $acte_filtre;
+}
+
 $evolution_quotidienne = $db->fetchAll("
     SELECT 
-        DATE(COALESCE(date_paiement, created_at)) as date,
-        COUNT(*) as nb_paiements,
-        SUM(montant_paye) as total_jour
-    FROM paiements
-    WHERE DATE(COALESCE(date_paiement, created_at)) BETWEEN ? AND ?
-    GROUP BY DATE(COALESCE(date_paiement, created_at))
+        DATE(COALESCE(p.date_paiement, p.created_at)) as date,
+        COUNT(DISTINCT p.id) as nb_paiements,
+        SUM(p.montant_paye) as total_jour
+    FROM paiements p
+    $evolution_join
+    $evolution_where
+    GROUP BY DATE(COALESCE(p.date_paiement, p.created_at))
     ORDER BY date
-", [$date_debut, $date_fin]);
+", $evolution_params);
 
-// Top 10 actes les plus facturés
-$top_actes = $db->fetchAll("
-    SELECT 
-        ap.nom_acte,
-        COUNT(*) as nb_fois,
-        SUM(ca.montant * ca.quantite) as total_montant
-    FROM consultation_actes ca
-    INNER JOIN actes_poses ap ON ca.acte_id = ap.id
-    INNER JOIN consultations_prenatales cp ON ca.consultation_id = cp.id
-    WHERE DATE(cp.date_consultation) BETWEEN ? AND ?
-    GROUP BY ap.id, ap.nom_acte
-    ORDER BY total_montant DESC
-    LIMIT 10
-", [$date_debut, $date_fin]);
+// Top 10 actes les plus facturés (uniquement si pas de filtre acte spécifique)
+$top_actes = [];
+if ($acte_filtre === 'tous') {
+    $top_actes = $db->fetchAll("
+        SELECT 
+            ap.nom_acte,
+            COUNT(*) as nb_fois,
+            SUM(ca.montant * ca.quantite) as total_montant
+        FROM consultation_actes ca
+        INNER JOIN actes_poses ap ON ca.acte_id = ap.id
+        INNER JOIN consultations_prenatales cp ON ca.consultation_id = cp.id
+        INNER JOIN paiements p ON cp.id = p.consultation_id
+        WHERE DATE(COALESCE(p.date_paiement, p.created_at)) BETWEEN ? AND ?
+        GROUP BY ap.id, ap.nom_acte
+        ORDER BY total_montant DESC
+        LIMIT 10
+    ", [$date_debut, $date_fin]);
+}
 
 // Performance par caissière
+$performance_params = [$date_debut, $date_fin];
+$performance_join = "";
+$performance_where = "WHERE DATE(p.date_paiement) BETWEEN ? AND ?";
+
+if ($acte_filtre !== 'tous' && is_numeric($acte_filtre)) {
+    $performance_join = "INNER JOIN consultations_prenatales cp ON p.consultation_id = cp.id
+                         INNER JOIN consultation_actes ca ON cp.id = ca.consultation_id";
+    $performance_where .= " AND ca.acte_id = ?";
+    $performance_params[] = $acte_filtre;
+}
+
 $performance_caissieres = $db->fetchAll("
     SELECT 
         u.nom,
         u.prenom,
-        COUNT(*) as nb_paiements,
+        COUNT(DISTINCT p.id) as nb_paiements,
         SUM(p.montant_paye) as total_collecte
     FROM paiements p
     INNER JOIN users u ON p.caissiere_id = u.id
-    WHERE DATE(p.date_paiement) BETWEEN ? AND ?
+    $performance_join
+    $performance_where
     GROUP BY u.id, u.nom, u.prenom
     ORDER BY total_collecte DESC
-", [$date_debut, $date_fin]);
+", $performance_params);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -142,7 +230,7 @@ $performance_caissieres = $db->fetchAll("
 
                 <!-- Filtres de période -->
                 <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                    <form method="GET" class="grid md:grid-cols-5 gap-4">
+                    <form method="GET" class="grid md:grid-cols-6 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Période rapide</label>
                             <select name="periode" onchange="this.form.submit()" class="w-full px-3 py-2 border border-gray-300 rounded-md">
@@ -152,6 +240,17 @@ $performance_caissieres = $db->fetchAll("
                                 <option value="mois_dernier" <?php echo $periode === 'mois_dernier' ? 'selected' : ''; ?>>Mois dernier</option>
                                 <option value="annee" <?php echo $periode === 'annee' ? 'selected' : ''; ?>>Cette année</option>
                                 <option value="personnalise" <?php echo $periode === 'personnalise' ? 'selected' : ''; ?>>Personnalisé</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Acte posé</label>
+                            <select name="acte_id" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                <option value="tous" <?php echo $acte_filtre === 'tous' ? 'selected' : ''; ?>>Tous les actes</option>
+                                <?php foreach ($actes_liste as $acte): ?>
+                                    <option value="<?php echo $acte['id']; ?>" <?php echo $acte_filtre == $acte['id'] ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($acte['nom_acte']); ?> (<?php echo number_format($acte['montant'], 0, ',', ' '); ?> FCFA)
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         <div>
@@ -177,10 +276,16 @@ $performance_caissieres = $db->fetchAll("
 
                 <!-- Période affichée -->
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <p class="text-blue-800">
-                        <i class="fas fa-calendar mr-2"></i>
-                        <strong>Période :</strong> <?php echo date('d/m/Y', strtotime($date_debut)); ?> au <?php echo date('d/m/Y', strtotime($date_fin)); ?>
-                    </p>
+                    <div class="flex items-center justify-between">
+                        <p class="text-blue-800">
+                            <i class="fas fa-calendar mr-2"></i>
+                            <strong>Période :</strong> <?php echo date('d/m/Y', strtotime($date_debut)); ?> au <?php echo date('d/m/Y', strtotime($date_fin)); ?>
+                        </p>
+                        <p class="text-blue-800">
+                            <i class="fas fa-stethoscope mr-2"></i>
+                            <strong>Acte :</strong> <?php echo htmlspecialchars($acte_nom); ?>
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Statistiques principales -->
@@ -222,6 +327,52 @@ $performance_caissieres = $db->fetchAll("
                         <p class="text-xs text-gray-500 mt-2"><?php echo $stats_globales['nb_complets']; ?> payé(s) complet(s)</p>
                     </div>
                 </div>
+
+                <!-- Statistiques par acte (si un acte est sélectionné) -->
+                <?php if ($stats_acte): ?>
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">
+                        <i class="fas fa-stethoscope text-indigo-600 mr-2"></i>
+                        Statistiques pour : <?php echo htmlspecialchars($stats_acte['nom_acte']); ?>
+                    </h2>
+                    <div class="grid md:grid-cols-4 gap-4">
+                        <div class="bg-white rounded-lg p-4 shadow">
+                            <p class="text-sm text-gray-600 mb-1">Total par Acte</p>
+                            <p class="text-2xl font-bold text-indigo-600">
+                                <?php echo number_format($stats_acte['total_montant_acte'], 0, ',', ' '); ?> <span class="text-sm">FCFA</span>
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1"><?php echo $stats_acte['nb_fois']; ?> fois</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 shadow">
+                            <p class="text-sm text-gray-600 mb-1">Collecté</p>
+                            <p class="text-2xl font-bold text-green-600">
+                                <?php echo number_format($stats_acte['total_collecte_acte'], 0, ',', ' '); ?> <span class="text-sm">FCFA</span>
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1"><?php echo $stats_acte['nb_consultations']; ?> consultation(s)</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 shadow">
+                            <p class="text-sm text-gray-600 mb-1">Reste à Collecter</p>
+                            <p class="text-2xl font-bold text-orange-600">
+                                <?php 
+                                $reste_acte = $stats_acte['total_montant_acte'] - $stats_acte['total_collecte_acte'];
+                                echo number_format($reste_acte, 0, ',', ' '); 
+                                ?> <span class="text-sm">FCFA</span>
+                            </p>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 shadow">
+                            <p class="text-sm text-gray-600 mb-1">Taux de Collecte</p>
+                            <p class="text-2xl font-bold text-purple-600">
+                                <?php 
+                                $taux_acte = $stats_acte['total_montant_acte'] > 0 
+                                    ? ($stats_acte['total_collecte_acte'] / $stats_acte['total_montant_acte']) * 100 
+                                    : 0;
+                                echo number_format($taux_acte, 1); 
+                                ?> <span class="text-sm">%</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
 
                 <div class="grid lg:grid-cols-2 gap-6 mb-6">
                     <!-- Évolution quotidienne -->
