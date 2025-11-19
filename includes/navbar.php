@@ -36,17 +36,17 @@ if (session_status() === PHP_SESSION_NONE) {
                 <?php if (in_array($_SESSION['user_role'] ?? '', ['admin', 'caissiere'])): ?>
                 <!-- Icône de notification pour la caissière -->
                 <div id="notification-bell-container" class="relative">
-                    <button id="notification-bell" class="relative text-gray-600 hover:text-purple-600 transition-colors p-2 focus:outline-none" title="Notifications">
-                        <i class="fas fa-bell text-lg sm:text-xl"></i>
-                        <span id="notification-badge" class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">
-                            <span id="notification-count">0</span>
+                    <button id="notification-bell" class="relative text-gray-600 hover:text-purple-600 transition-colors p-2 focus:outline-none" title="Notifications" aria-label="Notifications">
+                        <i class="fas fa-bell text-base sm:text-lg md:text-xl"></i>
+                        <span id="notification-badge" class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center hidden">
+                            <span id="notification-count" class="text-[10px] sm:text-xs">0</span>
                         </span>
                     </button>
                     <!-- Dropdown des notifications -->
-                    <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
-                        <div class="p-4 border-b border-gray-200 flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-900">Notifications</h3>
-                            <button id="mark-all-read" class="text-sm text-purple-600 hover:text-purple-800">Tout marquer lu</button>
+                    <div id="notification-dropdown" class="hidden fixed sm:absolute right-2 sm:right-0 top-16 sm:top-auto sm:mt-2 w-[calc(100vw-1rem)] sm:w-80 md:w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-[9999] max-h-[calc(100vh-5rem)] sm:max-h-96 overflow-y-auto">
+                        <div class="p-3 sm:p-4 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-900 text-sm sm:text-base">Notifications</h3>
+                            <button id="mark-all-read" class="text-xs sm:text-sm text-purple-600 hover:text-purple-800">Tout marquer lu</button>
                         </div>
                         <div id="notification-list" class="divide-y divide-gray-100">
                             <div class="p-4 text-center text-gray-500 text-sm">

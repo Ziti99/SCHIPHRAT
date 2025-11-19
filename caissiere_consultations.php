@@ -486,16 +486,16 @@ $stats = $db->fetch("
                     const unreadClass = notif.read ? '' : 'bg-purple-50 border-l-4 border-purple-500';
                     
                     return `
-                        <div class="p-4 hover:bg-gray-50 cursor-pointer ${unreadClass}" data-notification-id="${notif.id}">
+                        <div class="p-3 sm:p-4 hover:bg-gray-50 cursor-pointer ${unreadClass}" data-notification-id="${notif.id}">
                             <div class="flex items-start justify-between">
-                                <div class="flex-1">
+                                <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 mb-1">
-                                        <i class="fas fa-${notif.type === 'new_consultation' ? 'stethoscope' : 'bell'} text-purple-600"></i>
-                                        <h4 class="font-semibold text-gray-900 text-sm">${notif.title}</h4>
-                                        ${!notif.read ? '<span class="w-2 h-2 bg-purple-500 rounded-full"></span>' : ''}
+                                        <i class="fas fa-${notif.type === 'new_consultation' ? 'stethoscope' : 'bell'} text-purple-600 text-sm sm:text-base"></i>
+                                        <h4 class="font-semibold text-gray-900 text-xs sm:text-sm truncate">${notif.title}</h4>
+                                        ${!notif.read ? '<span class="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></span>' : ''}
                                     </div>
-                                    <p class="text-sm text-gray-600 mb-2">${notif.message}</p>
-                                    <p class="text-xs text-gray-400">${dateStr} à ${timeStr}</p>
+                                    <p class="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2 break-words">${notif.message}</p>
+                                    <p class="text-[10px] sm:text-xs text-gray-400">${dateStr} à ${timeStr}</p>
                                 </div>
                             </div>
                         </div>
@@ -546,7 +546,15 @@ $stats = $db->fetch("
         notificationBell.addEventListener('click', (e) => {
             e.stopPropagation();
             if (notificationDropdown) {
+                const isHidden = notificationDropdown.classList.contains('hidden');
                 notificationDropdown.classList.toggle('hidden');
+                
+                // Sur mobile, ajuster la position si nécessaire
+                if (!isHidden && window.innerWidth < 640) {
+                    const rect = notificationBell.getBoundingClientRect();
+                    notificationDropdown.style.right = '0.5rem';
+                    notificationDropdown.style.top = (rect.bottom + 8) + 'px';
+                }
             }
         });
     }
@@ -557,6 +565,15 @@ $stats = $db->fetch("
             notificationDropdown.classList.add('hidden');
         }
     });
+    
+    // Fermer le dropdown au scroll sur mobile
+    if (window.innerWidth < 640) {
+        window.addEventListener('scroll', () => {
+            if (notificationDropdown && !notificationDropdown.classList.contains('hidden')) {
+                notificationDropdown.classList.add('hidden');
+            }
+        }, { passive: true });
+    }
     
     // Fonction pour formater les montants
     function formatMontant(montant) {
