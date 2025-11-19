@@ -9,16 +9,28 @@
     scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
 }
 
-/* S'assurer que le menu est fermé par défaut sur mobile */
+/* S'assurer que le menu est fermé par défaut sur mobile - FORCER avec !important */
 @media (max-width: 1023px) {
-    /* Menu fermé par défaut - le style inline dans le HTML garantit cela */
+    /* Menu fermé par défaut - FORCER avec !important */
     #sidebar {
-        transform: translateX(-100%);
+        transform: translateX(-100%) !important;
+        left: -100% !important;
+    }
+    
+    /* Menu ouvert uniquement si data-menu-state="open" */
+    #sidebar[data-menu-state="open"] {
+        transform: translateX(0) !important;
+        left: 0 !important;
     }
     
     /* Overlay caché par défaut */
     #mobileMenuOverlay {
-        display: none;
+        display: none !important;
+    }
+    
+    /* Overlay visible uniquement si menu ouvert */
+    #mobileMenuOverlay:not(.hidden) {
+        display: block !important;
     }
 }
 

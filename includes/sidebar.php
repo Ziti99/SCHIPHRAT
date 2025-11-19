@@ -7,10 +7,42 @@ if (!isset($_SESSION['user_id'])) {
 }
 ?>
 <!-- Overlay pour fermer le menu sur mobile - Plus visible -->
-<div id="mobileMenuOverlay" class="hidden lg:hidden fixed inset-0 bg-black bg-opacity-60 z-40 backdrop-blur-sm transition-opacity duration-300"></div>
+<div id="mobileMenuOverlay" class="hidden lg:hidden fixed inset-0 bg-black bg-opacity-60 z-40 backdrop-blur-sm transition-opacity duration-300" style="display: none !important;"></div>
+
+<!-- Script IMMÉDIAT pour forcer la fermeture du menu avant tout -->
+<script>
+(function() {
+    'use strict';
+    // Fermer le menu IMMÉDIATEMENT dès que possible
+    function forceCloseMenu() {
+        var sidebar = document.getElementById('sidebar');
+        var overlay = document.getElementById('mobileMenuOverlay');
+        if (sidebar) {
+            sidebar.classList.add('-translate-x-full');
+            sidebar.setAttribute('data-menu-state', 'closed');
+            sidebar.style.cssText += 'transform: translateX(-100%) !important; left: -100% !important;';
+        }
+        if (overlay) {
+            overlay.classList.add('hidden');
+            overlay.style.cssText += 'display: none !important;';
+        }
+        if (document.body) {
+            document.body.style.overflow = 'auto';
+        }
+    }
+    // Exécuter immédiatement
+    forceCloseMenu();
+    // Et aussi dès que possible
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', forceCloseMenu);
+    } else {
+        forceCloseMenu();
+    }
+})();
+</script>
 
 <!-- Sidebar responsive avec scroll - Toujours fermé par défaut sur mobile -->
-<aside id="sidebar" class="w-64 bg-white shadow-lg h-screen fixed lg:static transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-50 top-0 lg:top-auto overflow-y-auto">
+<aside id="sidebar" class="w-64 bg-white shadow-lg h-screen fixed lg:static transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-50 top-0 lg:top-auto overflow-y-auto" data-menu-state="closed" style="transform: translateX(-100%) !important; left: -100% !important;">
     <!-- Bouton fermer (mobile uniquement) - Design amélioré -->
     <button id="closeSidebarButton" class="lg:hidden absolute top-4 right-4 bg-red-500 text-white hover:bg-red-600 w-10 h-10 rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-all z-50">
         <i class="fas fa-times text-lg"></i>
@@ -110,7 +142,12 @@ if (!isset($_SESSION['user_id'])) {
         const overlay = document.getElementById('mobileMenuOverlay');
         if (sidebar) {
             sidebar.classList.add('-translate-x-full');
-            if (overlay) overlay.classList.add('hidden');
+            sidebar.setAttribute('data-menu-state', 'closed');
+            sidebar.style.transform = 'translateX(-100%)';
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.style.display = 'none';
+            }
             document.body.style.overflow = 'auto';
         }
     }
@@ -121,7 +158,12 @@ if (!isset($_SESSION['user_id'])) {
         const overlay = document.getElementById('mobileMenuOverlay');
         if (sidebar) {
             sidebar.classList.remove('-translate-x-full');
-            if (overlay) overlay.classList.remove('hidden');
+            sidebar.setAttribute('data-menu-state', 'open');
+            sidebar.style.transform = 'translateX(0)';
+            if (overlay) {
+                overlay.classList.remove('hidden');
+                overlay.style.display = 'block';
+            }
             document.body.style.overflow = 'hidden';
         }
     }
@@ -130,25 +172,37 @@ if (!isset($_SESSION['user_id'])) {
     function ensureMenuClosed() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('mobileMenuOverlay');
-        if (sidebar && overlay) {
-            // Forcer la fermeture au chargement
+        if (sidebar) {
+            // Forcer la fermeture au chargement avec plusieurs méthodes
             sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('hidden');
+            sidebar.setAttribute('data-menu-state', 'closed');
+            sidebar.style.transform = 'translateX(-100%)';
+            sidebar.style.left = '-100%';
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.style.display = 'none';
+            }
             document.body.style.overflow = 'auto';
         }
     }
     
     // Attendre que le DOM soit chargé
     function initMobileMenu() {
-        const mobileMenuButton = document.getElementById('mobileMenuButton');
-        const closeSidebarButton = document.getElementById('closeSidebarButton');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('mobileMenuOverlay');
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const closeSidebarButton = document.getElementById('closeSidebarButton');
         
-        if (!sidebar) return;
+        if (!sidebar) {
+            console.warn('⚠️ Sidebar non trouvé');
+            return;
+        }
         
-        // S'assurer que le menu est fermé au chargement
+        // S'assurer que le menu est fermé au chargement IMMÉDIATEMENT
         ensureMenuClosed();
+        
+        // Double vérification après un court délai pour les appareils lents
+        setTimeout(ensureMenuClosed, 50);
         
         // Ouvrir le menu
         if (mobileMenuButton) {
@@ -221,16 +275,30 @@ if (!isset($_SESSION['user_id'])) {
         console.log('📱 Menu mobile responsive initialisé');
     }
     
-    // Fermer le menu immédiatement si possible
+    // Fermer le menu IMMÉDIATEMENT avant même le chargement du DOM
+    ensureMenuClosed();
+    
+    // Puis initialiser quand le DOM est prêt
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
             ensureMenuClosed();
-            initMobileMenu();
+            setTimeout(function() {
+                ensureMenuClosed();
+                initMobileMenu();
+            }, 10);
         });
     } else {
         ensureMenuClosed();
-        initMobileMenu();
+        setTimeout(function() {
+            ensureMenuClosed();
+            initMobileMenu();
+        }, 10);
     }
+    
+    // Vérification supplémentaire après chargement complet
+    window.addEventListener('load', function() {
+        ensureMenuClosed();
+    });
     
     // Exposer les fonctions globalement pour éviter les conflits
     window.closeMobileMenu = closeSidebar;
