@@ -101,48 +101,86 @@ if (!isset($_SESSION['user_id'])) {
 
 <!-- Script pour le menu mobile responsive -->
 <script>
-    // Gestion du menu mobile
-    const mobileMenuButton = document.getElementById('mobileMenuButton');
-    const closeSidebarButton = document.getElementById('closeSidebarButton');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('mobileMenuOverlay');
+(function() {
+    'use strict';
     
-    function openSidebar() {
-        sidebar.classList.remove('-translate-x-full');
-        overlay.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // Empêcher le scroll
-    }
-    
-    function closeSidebar() {
-        sidebar.classList.add('-translate-x-full');
-        overlay.classList.add('hidden');
-        document.body.style.overflow = 'auto'; // Réactiver le scroll
-    }
-    
-    // Ouvrir le menu
-    if (mobileMenuButton) {
-        mobileMenuButton.addEventListener('click', openSidebar);
-    }
-    
-    // Fermer le menu
-    if (closeSidebarButton) {
-        closeSidebarButton.addEventListener('click', closeSidebar);
-    }
-    
-    // Fermer en cliquant sur l'overlay
-    if (overlay) {
-        overlay.addEventListener('click', closeSidebar);
-    }
-    
-    // Fermer le menu après un clic sur un lien (mobile uniquement)
-    const sidebarLinks = sidebar.querySelectorAll('a');
-    sidebarLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            if (window.innerWidth < 1024) { // lg breakpoint
+    // Attendre que le DOM soit chargé
+    function initMobileMenu() {
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const closeSidebarButton = document.getElementById('closeSidebarButton');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobileMenuOverlay');
+        
+        if (!sidebar) return;
+        
+        function openSidebar() {
+            if (sidebar) {
+                sidebar.classList.remove('-translate-x-full');
+                if (overlay) overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Empêcher le scroll
+            }
+        }
+        
+        function closeSidebar() {
+            if (sidebar) {
+                sidebar.classList.add('-translate-x-full');
+                if (overlay) overlay.classList.add('hidden');
+                document.body.style.overflow = 'auto'; // Réactiver le scroll
+            }
+        }
+        
+        // Ouvrir le menu
+        if (mobileMenuButton) {
+            mobileMenuButton.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openSidebar();
+            };
+        }
+        
+        // Fermer le menu avec le bouton croix
+        if (closeSidebarButton) {
+            closeSidebarButton.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeSidebar();
+            };
+        }
+        
+        // Fermer en cliquant sur l'overlay
+        if (overlay) {
+            overlay.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeSidebar();
+            });
+        }
+        
+        // Fermer le menu après un clic sur un lien (mobile uniquement)
+        const sidebarLinks = sidebar.querySelectorAll('a');
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth < 1024) { // lg breakpoint
+                    setTimeout(closeSidebar, 100); // Petit délai pour laisser la navigation se faire
+                }
+            });
+        });
+        
+        // Fermer avec la touche Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && sidebar && !sidebar.classList.contains('-translate-x-full')) {
                 closeSidebar();
             }
         });
-    });
+        
+        console.log('📱 Menu mobile responsive initialisé');
+    }
     
-    console.log('📱 Menu mobile responsive initialisé');
+    // Initialiser immédiatement si le DOM est déjà chargé
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMobileMenu);
+    } else {
+        initMobileMenu();
+    }
+})();
 </script> 
