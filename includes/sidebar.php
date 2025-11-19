@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 <!-- Overlay pour fermer le menu sur mobile - Plus visible -->
 <div id="mobileMenuOverlay" class="hidden lg:hidden fixed inset-0 bg-black bg-opacity-60 z-40 backdrop-blur-sm transition-opacity duration-300"></div>
 
-<!-- Sidebar responsive avec scroll -->
+<!-- Sidebar responsive avec scroll - Toujours fermé par défaut sur mobile -->
 <aside id="sidebar" class="w-64 bg-white shadow-lg h-screen fixed lg:static transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-50 top-0 lg:top-auto overflow-y-auto">
     <!-- Bouton fermer (mobile uniquement) - Design amélioré -->
     <button id="closeSidebarButton" class="lg:hidden absolute top-4 right-4 bg-red-500 text-white hover:bg-red-600 w-10 h-10 rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-all z-50">
@@ -104,6 +104,40 @@ if (!isset($_SESSION['user_id'])) {
 (function() {
     'use strict';
     
+    // Fonction pour fermer le sidebar
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobileMenuOverlay');
+        if (sidebar) {
+            sidebar.classList.add('-translate-x-full');
+            if (overlay) overlay.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+    }
+    
+    // Fonction pour ouvrir le sidebar
+    function openSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobileMenuOverlay');
+        if (sidebar) {
+            sidebar.classList.remove('-translate-x-full');
+            if (overlay) overlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    
+    // S'assurer que le menu est fermé au chargement
+    function ensureMenuClosed() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobileMenuOverlay');
+        if (sidebar && overlay) {
+            // Forcer la fermeture au chargement
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+    }
+    
     // Attendre que le DOM soit chargé
     function initMobileMenu() {
         const mobileMenuButton = document.getElementById('mobileMenuButton');
@@ -113,47 +147,40 @@ if (!isset($_SESSION['user_id'])) {
         
         if (!sidebar) return;
         
-        function openSidebar() {
-            if (sidebar) {
-                sidebar.classList.remove('-translate-x-full');
-                if (overlay) overlay.classList.remove('hidden');
-                document.body.style.overflow = 'hidden'; // Empêcher le scroll
-            }
-        }
-        
-        function closeSidebar() {
-            if (sidebar) {
-                sidebar.classList.add('-translate-x-full');
-                if (overlay) overlay.classList.add('hidden');
-                document.body.style.overflow = 'auto'; // Réactiver le scroll
-            }
-        }
+        // S'assurer que le menu est fermé au chargement
+        ensureMenuClosed();
         
         // Ouvrir le menu
         if (mobileMenuButton) {
-            mobileMenuButton.onclick = function(e) {
+            mobileMenuButton.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 openSidebar();
-            };
+            }, { passive: false });
         }
         
         // Fermer le menu avec le bouton croix
         if (closeSidebarButton) {
-            closeSidebarButton.onclick = function(e) {
+            closeSidebarButton.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 closeSidebar();
-            };
+            }, { passive: false });
         }
         
-        // Fermer en cliquant sur l'overlay
+        // Fermer en cliquant sur l'overlay (click et touchstart pour mobile)
         if (overlay) {
             overlay.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 closeSidebar();
-            });
+            }, { passive: false });
+            
+            overlay.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeSidebar();
+            }, { passive: false });
         }
         
         // Fermer le menu après un clic sur un lien (mobile uniquement)
@@ -161,7 +188,7 @@ if (!isset($_SESSION['user_id'])) {
         sidebarLinks.forEach(link => {
             link.addEventListener('click', function() {
                 if (window.innerWidth < 1024) { // lg breakpoint
-                    setTimeout(closeSidebar, 100); // Petit délai pour laisser la navigation se faire
+                    setTimeout(closeSidebar, 150);
                 }
             });
         });
@@ -173,14 +200,40 @@ if (!isset($_SESSION['user_id'])) {
             }
         });
         
+        // Fermer le menu lors du redimensionnement si on passe en mode desktop
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                if (window.innerWidth >= 1024) { // lg breakpoint
+                    closeSidebar();
+                }
+            }, 100);
+        });
+        
+        // Fermer le menu lors du changement d'orientation
+        window.addEventListener('orientationchange', function() {
+            setTimeout(function() {
+                closeSidebar();
+            }, 100);
+        });
+        
         console.log('📱 Menu mobile responsive initialisé');
     }
     
-    // Initialiser immédiatement si le DOM est déjà chargé
+    // Fermer le menu immédiatement si possible
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initMobileMenu);
+        document.addEventListener('DOMContentLoaded', function() {
+            ensureMenuClosed();
+            initMobileMenu();
+        });
     } else {
+        ensureMenuClosed();
         initMobileMenu();
     }
+    
+    // Exposer les fonctions globalement pour éviter les conflits
+    window.closeMobileMenu = closeSidebar;
+    window.openMobileMenu = openSidebar;
 })();
 </script> 

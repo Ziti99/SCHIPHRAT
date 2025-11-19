@@ -9,6 +9,19 @@
     scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
 }
 
+/* S'assurer que le menu est fermé par défaut sur mobile */
+@media (max-width: 1023px) {
+    /* Menu fermé par défaut - le style inline dans le HTML garantit cela */
+    #sidebar {
+        transform: translateX(-100%);
+    }
+    
+    /* Overlay caché par défaut */
+    #mobileMenuOverlay {
+        display: none;
+    }
+}
+
 #sidebar::-webkit-scrollbar {
     width: 6px;
 }

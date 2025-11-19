@@ -46,14 +46,14 @@ $actes = $db->fetchAll("
     WHERE ca.consultation_id = ?
 ", [$paiement['consultation_id']]);
 
-// Historique des versements
-$versements = $db->fetchAll("
-    SELECT hp.*, u.nom, u.prenom
-    FROM historique_paiements hp
-    LEFT JOIN users u ON hp.caissiere_id = u.id
-    WHERE hp.paiement_id = ?
-    ORDER BY hp.date_versement
-", [$paiement_id]);
+// Historique des versements - Non utilisé dans le PDF
+// $versements = $db->fetchAll("
+//     SELECT hp.*, u.nom, u.prenom
+//     FROM historique_paiements hp
+//     LEFT JOIN users u ON hp.caissiere_id = u.id
+//     WHERE hp.paiement_id = ?
+//     ORDER BY hp.date_versement
+// ", [$paiement_id]);
 
 // Générer le HTML du reçu
 $html = '
@@ -62,35 +62,35 @@ $html = '
 <head>
     <meta charset="UTF-8">
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-        .header { text-align: center; border-bottom: 3px solid #10B981; padding-bottom: 20px; margin-bottom: 30px; }
-        .header h1 { color: #10B981; margin: 0; font-size: 28px; }
-        .header p { margin: 5px 0; color: #666; }
-        .recu-numero { background: #10B981; color: white; padding: 10px; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; }
-        .section { margin-bottom: 20px; }
-        .section-title { background: #f3f4f6; padding: 8px; font-weight: bold; color: #333; border-left: 4px solid #10B981; margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #f9fafb; font-weight: bold; }
-        .total-row { background: #f0fdf4; font-weight: bold; font-size: 16px; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 15px; font-size: 12px; }
+        .header { text-align: center; border-bottom: 3px solid #8B5CF6; padding-bottom: 15px; margin-bottom: 15px; }
+        .header h1 { color: #8B5CF6; margin: 0; font-size: 24px; font-weight: bold; }
+        .header p { margin: 3px 0; color: #666; font-size: 11px; }
+        .recu-numero { background: #8B5CF6; color: white; padding: 8px; text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 15px; }
+        .section { margin-bottom: 12px; }
+        .section-title { background: #F3E8FF; padding: 6px; font-weight: bold; color: #8B5CF6; border-left: 4px solid #8B5CF6; margin-bottom: 8px; font-size: 11px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 11px; }
+        th, td { padding: 6px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #F3E8FF; font-weight: bold; color: #8B5CF6; }
+        .total-row { background: #F3E8FF; font-weight: bold; font-size: 13px; }
         .info-grid { display: table; width: 100%; }
         .info-row { display: table-row; }
-        .info-label { display: table-cell; width: 40%; padding: 5px 0; color: #666; }
-        .info-value { display: table-cell; padding: 5px 0; font-weight: bold; }
-        .footer { margin-top: 40px; text-align: center; padding-top: 20px; border-top: 2px solid #ddd; font-size: 12px; color: #666; }
-        .signature { margin-top: 40px; }
-        .signature-line { border-top: 1px solid #000; width: 200px; margin: 30px auto 5px; }
-        .statut-paye { background: #10B981; color: white; padding: 5px 10px; border-radius: 5px; display: inline-block; }
-        .statut-partiel { background: #F59E0B; color: white; padding: 5px 10px; border-radius: 5px; display: inline-block; }
-        .amount-badges { display: flex; gap: 10px; margin: 10px 0 0 0; }
-        .amount-badge { padding: 8px 12px; border-radius: 6px; font-weight: bold; font-size: 14px; }
-        .amount-paid { background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0; }
-        .amount-remaining { background:#FEF2F2; color:#991B1B; border:1px solid #FECACA; }
+        .info-label { display: table-cell; width: 40%; padding: 3px 0; color: #666; font-size: 11px; }
+        .info-value { display: table-cell; padding: 3px 0; font-weight: bold; font-size: 11px; }
+        .footer { margin-top: 20px; text-align: center; padding-top: 15px; border-top: 2px solid #ddd; font-size: 10px; color: #666; }
+        .signature { margin-top: 20px; }
+        .signature-line { border-top: 1px solid #000; width: 200px; margin: 20px auto 5px; }
+        .statut-paye { background: #8B5CF6; color: white; padding: 4px 8px; border-radius: 4px; display: inline-block; font-size: 10px; }
+        .statut-partiel { background: #F59E0B; color: white; padding: 4px 8px; border-radius: 4px; display: inline-block; font-size: 10px; }
+        .amount-badges { display: flex; gap: 8px; margin: 8px 0 0 0; }
+        .amount-badge { padding: 6px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+        .amount-paid { background: #F3E8FF; color: #6B21A8; border: 1px solid #C084FC; }
+        .amount-remaining { background: #FCE7F3; color: #BE185D; border: 1px solid #F9A8D4; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🏥 CLINIQUE OBSTÉTRIQUE</h1>
+        <h1>🏥 SCHIPHRAT</h1>
         <p>Excellence en soins maternels</p>
         <p>Libreville, Gabon | Tél: +241 XX XX XX XX</p>
     </div>
@@ -190,37 +190,6 @@ $html .= '
         </div>
     </div>';
 
-if (!empty($versements)) {
-    $html .= '
-    <div class="section">
-        <div class="section-title">HISTORIQUE DES VERSEMENTS</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Montant</th>
-                    <th>Mode</th>
-                    <th>Caissière</th>
-                </tr>
-            </thead>
-            <tbody>';
-    
-    foreach ($versements as $v) {
-        $html .= '
-                <tr>
-                    <td>' . date('d/m/Y H:i', strtotime($v['date_versement'])) . '</td>
-                    <td>' . number_format($v['montant'], 0, ',', ' ') . ' FCFA</td>
-                    <td>' . ucfirst(str_replace('_', ' ', $v['mode_paiement'])) . '</td>
-                    <td>' . htmlspecialchars($v['prenom'] . ' ' . $v['nom']) . '</td>
-                </tr>';
-    }
-    
-    $html .= '
-            </tbody>
-        </table>
-    </div>';
-}
-
 $html .= '
     <div class="signature">
         <div style="text-align: right; margin-right: 50px;">
@@ -233,7 +202,7 @@ $html .= '
     <div class="footer">
         <p>Merci de votre confiance</p>
         <p>Ce reçu est généré électroniquement le ' . date('d/m/Y à H:i') . '</p>
-        <p style="margin-top: 10px; font-size: 10px;">Clinique Obstétrique - Libreville, Gabon</p>
+        <p style="margin-top: 10px; font-size: 10px;">Schiphrat - Libreville, Gabon</p>
     </div>
 </body>
 </html>';

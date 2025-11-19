@@ -14,16 +14,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Smooth scroll
         sidebar.style.scrollBehavior = 'smooth';
         
-        // Sur mobile, fermer le menu en touchant en dehors
+        // S'assurer que le menu est fermé au chargement
+        sidebar.classList.add('-translate-x-full');
         const overlay = document.getElementById('mobileMenuOverlay');
         if (overlay) {
-            overlay.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            });
+            overlay.classList.add('hidden');
         }
+        document.body.style.overflow = 'auto';
     }
     
     // Amélioration du scroll des tableaux sur mobile
@@ -43,17 +40,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Fermeture automatique du menu mobile après clic
+    // Fermeture automatique du menu mobile après clic (utiliser la fonction globale si disponible)
     const sidebarLinks = document.querySelectorAll('#sidebar a');
     sidebarLinks.forEach(link => {
         link.addEventListener('click', function() {
             if (window.innerWidth < 1024) {
-                const sidebar = document.getElementById('sidebar');
-                const overlay = document.getElementById('mobileMenuOverlay');
-                if (sidebar && overlay) {
-                    sidebar.classList.add('-translate-x-full');
-                    overlay.classList.add('hidden');
-                    document.body.style.overflow = 'auto';
+                if (typeof window.closeMobileMenu === 'function') {
+                    window.closeMobileMenu();
+                } else {
+                    const sidebar = document.getElementById('sidebar');
+                    const overlay = document.getElementById('mobileMenuOverlay');
+                    if (sidebar && overlay) {
+                        sidebar.classList.add('-translate-x-full');
+                        overlay.classList.add('hidden');
+                        document.body.style.overflow = 'auto';
+                    }
                 }
             }
         });
@@ -84,15 +85,21 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('📱 Améliorations mobile chargées - Device: ' + (isMobile ? 'Mobile' : 'Desktop'));
 });
 
-// Fonction pour détecter l'orientation
+// Fonction pour détecter l'orientation (utiliser la fonction globale si disponible)
 window.addEventListener('orientationchange', function() {
     console.log('📱 Orientation changée');
-    // Fermer le sidebar si ouvert
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('mobileMenuOverlay');
-    if (sidebar && overlay) {
-        sidebar.classList.add('-translate-x-full');
-        overlay.classList.add('hidden');
-    }
+    setTimeout(function() {
+        if (typeof window.closeMobileMenu === 'function') {
+            window.closeMobileMenu();
+        } else {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileMenuOverlay');
+            if (sidebar && overlay) {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+    }, 100);
 });
 
