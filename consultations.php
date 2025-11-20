@@ -1,17 +1,21 @@
 <?php
 session_start();
+error_log("[CONSULTATIONS_LISTE] Début - User ID: " . ($_SESSION['user_id'] ?? 'non défini'));
+
 if (!isset($_SESSION['user_id'])) {
+    error_log("[CONSULTATIONS_LISTE] ERREUR - User non connecté, redirection vers login");
     header('Location: /login.php');
     exit;
 }
 require_once __DIR__ . '/config/database.php';
 
 $db = new Database();
+error_log("[CONSULTATIONS_LISTE] Connexion DB établie");
 
 // Recherche et filtres
-$search = $_GET['search'] ?? '';
-$medecin_id = $_GET['medecin_id'] ?? '';
-$date_consultation = $_GET['date_consultation'] ?? '';
+$search = trim($_GET['search'] ?? '');
+$medecin_id = trim($_GET['medecin_id'] ?? '');
+$date_consultation = trim($_GET['date_consultation'] ?? '');
 $page = max(1, intval($_GET['page'] ?? 1));
 $limit = 20;
 $offset = ($page - 1) * $limit;
@@ -26,19 +30,26 @@ if (!empty($search)) {
     $params[] = "%$search%";
 }
 
-if (!empty($medecin_id)) {
+if (!empty($medecin_id) && is_numeric($medecin_id)) {
     $where[] = "cp.medecin_id = ?";
-    $params[] = $medecin_id;
+    $params[] = intval($medecin_id);
 }
 
 if (!empty($date_consultation)) {
-    $where[] = "DATE(cp.date_consultation) = ?";
-    $params[] = $date_consultation;
+    // Valider le format de date (YYYY-MM-DD)
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_consultation)) {
+        $where[] = "DATE(cp.date_consultation) = ?";
+        $params[] = $date_consultation;
+    }
 }
 
 $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
 // Récupération des consultations
+error_log("[CONSULTATIONS_LISTE] Requête SQL - WHERE: " . $whereClause);
+error_log("[CONSULTATIONS_LISTE] Paramètres: " . json_encode($params));
+error_log("[CONSULTATIONS_LISTE] LIMIT: $limit, OFFSET: $offset");
+
 $consultations = $db->fetchAll("
     SELECT cp.*, 
            p.nom, p.prenom,
@@ -46,18 +57,23 @@ $consultations = $db->fetchAll("
            cp.dpa
     FROM consultations_prenatales cp
     JOIN patientes p ON cp.patiente_id = p.id
-    JOIN users u ON cp.medecin_id = u.id
+    LEFT JOIN users u ON cp.medecin_id = u.id
     $whereClause
     ORDER BY cp.date_consultation DESC
     LIMIT $limit OFFSET $offset
 ", $params);
+
+error_log("[CONSULTATIONS_LISTE] Nombre de consultations trouvées: " . count($consultations));
+if (!empty($consultations)) {
+    error_log("[CONSULTATIONS_LISTE] Première consultation ID: " . $consultations[0]['id']);
+}
 
 // Comptage total pour pagination
 $total = $db->fetch("
     SELECT COUNT(*) as count
     FROM consultations_prenatales cp
     JOIN patientes p ON cp.patiente_id = p.id
-    JOIN users u ON cp.medecin_id = u.id
+    LEFT JOIN users u ON cp.medecin_id = u.id
     $whereClause
 ", $params)['count'];
 
@@ -263,7 +279,11 @@ $medecins = $db->fetchAll("
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="text-sm text-gray-900">
-                                                Dr. <?php echo htmlspecialchars($consultation['medecin_nom'] . ' ' . $consultation['medecin_prenom']); ?>
+                                                <?php if ($consultation['medecin_nom']): ?>
+                                                    Dr. <?php echo htmlspecialchars($consultation['medecin_nom'] . ' ' . $consultation['medecin_prenom']); ?>
+                                                <?php else: ?>
+                                                    <span class="text-gray-400 italic">Non assigné</span>
+                                                <?php endif; ?>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
@@ -285,7 +305,10 @@ $medecins = $db->fetchAll("
                                         </td>
                                         <td class="px-6 py-4 text-sm font-medium">
                                             <div class="flex space-x-2">
-                                                <a href="/consultations/voir.php?id=<?php echo $consultation['id']; ?>" class="text-purple-600 hover:text-purple-900" title="Voir la consultation">
+                                                <a href="/consultations/voir.php?id=<?php echo $consultation['id']; ?>" 
+                                                   class="text-purple-600 hover:text-purple-900" 
+                                                   title="Voir la consultation"
+                                                   onclick="console.log('Clic sur voir consultation ID: <?php echo $consultation['id']; ?>'); return true;">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                                 <a href="/consultations/modifier.php?id=<?php echo $consultation['id']; ?>" class="text-blue-600 hover:text-blue-900" title="Modifier">

@@ -31,13 +31,27 @@ try {
         exit();
     }
     
-    // Récupérer les consultations prénatales (sans grossesses car table inexistante)
+    // Récupérer les consultations prénatales avec détails complets
     $consultations = $db->fetchAll("
-        SELECT cp.* 
+        SELECT cp.*, 
+               u.nom as medecin_nom, u.prenom as medecin_prenom, u.specialite
         FROM consultations_prenatales cp 
+        LEFT JOIN users u ON cp.medecin_id = u.id
         WHERE cp.patiente_id = ? 
         ORDER BY cp.date_consultation DESC
     ", [$id]);
+    
+    // Pour chaque consultation, récupérer les actes médicaux
+    foreach ($consultations as &$consultation) {
+        $consultation['actes'] = $db->fetchAll("
+            SELECT ca.*, ap.nom_acte, ap.description, 
+                   COALESCE(ca.montant, ap.montant) as montant
+            FROM consultation_actes ca
+            INNER JOIN actes_poses ap ON ca.acte_id = ap.id
+            WHERE ca.consultation_id = ?
+        ", [$consultation['id']]);
+    }
+    unset($consultation); // Important : libérer la référence
     
     // Récupérer les accouchements (sans grossesses car table inexistante)
     $accouchements = $db->fetchAll("
@@ -189,12 +203,23 @@ try {
                                 <p class="text-gray-500 text-center py-4">Aucune consultation enregistrée</p>
                             <?php else: ?>
                                 <div class="space-y-3">
-                                    <?php foreach (array_slice($consultations, 0, 5) as $consultation): ?>
-                                        <div class="border border-gray-200 rounded-lg p-4">
-                                            <div class="flex justify-between items-start">
-                                                <div>
-                                                    <h4 class="font-semibold text-gray-900">
+                                    <?php foreach (array_slice($consultations, 0, 5) as $index => $consultation): ?>
+                                        <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                            <!-- En-tête cliquable -->
+                                            <button 
+                                                type="button"
+                                                onclick="toggleConsultationDetails(<?php echo $consultation['id']; ?>)"
+                                                class="w-full text-left p-4 hover:bg-blue-50 hover:border-blue-300 transition-colors cursor-pointer flex justify-between items-start"
+                                                id="consultation-header-<?php echo $consultation['id']; ?>">
+                                                <div class="flex-1">
+                                                    <h4 class="font-semibold text-gray-900 flex items-center">
+                                                        <i class="fas fa-calendar-check text-blue-600 mr-2"></i>
                                                         Consultation du <?php echo date('d/m/Y', strtotime($consultation['date_consultation'])); ?>
+                                                        <?php if (!empty($consultation['date_consultation'])): ?>
+                                                            <span class="text-sm font-normal text-gray-500 ml-2">
+                                                                à <?php echo date('H:i', strtotime($consultation['date_consultation'])); ?>
+                                                            </span>
+                                                        <?php endif; ?>
                                                     </h4>
                                                     <?php if ($consultation['observations']): ?>
                                                         <p class="text-sm text-gray-700 mt-2">
@@ -202,6 +227,123 @@ try {
                                                             <?php if (strlen($consultation['observations']) > 100): ?>...<?php endif; ?>
                                                         </p>
                                                     <?php endif; ?>
+                                                </div>
+                                                <i class="fas fa-chevron-down text-gray-400 ml-2 transition-transform" id="chevron-<?php echo $consultation['id']; ?>"></i>
+                                            </button>
+                                            
+                                            <!-- Détails (masqués par défaut) -->
+                                            <div 
+                                                id="consultation-details-<?php echo $consultation['id']; ?>" 
+                                                class="hidden border-t border-gray-200 bg-gray-50 p-4">
+                                                <div class="space-y-4">
+                                                    <!-- Informations générales -->
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div>
+                                                            <span class="text-sm font-medium text-gray-600">Date et heure:</span>
+                                                            <p class="text-gray-900"><?php echo date('d/m/Y à H:i', strtotime($consultation['date_consultation'])); ?></p>
+                                                        </div>
+                                                        <?php if ($consultation['medecin_nom']): ?>
+                                                            <div>
+                                                                <span class="text-sm font-medium text-gray-600">Médecin:</span>
+                                                                <p class="text-gray-900">Dr. <?php echo htmlspecialchars($consultation['medecin_prenom'] . ' ' . $consultation['medecin_nom']); ?></p>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                        <?php if ($consultation['tension_arterielle']): ?>
+                                                            <div>
+                                                                <span class="text-sm font-medium text-gray-600">Tension artérielle:</span>
+                                                                <p class="text-gray-900"><?php echo htmlspecialchars($consultation['tension_arterielle']); ?></p>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                        <?php if ($consultation['poids']): ?>
+                                                            <div>
+                                                                <span class="text-sm font-medium text-gray-600">Poids:</span>
+                                                                <p class="text-gray-900"><?php echo htmlspecialchars($consultation['poids']); ?> kg</p>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                        <?php if ($consultation['hauteur_uterine']): ?>
+                                                            <div>
+                                                                <span class="text-sm font-medium text-gray-600">Hauteur utérine:</span>
+                                                                <p class="text-gray-900"><?php echo htmlspecialchars($consultation['hauteur_uterine']); ?> cm</p>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                        <?php if ($consultation['frequence_cardiaque_foetale']): ?>
+                                                            <div>
+                                                                <span class="text-sm font-medium text-gray-600">Fréquence cardiaque fœtale:</span>
+                                                                <p class="text-gray-900"><?php echo htmlspecialchars($consultation['frequence_cardiaque_foetale']); ?> bpm</p>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    
+                                                    <!-- Actes médicaux -->
+                                                    <?php if (!empty($consultation['actes'])): ?>
+                                                        <div class="border-t border-gray-300 pt-4">
+                                                            <h5 class="font-semibold text-gray-900 mb-3">
+                                                                <i class="fas fa-stethoscope text-purple-600 mr-2"></i>Actes médicaux (<?php echo count($consultation['actes']); ?>)
+                                                            </h5>
+                                                            <div class="space-y-2">
+                                                                <?php 
+                                                                $total_actes = 0;
+                                                                foreach ($consultation['actes'] as $acte): 
+                                                                    $total_actes += $acte['montant'] * $acte['quantite'];
+                                                                ?>
+                                                                    <div class="bg-white rounded-lg p-3 border border-gray-200">
+                                                                        <div class="flex justify-between items-center">
+                                                                            <div>
+                                                                                <p class="font-medium text-gray-900"><?php echo htmlspecialchars($acte['nom_acte']); ?></p>
+                                                                                <?php if ($acte['description']): ?>
+                                                                                    <p class="text-sm text-gray-600"><?php echo htmlspecialchars($acte['description']); ?></p>
+                                                                                <?php endif; ?>
+                                                                                <p class="text-xs text-gray-500 mt-1">Quantité: <?php echo $acte['quantite']; ?></p>
+                                                                            </div>
+                                                                            <p class="font-semibold text-purple-600">
+                                                                                <?php echo number_format($acte['montant'] * $acte['quantite'], 0, ',', ' '); ?> FCFA
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                <?php endforeach; ?>
+                                                                <div class="bg-purple-50 rounded-lg p-3 border border-purple-200 mt-2">
+                                                                    <div class="flex justify-between items-center">
+                                                                        <span class="font-semibold text-gray-900">Total:</span>
+                                                                        <span class="font-bold text-purple-600 text-lg">
+                                                                            <?php echo number_format($total_actes, 0, ',', ' '); ?> FCFA
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    
+                                                    <!-- Observations -->
+                                                    <?php if ($consultation['observations']): ?>
+                                                        <div class="border-t border-gray-300 pt-4">
+                                                            <h5 class="font-semibold text-gray-900 mb-2">
+                                                                <i class="fas fa-notes-medical text-green-600 mr-2"></i>Observations
+                                                            </h5>
+                                                            <p class="text-gray-700 whitespace-pre-wrap"><?php echo htmlspecialchars($consultation['observations']); ?></p>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    
+                                                    <!-- Recommandations -->
+                                                    <?php if ($consultation['recommandations']): ?>
+                                                        <div class="border-t border-gray-300 pt-4">
+                                                            <h5 class="font-semibold text-gray-900 mb-2">
+                                                                <i class="fas fa-clipboard-check text-blue-600 mr-2"></i>Recommandations
+                                                            </h5>
+                                                            <p class="text-gray-700 whitespace-pre-wrap"><?php echo htmlspecialchars($consultation['recommandations']); ?></p>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    
+                                                    <!-- Actions -->
+                                                    <div class="border-t border-gray-300 pt-4 flex justify-end space-x-2">
+                                                        <a href="consultations/voir.php?id=<?php echo $consultation['id']; ?>" 
+                                                           class="text-sm text-blue-600 hover:text-blue-800">
+                                                            <i class="fas fa-external-link-alt mr-1"></i>Voir la page complète
+                                                        </a>
+                                                        <a href="consultations/modifier.php?id=<?php echo $consultation['id']; ?>" 
+                                                           class="text-sm text-green-600 hover:text-green-800">
+                                                            <i class="fas fa-edit mr-1"></i>Modifier
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -315,5 +457,33 @@ try {
             </div>
         </div>
     </div>
+    
+    <script>
+        function toggleConsultationDetails(consultationId) {
+            const detailsDiv = document.getElementById('consultation-details-' + consultationId);
+            const chevron = document.getElementById('chevron-' + consultationId);
+            
+            if (!detailsDiv || !chevron) {
+                console.error('Éléments non trouvés pour consultation ID:', consultationId);
+                return;
+            }
+            
+            if (detailsDiv.classList.contains('hidden')) {
+                // Ouvrir
+                detailsDiv.classList.remove('hidden');
+                chevron.classList.remove('fa-chevron-down');
+                chevron.classList.add('fa-chevron-up');
+                chevron.style.transform = 'rotate(180deg)';
+                console.log('Consultation', consultationId, 'ouverte');
+            } else {
+                // Fermer
+                detailsDiv.classList.add('hidden');
+                chevron.classList.remove('fa-chevron-up');
+                chevron.classList.add('fa-chevron-down');
+                chevron.style.transform = 'rotate(0deg)';
+                console.log('Consultation', consultationId, 'fermée');
+            }
+        }
+    </script>
 </body>
 </html> 

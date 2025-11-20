@@ -19,29 +19,40 @@ $db = new Database();
 // Récupérer l'ID de la consultation
 $consultation_id = $_GET['id'] ?? 0;
 
-error_log("Consultation ID: " . $consultation_id);
+error_log("[VOIR_CONSULTATION] Début - Consultation ID reçu: " . $consultation_id);
+error_log("[VOIR_CONSULTATION] User ID: " . ($_SESSION['user_id'] ?? 'non défini'));
+error_log("[VOIR_CONSULTATION] URL complète: " . ($_SERVER['REQUEST_URI'] ?? 'non défini'));
 
-if (!$consultation_id) {
-    error_log("Redirection vers consultations.php - consultation_id vide");
+if (!$consultation_id || !is_numeric($consultation_id)) {
+    error_log("[VOIR_CONSULTATION] ERREUR - consultation_id invalide ou vide: " . var_export($consultation_id, true));
     header('Location: /consultations.php');
     exit;
 }
 
-// Récupérer les détails de la consultation
+$consultation_id = intval($consultation_id);
+error_log("[VOIR_CONSULTATION] Consultation ID validé: " . $consultation_id);
+
+// Récupérer les détails de la consultation avec LEFT JOIN pour le médecin (peut être NULL)
 $consultation = $db->fetch("
     SELECT c.*, p.nom, p.prenom, p.date_naissance, p.nationalite, p.telephone, p.adresse, p.groupe_sanguin,
            medecin.nom as medecin_nom, medecin.prenom as medecin_prenom, medecin.specialite
     FROM consultations_prenatales c
     JOIN patientes p ON c.patiente_id = p.id
-    JOIN users medecin ON c.medecin_id = medecin.id
+    LEFT JOIN users medecin ON c.medecin_id = medecin.id
     WHERE c.id = ?
 ", [$consultation_id]);
 
+error_log("[VOIR_CONSULTATION] Résultat requête: " . ($consultation ? "Consultation trouvée" : "Consultation NON trouvée"));
+
 if (!$consultation) {
-    error_log("Redirection vers consultations.php - consultation non trouvée pour ID: " . $consultation_id);
+    error_log("[VOIR_CONSULTATION] ERREUR - Consultation non trouvée pour ID: " . $consultation_id);
+    error_log("[VOIR_CONSULTATION] Redirection vers consultations.php");
     header('Location: /consultations.php');
     exit;
 }
+
+error_log("[VOIR_CONSULTATION] Consultation trouvée - Patiente: " . ($consultation['prenom'] ?? '') . " " . ($consultation['nom'] ?? ''));
+error_log("[VOIR_CONSULTATION] Médecin: " . ($consultation['medecin_nom'] ?? 'NULL'));
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -149,7 +160,13 @@ if (!$consultation) {
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Médecin</label>
-                            <p class="text-gray-900">Dr. <?php echo htmlspecialchars($consultation['medecin_prenom'] . ' ' . $consultation['medecin_nom']); ?></p>
+                            <p class="text-gray-900">
+                                <?php if ($consultation['medecin_nom']): ?>
+                                    Dr. <?php echo htmlspecialchars($consultation['medecin_prenom'] . ' ' . $consultation['medecin_nom']); ?>
+                                <?php else: ?>
+                                    <span class="text-gray-400 italic">Non assigné</span>
+                                <?php endif; ?>
+                            </p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Spécialité</label>
