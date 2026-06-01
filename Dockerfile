@@ -34,7 +34,10 @@ RUN if [ ! -f .env ]; then cp .env.example .env 2>/dev/null || echo "APP_ENV=pro
 EXPOSE 8000
 
 # Set permissions
-RUN chmod -R 755 /app
+RUN chmod -R 755 /app && chmod +x /app/start.sh
 
-# Start PHP built-in server
-CMD ["php", "-S", "0.0.0.0:8000"]
+# Initialize database directory
+RUN mkdir -p /app/database
+
+# Start PHP built-in server with Railway PORT variable
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8000}"]
