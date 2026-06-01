@@ -7,7 +7,6 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     libzip-dev \
-    oniguruma-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
@@ -38,4 +37,4 @@ EXPOSE 8000
 RUN chmod -R 755 /app
 
 # Start PHP built-in server
-CMD php -S 0.0.0.0:${PORT:-8000}
+CMD ["php", "-S", "0.0.0.0:8000"]
