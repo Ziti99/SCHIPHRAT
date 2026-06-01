@@ -1,52 +1,41 @@
-# Utiliser l'image PHP officielle avec Apache
-FROM php:8.1-apache
+FROM php:8.2-cli
 
-# Installer les dépendances système
+# Install required packages
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libzip-dev \
+    curl \
+    git \
     zip \
     unzip \
-    git \
-    default-mysql-client \
-    pkg-config \
-    libssl-dev \
+    libzip-dev \
+    oniguruma-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Installer les extensions PHP
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql mysqli zip
+# Install PHP extensions
+RUN docker-php-ext-install \
+    zip \
+    pdo \
+    pdo_mysql
 
-# Activer les modules Apache nécessaires
-RUN a2enmod rewrite headers
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Configurer PHP pour afficher les erreurs
-RUN echo "display_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+# Set working directory
+WORKDIR /app
 
-# Définir le répertoire de travail
-WORKDIR /var/www/html
+# Copy project files
+COPY . .
 
-# Copier les fichiers de l'application
-COPY . /var/www/html/
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader 2>/dev/null || true
 
-# Configurer les permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+# Create .env file if not exists
+RUN if [ ! -f .env ]; then cp .env.example .env 2>/dev/null || echo "APP_ENV=production" > .env; fi
 
-# Exposer le port (Railway définira le port)
-EXPOSE $PORT
+# Expose port
+EXPOSE 8000
 
-# Script de démarrage pour configurer le port dynamique
-RUN echo '#!/bin/bash' > /start.sh && \
-    echo 'echo "🚀 Configuration du port $PORT..."' >> /start.sh && \
-    echo 'sed -i "s/Listen 80/Listen $PORT/g" /etc/apache2/ports.conf' >> /start.sh && \
-    echo 'sed -i "s/:80/:$PORT/g" /etc/apache2/sites-available/000-default.conf' >> /start.sh && \
-    echo 'echo "🌐 Démarrage dApache sur le port $PORT..."' >> /start.sh && \
-    echo 'apache2-foreground' >> /start.sh && \
-    chmod +x /start.sh
+# Set permissions
+RUN chmod -R 755 /app
 
-# Démarrer avec le script personnalisé
-CMD ["/start.sh"] 
+# Start PHP built-in server
+CMD php -S 0.0.0.0:${PORT:-8000}
