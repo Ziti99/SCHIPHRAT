@@ -93,14 +93,14 @@ CREATE TABLE accouchements (
     grossesse_id INT NOT NULL,
     date_accouchement DATETIME NOT NULL,
     mode_accouchement ENUM('voie_basse', 'cesarienne', 'forceps', 'ventouse') NOT NULL,
-    duree_travail INT, -- en minutes
+    duree_travail INT,
     complications TEXT,
     medecin_id INT NOT NULL,
     sage_femme_id INT,
     nom_bebe VARCHAR(100),
     sexe_bebe ENUM('M', 'F'),
-    poids_bebe DECIMAL(4,3), -- en kg
-    taille_bebe INT, -- en cm
+    poids_bebe DECIMAL(4,3),
+    taille_bebe INT,
     statut_bebe ENUM('vivant', 'mort_ne', 'decede') DEFAULT 'vivant',
     apgar_score INT,
     observations TEXT,
@@ -134,7 +134,7 @@ CREATE TABLE deces_neonataux (
     accouchement_id INT NOT NULL,
     date_deces DATETIME NOT NULL,
     cause_deces TEXT,
-    age_deces INT, -- en heures
+    age_deces INT,
     observations TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -193,4 +193,4 @@ CREATE INDEX idx_consultations_grossesse_id ON consultations_prenatales(grossess
 CREATE INDEX idx_accouchements_grossesse_id ON accouchements(grossesse_id);
 CREATE INDEX idx_accouchements_date ON accouchements(date_accouchement);
 CREATE INDEX idx_registres_type ON registres(type_registre);
-CREATE INDEX idx_registres_date ON registres(date_evenement); 
+CREATE INDEX idx_registres_date ON registres(date_evenement);
