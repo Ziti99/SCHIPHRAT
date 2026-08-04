@@ -125,17 +125,35 @@ class Database
     private function connect(): void
     {
         $c = $this->config;
+        $root = dirname(__DIR__, 2);
 
         // SQLite pour démo locale / tests sans serveur MySQL
         if (($c['connection'] ?? 'mysql') === 'sqlite') {
             $sqlitePath = $c['sqlite_path'];
-            // Si DB_DATABASE contient :memory: ou un fichier .db
+            // Si chemin relatif, on le résout depuis la racine du projet (pour que database/clinique.db marche sur ton PC)
+            if ($sqlitePath !== ':memory:' && !str_starts_with($sqlitePath, '/') && !str_starts_with($sqlitePath, 'C:') && !preg_match('/^[a-zA-Z]:/', $sqlitePath)) {
+                $candidate = $root . '/' . ltrim($sqlitePath, '/');
+                if (file_exists($candidate) || !file_exists($sqlitePath)) {
+                    $sqlitePath = $candidate;
+                }
+            }
+            // Fallback: si le fichier n'existe pas, essaie database/clinique.db dans le projet
+            if (!file_exists($sqlitePath) && $sqlitePath !== ':memory:') {
+                $fallback = $root . '/database/clinique.db';
+                if (file_exists($fallback)) {
+                    $sqlitePath = $fallback;
+                }
+            }
+
             if ($sqlitePath === ':memory:' || str_ends_with($sqlitePath, '.db') || str_ends_with($sqlitePath, '.sqlite')) {
                 $dsn = "sqlite:" . $sqlitePath;
             } else {
-                // Si DB_NAME est un chemin sqlite
                 if (str_ends_with($c['dbname'], '.db') || str_ends_with($c['dbname'], '.sqlite') || $c['dbname'] === ':memory:') {
-                    $dsn = "sqlite:" . $c['dbname'];
+                    $dPath = $c['dbname'];
+                    if (!str_starts_with($dPath, '/') && $dPath !== ':memory:') {
+                        $dPath = $root . '/' . ltrim($dPath, '/');
+                    }
+                    $dsn = "sqlite:" . $dPath;
                 } else {
                     $dsn = "sqlite:" . $sqlitePath;
                 }

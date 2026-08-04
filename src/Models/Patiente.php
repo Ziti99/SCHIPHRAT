@@ -65,6 +65,10 @@ class Patiente
     {
         try {
             $db = Database::getInstance();
+            $driver = $db->getConnection()->getAttribute(\PDO::ATTR_DRIVER_NAME);
+            if ($driver === 'sqlite') {
+                return (int) $db->fetchColumn("SELECT COUNT(*) FROM patientes WHERE strftime('%m', created_at) = strftime('%m','now') AND strftime('%Y', created_at) = strftime('%Y','now')");
+            }
             return (int) $db->fetchColumn("SELECT COUNT(*) FROM patientes WHERE MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE())");
         } catch (\Throwable $e) {
             return 0;
@@ -80,8 +84,13 @@ class Patiente
     {
         try {
             $db = Database::getInstance();
+            $driver = $db->getConnection()->getAttribute(\PDO::ATTR_DRIVER_NAME);
             $total = $db->fetchColumn("SELECT COUNT(*) FROM patientes");
-            $thisMonth = $db->fetchColumn("SELECT COUNT(*) FROM patientes WHERE MONTH(created_at)=MONTH(NOW()) AND YEAR(created_at)=YEAR(NOW())");
+            if ($driver === 'sqlite') {
+                $thisMonth = $db->fetchColumn("SELECT COUNT(*) FROM patientes WHERE strftime('%m', created_at)=strftime('%m','now') AND strftime('%Y', created_at)=strftime('%Y','now')");
+            } else {
+                $thisMonth = $db->fetchColumn("SELECT COUNT(*) FROM patientes WHERE MONTH(created_at)=MONTH(NOW()) AND YEAR(created_at)=YEAR(NOW())");
+            }
             $groupeSanguin = $db->fetchAll("SELECT groupe_sanguin, COUNT(*) as total FROM patientes WHERE groupe_sanguin IS NOT NULL GROUP BY groupe_sanguin");
             return [
                 'total' => (int)$total,
