@@ -17,6 +17,9 @@ use Clinique\Helpers\Security;
 
 Auth::initSecureSession();
 
+// Génère le token CSRF AVANT le traitement POST pour s'assurer qu'il existe dans la session
+$csrfToken = Security::generateCsrfToken();
+
 // Si déjà connecté, rediriger
 if (Auth::check()) {
     header('Location: /dashboard.php');
@@ -32,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $csrf = $_POST['csrf_token'] ?? '';
     if (!Security::verifyCsrfToken($csrf)) {
         $error = 'Jeton de sécurité invalide. Veuillez réessayer.';
+        error_log('CSRF verification failed on login for session ' . session_id());
     } else {
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
@@ -47,12 +51,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: ' . $redirect);
             exit;
         } else {
+            // Log serveur pour diagnostic sans exposer le mot de passe
+            error_log(sprintf('Login failed for username="%s": %s', $username, $result['message']));
             $error = $result['message'];
         }
     }
 }
 
-$csrfToken = Security::generateCsrfToken();
+// Re-évalue l'état de rate-limit (utile si POST a modifié la session)
 $isRateLimited = Security::isRateLimited('login', (int)($_ENV['LOGIN_MAX_ATTEMPTS'] ?? 5), (int)($_ENV['LOGIN_LOCKOUT_MINUTES'] ?? 15));
 ?>
 <!DOCTYPE html>
@@ -132,7 +138,11 @@ $isRateLimited = Security::isRateLimited('login', (int)($_ENV['LOGIN_MAX_ATTEMPT
 
                 <button 
                     type="submit" 
-                    <?= $isRateLimited ? 'disabled class="w-full bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-semibold cursor-not-allowed"' : 'class="w-full bg-gradient-to-r from-purple-50[...]' ?>
+                    <?php if ($isRateLimited): ?>
+                        disabled class="w-full bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-semibold cursor-not-allowed"
+                    <?php else: ?>
+                        class="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white py-3 px-4 rounded-lg font-semibold hover:opacity-95 transition"
+                    <?php endif; ?>
                 >
                     <i class="fas fa-sign-in-alt mr-2"></i>
                     <?= $isRateLimited ? 'Compte bloqué' : 'Se connecter' ?>
