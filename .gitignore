@@ -1,0 +1,39 @@
+# Environnement
+.env
+.env.local
+.env.production
+
+# Dépendances
+/vendor/
+composer.lock
+
+# Logs
+*.log
+/logs/
+storage/logs/
+
+# OS
+.DS_Store
+Thumbs.db
+.sass-cache/
+.tmp
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Uploads & generated
+/uploads/
+storage/
+/cache/
+*.pdf
+*.xlsx
+!database/seed.sql
+
+# Build
+/dist/
+/build/
+node_modules/

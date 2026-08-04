@@ -1,6 +1,6 @@
 {
     "name": "clinique/obstetrique",
-    "description": "Système de gestion de clinique obstétrique",
+    "description": "Système de gestion de clinique obstétrique – Sécurisé v2.0",
     "type": "project",
     "require": {
         "php": ">=8.0",
@@ -12,14 +12,22 @@
     "autoload": {
         "psr-4": {
             "Clinique\\": "src/"
-        }
+        },
+        "files": [
+            "includes/layout.php"
+        ]
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0"
     },
     "scripts": {
         "post-install-cmd": [
-            "php -r \"copy('.env.example', '.env');\""
+            "@php -r \"if (!file_exists('.env') && file_exists('.env.example')) { copy('.env.example', '.env'); echo '.env created from .env.example'.PHP_EOL; }\""
         ]
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true,
+        "allow-plugins": {}
     }
 }

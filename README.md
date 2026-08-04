@@ -1,58 +1,136 @@
-# Clinique Obstétrique - Gestionnaire de Cabinet Médical
+# Clinique Obstétrique – Gestionnaire Sécurisé v2.0
 
-Système de gestion complet pour cliniques obstétriques avec:
-- Gestion des patientes
-- Suivi des consultations prénatales
-- Enregistrement des accouchements
-- Suivi post-natal
-- Registres numériques
-- Rapports et statistiques
-- Gestion des utilisateurs (Admin, Médecin, Sage-femme, Secrétaire, Caissier)
+Système de gestion complet pour cliniques obstétriques, **sécurisé et refactoré**.
 
-## Déploiement sur Railway
+## ✅ Failles corrigées (v2.0)
 
-Ce projet est configuré pour être déployé sur Railway avec Docker.
+### Sécurité P0 – Critiques
+- [x] **Secrets supprimés** : plus de credentials hardcodés dans `login.php`. Tout passe par `.env` + variables Railway (`DB_HOST`, `MYSQLHOST`, etc.)
+- [x] `.gitignore` : `.env`, `vendor/`, logs ignorés
+- [x] `Database.php` refait : singleton propre dans `src/Config/Database.php`, chargement via `vlucas/phpdotenv` avec fallback sécurisé, support Railway `MYSQL*` vars
+- [x] Session durcie : `httponly`, `samesite=Lax`, `secure` auto, `session_regenerate_id(true)` anti-fixation
+- [x] CSRF tokens + Rate-limiting (5 tentatives / 15min)
+- [x] Pas de `die()` exposant PDO – erreurs loggées uniquement
+- [x] Bcrypt cost 12 + rehash automatique
+- [x] Protection open redirect sur login
 
-### Prérequis
-- Compte Railway (https://railway.app)
-- Accès à GitHub
+### Architecture
+- [x] Structure PSR-4 fonctionnelle : `src/Config`, `src/Models`, `src/Services`, `src/Helpers`
+- [x] `Database.php` legacy devient wrapper deprecated vers nouvelle classe
+- [x] `Auth` service centralisé : `attempt()`, `check()`, `requireAuth()`, `requireRole()`
+- [x] Composer `post-install` ne casse plus `.env`
+- [x] Dockerfile durci : multi-stage, non-root user, opcache prod, healthcheck
 
-### Étapes de déploiement
+### Fonctionnel
+- [x] `dashboard.php` créé – plus de 404
+- [x] `logout.php`, `patientes.php`, `consultations.php`, `rapports.php`, `users.php` (RBAC admin)
+- [x] Schéma SQL complet : `users`, `patientes`, `consultations`, `accouchements`, `nouveaux_nes`, `suivi_postnatal`, `audit_logs`
+- [x] `database/seed.sql` avec comptes test (password = `password`)
 
-1. **Créer un nouveau projet Railway**
-   - Allez sur https://railway.app
-   - Cliquez sur "Create New Project"
-   - Sélectionnez "Deploy from GitHub repo"
+---
 
-2. **Connecter le dépôt GitHub**
-   - Autorisez Railway à accéder à vos dépôts
-   - Sélectionnez `Ziti99/SCHIPHRAT`
+## 📁 Nouvelle arborescence
 
-3. **Configuration automatique**
-   - Railway détectera automatiquement le Dockerfile
-   - Le déploiement commencera immédiatement
+```
+├── src/
+│   ├── Config/Database.php      # Singleton sécurisé, dotenv, Railway compat
+│   ├── Models/User.php, Patiente.php
+│   ├── Services/Auth.php        # Login, session, RBAC
+│   └── Helpers/Security.php     # CSRF, rate-limit, sanitize
+├── includes/
+│   ├── auth.php                 # Middleware
+│   └── layout.php               # Header/footer Tailwind
+├── database/
+│   ├── schema.sql               # Schéma complet
+│   └── seed.sql
+├── dashboard.php                # Tableau de bord (auth required)
+├── patientes.php                # CRUD patientes
+├── consultations.php / rapports.php / users.php
+├── login.php                    # Sécurisé – CSRF + rate-limit
+├── index.php                    # Landing + secure session init
+├── .env.example                 # Complet
+├── .gitignore
+├── docker-compose.yml           # Dev local MySQL 8
+├── Dockerfile (durci, non-root, healthcheck)
+```
 
-4. **Accéder à l'application**
-   - Une URL publique sera générée (ex: https://clinique-production.railway.app)
-   - Utilisez vos identifiants de test pour vous connecter
+## 🚀 Installation locale
 
-### Identifiants de test
-- **Admin:** admin / password
-- **Médecin:** medecin1 / password
-- **Sage-femme:** sagefemme1 / password
-- **Secrétaire:** secretaire1 / password
-- **Caissier:** caissier1 / password
+### Option 1 – Docker Compose (recommandé)
 
-## Variables d'environnement
+```bash
+cp .env.example .env
+docker-compose up --build
+# http://localhost:8000
+# MySQL: localhost:3307, user clinique / clinique_secret
+```
 
-Vous pouvez configurer les variables dans le Dashboard Railway:
+### Option 2 – PHP natif
 
-- `APP_ENV`: Mode d'exécution (production/development)
-- `DB_HOST`: Hôte de la base de données
-- `DB_NAME`: Nom de la base de données
-- `DB_USER`: Utilisateur de la base
-- `DB_PASSWORD`: Mot de passe de la base
+```bash
+composer install
+cp .env.example .env
+# Edite .env avec tes credentials DB
+php -S 0.0.0.0:8000
+```
 
-## Support
+Importer DB :
 
-Pour plus d'informations sur Railway, consultez: https://docs.railway.app
+```bash
+mysql -u root -p < database/schema.sql
+mysql -u root -p clinique_obstetrique < database/seed.sql
+```
+
+## 🔐 Variables d'environnement
+
+Voir `.env.example`. Supporte à la fois `DB_*` et Railway `MYSQL*` :
+
+```
+DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
+APP_DEBUG=false (masque comptes test en prod)
+SESSION_SECURE, SESSION_SAMESITE
+LOGIN_MAX_ATTEMPTS, LOGIN_LOCKOUT_MINUTES
+```
+
+## 👥 Comptes test (password = `password`)
+
+- **Admin:** admin
+- **Médecin:** medecin1
+- **Sage-femme:** sagefemme1
+- **Secrétaire:** secretaire1
+- **Caissier:** caissier1
+
+> En production, `APP_DEBUG=false` masque cette liste.
+
+## 🛡️ Sécurité
+
+- Pas de secrets dans Git
+- Sessions HttpOnly + SameSite + Secure auto
+- CSRF tokens sur tous les POST
+- Rate-limiting login
+- Bcrypt cost 12 + rehash
+- Audit logs table prête
+- RBAC : `requireRole(['admin','medecin',...])`
+
+## 📦 Déploiement Railway
+
+Le projet est prêt :
+
+1. Railway détecte Dockerfile
+2. Définir variables dans Railway Dashboard : `DB_HOST`, `DB_PORT`, etc. ou utiliser plugin MySQL (il injecte `MYSQLHOST` automatiquement supporté)
+3. `APP_DEBUG=false` en prod
+4. Déployer – healthcheck inclus
+
+**IMPORTANT :** Révoquez l'ancien password hardcodé `[REDACTED-REVOKED]` qui était dans Git.
+
+## 🔮 Roadmap
+
+- [ ] CRUD consultations avec calcul semaine grossesse
+- [ ] Export PDF ordonnance (dompdf) + Excel (PhpSpreadsheet) via `src/Services/ExportService.php`
+- [ ] Graphiques Chart.js dans rapports
+- [ ] Tests phpunit + GitHub Actions
+- [ ] 2FA optionnel
+
+## 📄 Licence
+
+Interne clinique – Tous droits réservés.
