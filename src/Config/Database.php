@@ -89,6 +89,9 @@ class Database
 
     private function resolveConfig(): array
     {
+        // Choix plateforme: sqlite pour démo locale sans serveur, mysql pour prod
+        $connection = $this->env('DB_CONNECTION') ?? $this->env('DB_DRIVER') ?? 'mysql';
+        
         // Supporte à la fois les variables Railway (MYSQL*) et les standards DB_*
         $host = $this->env('DB_HOST') ?? $this->env('MYSQLHOST') ?? $this->env('MYSQL_HOST') ?? '127.0.0.1';
         $port = $this->env('DB_PORT') ?? $this->env('MYSQLPORT') ?? $this->env('MYSQL_PORT') ?? '3306';
@@ -96,6 +99,7 @@ class Database
         $user = $this->env('DB_USER') ?? $this->env('MYSQLUSER') ?? $this->env('MYSQL_USER') ?? 'root';
         $password = $this->env('DB_PASSWORD') ?? $this->env('MYSQLPASSWORD') ?? $this->env('MYSQL_PASSWORD') ?? '';
         $charset = $this->env('DB_CHARSET', 'utf8mb4');
+        $sqlitePath = $this->env('DB_DATABASE') ?? $this->env('DB_SQLITE_PATH') ?? dirname(__DIR__, 2) . '/database/clinique.db';
 
         // Nettoyage port qui peut contenir host:port dans certaines configs Railway
         if (str_contains($host, ':')) {
@@ -107,25 +111,44 @@ class Database
         }
 
         return [
+            'connection' => $connection,
             'host' => $host,
             'port' => $port,
             'dbname' => $dbname,
             'user' => $user,
             'password' => $password,
             'charset' => $charset,
+            'sqlite_path' => $sqlitePath,
         ];
     }
 
     private function connect(): void
     {
         $c = $this->config;
-        $dsn = sprintf(
-            "mysql:host=%s;port=%s;dbname=%s;charset=%s",
-            $c['host'],
-            $c['port'],
-            $c['dbname'],
-            $c['charset']
-        );
+
+        // SQLite pour démo locale / tests sans serveur MySQL
+        if (($c['connection'] ?? 'mysql') === 'sqlite') {
+            $sqlitePath = $c['sqlite_path'];
+            // Si DB_DATABASE contient :memory: ou un fichier .db
+            if ($sqlitePath === ':memory:' || str_ends_with($sqlitePath, '.db') || str_ends_with($sqlitePath, '.sqlite')) {
+                $dsn = "sqlite:" . $sqlitePath;
+            } else {
+                // Si DB_NAME est un chemin sqlite
+                if (str_ends_with($c['dbname'], '.db') || str_ends_with($c['dbname'], '.sqlite') || $c['dbname'] === ':memory:') {
+                    $dsn = "sqlite:" . $c['dbname'];
+                } else {
+                    $dsn = "sqlite:" . $sqlitePath;
+                }
+            }
+        } else {
+            $dsn = sprintf(
+                "mysql:host=%s;port=%s;dbname=%s;charset=%s",
+                $c['host'],
+                $c['port'],
+                $c['dbname'],
+                $c['charset']
+            );
+        }
 
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -135,15 +158,21 @@ class Database
         ];
 
         try {
-            $this->connection = new PDO($dsn, $c['user'], $c['password'], $options);
+            if (($c['connection'] ?? 'mysql') === 'sqlite') {
+                $this->connection = new PDO($dsn, null, null, $options);
+                // Activer FK pour SQLite
+                $this->connection->exec("PRAGMA foreign_keys = ON;");
+            } else {
+                $this->connection = new PDO($dsn, $c['user'], $c['password'], $options);
+            }
         } catch (PDOException $e) {
             // Ne jamais exposer le message PDO en production
-            error_log("DB Connection failed: " . $e->getMessage());
+            error_log("DB Connection failed [$dsn]: " . $e->getMessage());
             $isDebug = filter_var($this->env('APP_DEBUG', 'false'), FILTER_VALIDATE_BOOLEAN);
             if ($isDebug) {
                 throw $e;
             }
-            throw new PDOException("Erreur de connexion à la base de données. Vérifiez la configuration .env");
+            throw new PDOException("Erreur de connexion à la base de données [$dsn]. Vérifiez la configuration .env");
         }
     }
 
