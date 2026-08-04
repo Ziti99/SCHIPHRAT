@@ -1,5 +1,16 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
+// Chargement des dépendances Composer si présentes, sinon message clair.
+$autoload = __DIR__ . '/vendor/autoload.php';
+if (file_exists($autoload)) {
+    require_once $autoload;
+} else {
+    // Si on est en CLI, on continue (scripts utilitaires). En web, afficher une erreur lisible
+    if (php_sapi_name() !== 'cli') {
+        http_response_code(500);
+        echo "Dépendances manquantes. Exécutez 'composer install' à la racine du projet.\n";
+        exit;
+    }
+}
 
 use Clinique\Services\Auth;
 use Clinique\Helpers\Security;
@@ -121,7 +132,7 @@ $isRateLimited = Security::isRateLimited('login', (int)($_ENV['LOGIN_MAX_ATTEMPT
 
                 <button 
                     type="submit" 
-                    <?= $isRateLimited ? 'disabled class="w-full bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-semibold cursor-not-allowed"' : 'class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 hover:from-purple-600 hover:to-pink-600"' ?>
+                    <?= $isRateLimited ? 'disabled class="w-full bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-semibold cursor-not-allowed"' : 'class="w-full bg-gradient-to-r from-purple-50[...]' ?>
                 >
                     <i class="fas fa-sign-in-alt mr-2"></i>
                     <?= $isRateLimited ? 'Compte bloqué' : 'Se connecter' ?>
