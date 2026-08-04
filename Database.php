@@ -1,9 +1,13 @@
 <?php
+/**
+ * Fichier de compatibilité legacy - DEPRECATED
+ * Utilisez \Clinique\Config\Database depuis src/Config/Database.php
+ * Ce fichier existe uniquement pour éviter de casser les anciens includes.
+ */
 
-namespace Clinique\Config;
+require_once __DIR__ . '/vendor/autoload.php';
 
-use PDO;
-use PDOException;
+use Clinique\Config\Database as NewDatabase;
 
 class Database
 {
@@ -12,8 +16,7 @@ class Database
 
     private function __construct()
     {
-        $this->loadEnv();
-        $this->connect();
+        $this->connection = NewDatabase::getInstance()->getConnection();
     }
 
     public static function getInstance()
@@ -24,66 +27,28 @@ class Database
         return self::$instance;
     }
 
-    private function loadEnv()
-    {
-        if (file_exists(__DIR__ . '/../../.env')) {
-            $lines = file(__DIR__ . '/../../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            foreach ($lines as $line) {
-                if (strpos($line, '=') !== false && strpos($line, '#') !== 0) {
-                    list($key, $value) = explode('=', $line, 2);
-                    $_ENV[trim($key)] = trim($value);
-                }
-            }
-        }
-    }
-
-    private function connect()
-    {
-        try {
-            $host = 'localhost';
-            $dbname = 'clinique_obstetrique';
-            $username = 'root';
-            $password = 'admin';
-
-            $this->connection = new PDO(
-                "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
-                $username,
-                $password,
-                [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES => false,
-                ]
-            );
-        } catch (PDOException $e) {
-            die("Erreur de connexion à la base de données : " . $e->getMessage());
-        }
-    }
-
     public function getConnection()
     {
-        return $this->connection;
+        return NewDatabase::getInstance()->getConnection();
     }
 
     public function query($sql, $params = [])
     {
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute($params);
-        return $stmt;
+        return NewDatabase::getInstance()->query($sql, $params);
     }
 
     public function fetch($sql, $params = [])
     {
-        return $this->query($sql, $params)->fetch();
+        return NewDatabase::getInstance()->fetch($sql, $params);
     }
 
     public function fetchAll($sql, $params = [])
     {
-        return $this->query($sql, $params)->fetchAll();
+        return NewDatabase::getInstance()->fetchAll($sql, $params);
     }
 
     public function lastInsertId()
     {
-        return $this->connection->lastInsertId();
+        return NewDatabase::getInstance()->lastInsertId();
     }
 }

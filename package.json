@@ -1,0 +1,23 @@
+{
+  "name": "clinique-obstetrique",
+  "version": "2.0.0",
+  "description": "Clinique Obstétrique – Serveur Node + SQLite (plateforme choisie pour démo locale conséquente)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "PORT=8000 node server.js",
+    "db:generate": "python3 database/generate.py",
+    "db:reset": "rm -f database/clinique.db && python3 database/generate.py",
+    "test": "node -e \"console.log('Base:', require('better-sqlite3')('database/clinique.db').prepare('SELECT COUNT(*) as c FROM patientes').get().c, 'patientes')\""
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.0.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "php-wasm": "^0.1.0"
+  },
+  "keywords": ["clinique", "obstetrique", "sqlite", "express", "medical"],
+  "author": "Clinique Obstétrique",
+  "license": "MIT"
+}
