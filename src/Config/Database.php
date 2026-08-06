@@ -158,6 +158,59 @@ class Database
                     $dsn = "sqlite:" . $sqlitePath;
                 }
             }
+
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::ATTR_STRINGIFY_FETCHES => false,
+            ];
+
+            // Prépare l'initialisation si le fichier n'existe pas encore (sauf :memory:)
+            $needInit = ($sqlitePath !== ':memory:' && !file_exists($sqlitePath));
+
+            try {
+                // Crée la connexion PDO (si le fichier SQLite n'existe pas, PDO le créera)
+                $this->connection = new PDO($dsn, null, null, $options);
+                // Activer FK pour SQLite
+                $this->connection->exec("PRAGMA foreign_keys = ON;");
+
+                // Si la DB vient d'être créée, initialiser le schéma + seed si présents
+                if ($needInit) {
+                    $schemaFile = $root . '/database/schema.sql';
+                    if (file_exists($schemaFile) && is_readable($schemaFile)) {
+                        try {
+                            $sql = file_get_contents($schemaFile);
+                            if ($sql !== false && trim($sql) !== '') {
+                                // Utilise exec pour exécuter le fichier SQL complet
+                                $this->connection->exec($sql);
+                            }
+                        } catch (\Throwable $e) {
+                            error_log("SQLite schema import failed: " . $e->getMessage());
+                        }
+                    }
+
+                    $seedFile = $root . '/database/seed.sql';
+                    if (file_exists($seedFile) && is_readable($seedFile)) {
+                        try {
+                            $seed = file_get_contents($seedFile);
+                            if ($seed !== false && trim($seed) !== '') {
+                                $this->connection->exec($seed);
+                            }
+                        } catch (\Throwable $e) {
+                            error_log("SQLite seed import failed: " . $e->getMessage());
+                        }
+                    }
+                }
+            } catch (PDOException $e) {
+                // Ne jamais exposer le message PDO en production
+                error_log("DB Connection failed [$dsn]: " . $e->getMessage());
+                $isDebug = filter_var($this->env('APP_DEBUG', 'false'), FILTER_VALIDATE_BOOLEAN);
+                if ($isDebug) {
+                    throw $e;
+                }
+                throw new PDOException("Erreur de connexion à la base de données [$dsn]. Vérifiez la configuration .env");
+            }
         } else {
             $dsn = sprintf(
                 "mysql:host=%s;port=%s;dbname=%s;charset=%s",
@@ -166,31 +219,24 @@ class Database
                 $c['dbname'],
                 $c['charset']
             );
-        }
 
-        $options = [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-            PDO::ATTR_STRINGIFY_FETCHES => false,
-        ];
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::ATTR_STRINGIFY_FETCHES => false,
+            ];
 
-        try {
-            if (($c['connection'] ?? 'mysql') === 'sqlite') {
-                $this->connection = new PDO($dsn, null, null, $options);
-                // Activer FK pour SQLite
-                $this->connection->exec("PRAGMA foreign_keys = ON;");
-            } else {
+            try {
                 $this->connection = new PDO($dsn, $c['user'], $c['password'], $options);
+            } catch (PDOException $e) {
+                error_log("DB Connection failed [$dsn]: " . $e->getMessage());
+                $isDebug = filter_var($this->env('APP_DEBUG', 'false'), FILTER_VALIDATE_BOOLEAN);
+                if ($isDebug) {
+                    throw $e;
+                }
+                throw new PDOException("Erreur de connexion à la base de données [$dsn]. Vérifiez la configuration .env");
             }
-        } catch (PDOException $e) {
-            // Ne jamais exposer le message PDO en production
-            error_log("DB Connection failed [$dsn]: " . $e->getMessage());
-            $isDebug = filter_var($this->env('APP_DEBUG', 'false'), FILTER_VALIDATE_BOOLEAN);
-            if ($isDebug) {
-                throw $e;
-            }
-            throw new PDOException("Erreur de connexion à la base de données [$dsn]. Vérifiez la configuration .env");
         }
     }
 
