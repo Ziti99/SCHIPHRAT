@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "build": "echo 'No build step'",
     "dev": "PORT=8000 node server.js",
     "db:generate": "python3 database/generate.py",
     "db:reset": "rm -f database/clinique.db && python3 database/generate.py",
